@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+    // Further reading:
+    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    url      = env("DATABASE_URL")
+}
+
+model Example {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum Color {
+    white
+    blue
+    green
+    red
+    black
+}
+
+type Price {
+    white   Int
+    blue    Int
+    green   Int
+    red     Int
+    black   Int
+}
+
+model Card {
+    id      Int       @id @map("_id")
+    color   Color
+    level   Int
+    price   Price
+    score   Int
+}
+
+model Noble {
+    id      Int       @id @map("_id")
+    price   Price
+    score   Int
+}
+
+type CardShuffle {
+    lv1_ids      Int[]
+    lv2_ids      Int[]
+    lv3_ids      Int[]
+    noble_ids    Int[]
+}
+
+enum GameStatus {
+    starting
+    playing
+    ended
+}
+
+model Lobby {
+    id              String    @id @default(auto()) @map("_id") @db.ObjectId
+    playerCount     Int
+    playerIds       String[]  @db.ObjectId
+    players         Player[]
+}
+
+model Game {
+    id              String    @id @default(auto()) @map("_id") @db.ObjectId
+    playerCount     Int
+    playerIds       String[]  @db.ObjectId
+    players         Player[]  @relation(fields: [playerIds], references: [id])
+    shuffle         CardShuffle
+    status          GameStatus
+}
+
+model Player {
+    id              String      @id @map("_id") @db.ObjectId
+    user            User        @relation(fields: [id], references: [id])
+    name            String?
+    image           String?
+    lobbyId         String?     @db.ObjectId
+    lobby           Lobby?      @relation(fields: [lobbyId], references: [id])
+    gameIds         String[]    @db.ObjectId
+    games           Game[]      @relation(fields: [gameIds], references: [id])
+}
+
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(auto()) @map("_id") @db.ObjectId
+    userId            String  @db.ObjectId
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? // @db.Text
+    access_token      String? // @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? // @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    sessionToken String   @unique
+    userId       String   @db.ObjectId
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// type GameData {
+//     gameIds         String[]
+//     // games           Game[]      @relation(fields: [gameIds], references: [id])
+//     currentGameId   String?
+// }
+
+model User {
+    id            String    @id @default(auto()) @map("_id") @db.ObjectId
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    // gameData      GameData?
+    // playerId      String        @db.ObjectId @unique
+    player        Player?
+}
+
+model VerificationToken {
+    identifier String   @id @map("_id")
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
