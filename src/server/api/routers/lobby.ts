@@ -15,14 +15,14 @@ export const lobbyRouter = createTRPCRouter({
   //   })
   // ),
 
-  createOne: publicProcedure.mutation(async ({ ctx }) =>
-    ctx.prisma.lobby.create({
-      data: {
-        playerCount: 0,
-        playerIds: Array<string>(),
-      },
-    })
-  ),
+  // createEmptyOne: publicProcedure.mutation(async ({ ctx }) =>
+  //   ctx.prisma.lobby.create({
+  //     data: {
+  //       playerCount: 0,
+  //       playerIds: Array<string>(),
+  //     },
+  //   })
+  // ),
 
   findEmptyOne: publicProcedure.query(
     async ({ ctx }) =>
@@ -43,14 +43,32 @@ export const lobbyRouter = createTRPCRouter({
       })
     ),
 
-  updateById: publicProcedure
+  findByIdAndAuthorize: publicProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        playerId: z.string().optional(),
+      })
+    )
+    .query(({ ctx, input }) =>
+      ctx.prisma.lobby.findFirstOrThrow({
+        where: {
+          id: input.id,
+          playerIds: {
+            has: input.playerId,
+          },
+        },
+      })
+    ),
+
+  updateOneOnLobbyJoin: publicProcedure
     .input(
       z.object({
         id: z.string(),
         playerId: z.string(),
       })
     )
-    .mutation(async ({ ctx, input }) =>
+    .mutation(({ ctx, input }) =>
       ctx.prisma.lobby.update({
         where: {
           id: input.id,
@@ -58,6 +76,9 @@ export const lobbyRouter = createTRPCRouter({
         data: {
           playerIds: {
             push: input.playerId,
+          },
+          playerCount: {
+            increment: 1,
           },
         },
       })

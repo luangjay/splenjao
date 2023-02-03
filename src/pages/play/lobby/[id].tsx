@@ -16,24 +16,28 @@ export default function Lobby() {
   const { data: sessionData } = useSession();
   const [message, setMessage] = useState("");
 
-  const lobby = api.lobby.findById.useQuery(id, {
-    retry: false,
-    onError() {
-      // maybe handle error here
+  // const user = api.user.findById.useQuery(sessionData?.user.id, {
+  //   refetchInterval: 1000,
+  // });
+
+  const lobby = api.lobbyx.findAndAuthorize.useQuery(
+    {
+      id,
+      playerId: sessionData?.user.id,
     },
-  });
-  const user = api.user.findById.useQuery(sessionData?.user.id, {
-    refetchInterval: 1000,
-  });
-  const createGame = api.game.createOne.useMutation();
-  const upsertPlayer = api.player.upsertOne.useMutation();
+    {
+      retry: false,
+    }
+  );
+  const createGame = api.lobbyx.createGame.useMutation();
+  const updatePlayers = api.lobbyx.updatePlayers.useMutation();
 
   const handleClick = async () => {
-    await user.refetch();
-    if (user.data && lobby.data) {
+    if (sessionData?.user && lobby.data) {
       const gameData = {
+        hostId: sessionData?.user.id,
         playerCount: lobby.data.playerCount,
-        playerIds: [user.data.id],
+        playerIds: lobby.data.playerIds,
         shuffle: {
           lv1_ids: shuffleArray(Array.from(shuffle(0, 40))),
           lv2_ids: shuffleArray(Array.from(shuffle(40, 70))),
@@ -45,21 +49,17 @@ export default function Lobby() {
       let game = await createGame.mutateAsync(gameData);
       setMessage(`Create game success, game id: ${game.id}`);
       // alert(`XXXX ${game.id} XXXX`);
-      const playerData = {
-        id: user.data.id,
-        name: user.data.name,
-        image: user.data.image,
+      await updatePlayers.mutateAsync({
+        ids: lobby.data.playerIds,
         gameId: game.id,
-      };
-      let player = await upsertPlayer.mutateAsync(playerData);
-      // alert(`XXXX ${player.id} XXXX`);
-      setMessage(
-        (prev) => (prev += `\nCreate player success, player id: ${player.id}`)
-      );
+      });
+      // setMessage(
+      //   (prev) => (prev += `\nCreate player success, player id: ${player.id}`)
+      // );
     }
   };
 
-  if (lobby.isLoading) return <></>;
+  if (lobby.isLoading || !sessionData?.user) return <></>;
   if (lobby.isError) return <Error statusCode={404} />;
   return (
     <>

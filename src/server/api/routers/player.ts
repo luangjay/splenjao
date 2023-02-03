@@ -7,30 +7,34 @@ export const playerRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        name: z.string(),
-        image: z.string(),
-        gameId: z.string(),
+        name: z.string().nullable().optional(),
+        image: z.string().nullable().optional(),
       })
     )
-    .mutation(
-      async ({ ctx, input }) =>
-        await ctx.prisma.player.create({
-          data: {
-            id: input.id,
-            name: input.name,
-            image: input.image,
-            gameIds: [input.gameId],
-          },
-        })
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.player.upsert({
+        where: {
+          id: input.id,
+        },
+        update: {},
+        create: {
+          id: input.id,
+          name: input.name,
+          image: input.image,
+          gameCount: 0,
+          gameIds: Array<string>(),
+          lobbyId: null,
+        },
+      })
     ),
 
-  upsertOne: publicProcedure
+  upsertOneOnLobbyJoin: publicProcedure
     .input(
       z.object({
         id: z.string(),
         name: z.string().nullable().optional(),
         image: z.string().nullable().optional(),
-        gameId: z.string(),
+        lobbyId: z.string(),
       })
     )
     .mutation(({ ctx, input }) =>
@@ -40,16 +44,38 @@ export const playerRouter = createTRPCRouter({
         },
         update: {
           name: undefined,
-          gameIds: {
-            push: input.gameId,
-          },
+          lobbyId: input.lobbyId,
         },
         create: {
           id: input.id,
           name: input.name,
           image: input.image,
-          gameIds: [input.gameId],
+          gameCount: 0,
+          gameIds: Array<string>(),
+          lobbyId: input.lobbyId,
         },
       })
     ),
+
+  updateManyOnGameJoin: publicProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()),
+        gameId: z.string(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      ctx.prisma.player.updateMany({
+        where: {
+          id: {
+            in: input.ids,
+          },
+        },
+        data: {
+          gameIds: {
+            push: input.gameId,
+          },
+        },
+      });
+    }),
 });

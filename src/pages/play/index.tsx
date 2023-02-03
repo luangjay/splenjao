@@ -20,27 +20,27 @@ export default function Play() {
 
   const router = useRouter();
   const { data: sessionData } = useSession();
-  const lobbyIdQuery: string = watch("lobbyId");
+  const inputLobbyId: string = watch("lobbyId");
 
-  const user = api.user.findById.useQuery(sessionData?.user.id);
-  const createLobby = api.lobby.createOne.useMutation();
-  const emptyLobby = api.lobby.findEmptyOne.useQuery(undefined, {
-    refetchInterval: 5000
+  // const player = api.play.findPlayerById.useQuery(sessionData?.user.id, {
+  //   refetchInterval: 2000
+  // });
+  const createLobby = api.play.createLobby.useMutation();
+  const aLobby = api.play.findLobby.useQuery(undefined, {
+    refetchInterval: 2000,
   });
-  const uniqueLobby = api.lobby.findById.useQuery(lobbyIdQuery);
-  const addUser = api.lobby.updateById.useMutation();
+  const theLobby = api.play.findLobbyById.useQuery(inputLobbyId);
+  // const upsertPlayer = api.player.upsertOneOnLobbyJoin.useMutation();
+  const updatePlayer = api.play.updatePlayer.useMutation();
+  const updateLobby = api.play.updateLobby.useMutation();
 
   const handleNewLobby = handleSubmit(async () => {
-    await user.refetch();
-    if (user.data) {
-      await emptyLobby.refetch();
-      if (emptyLobby.data) {
-        const userData = {
-          id: emptyLobby.data.id,
-          playerId: user.data.id,
-        };
-        await addUser.mutateAsync(userData);
-        router.push(`/play/lobby/${emptyLobby.data.id}`);
+    // await player.refetch();
+    if (sessionData?.user) {
+      // await aLobby.refetch();
+      if (aLobby.data) {
+        await addPlayerToLobby(aLobby.data);
+        router.push(`/play/lobby/${aLobby.data.id}`);
       } /*else {
       const newLobby = await createLobby.mutateAsync();
       router.push(`/play/lobby/${newLobby.id}`);
@@ -48,26 +48,49 @@ export default function Play() {
     }
   });
   const handleCreateLobby = handleSubmit(async () => {
-    const a = await createLobby.mutateAsync();
-    alert(a.id);
+    if (sessionData?.user) {
+      const a = await createLobby.mutateAsync(sessionData.user.id);
+      alert(a.id);
+    }
   });
   const handleJoinLobby = handleSubmit(async () => {
-    await user.refetch();
-    if (user.data) {
-      await uniqueLobby.refetch();
-      if (uniqueLobby.data) {
-        const userData = {
-          id: uniqueLobby.data.id,
-          playerId: user.data.id,
-        };
-        addUser.mutate(userData);
-        router.push(`/play/lobby/${uniqueLobby.data.id}`);
+    // await player.refetch();
+    if (sessionData?.user) {
+      // await theLobby.refetch();
+      if (theLobby.data) {
+        // const userData = {
+        //   id: uniqueLobby.data.id,
+        //   playerId: user.data.id,
+        // };
+        await addPlayerToLobby(theLobby.data);
+        router.push(`/play/lobby/${theLobby.data.id}`);
       } /*else {
       const newLobby = await createLobby.mutateAsync();
       router.push(`/play/lobby/${newLobby.id}`);
-    }*/
+      }*/
     }
   });
+
+  const addPlayerToLobby = async (lobby: Lobby) => {
+    // await player.refetch();
+    if (sessionData?.user) {
+      const lobbyData = {
+        id: lobby.id,
+        playerId: sessionData.user.id,
+      };
+      let goLobby = await updateLobby.mutateAsync(lobbyData);
+      alert(`XXXX ${JSON.stringify(goLobby)} XXXX`);
+      if (goLobby) {
+        const playerData = {
+          id: sessionData?.user.id,
+          lobbyId: lobby.id,
+        };
+        // const player = await upsertPlayer.mutateAsync(playerData);
+        await updatePlayer.mutateAsync(playerData);
+        alert(`XXXX ${sessionData.user.id} XXXX`);
+      }
+    }
+  };
 
   return (
     <>
@@ -97,14 +120,14 @@ export default function Play() {
             <Input id="lobbyId" register={register} placeholder="Lobby Id" />
             <Button
               onClick={handleJoinLobby}
-              disabled={!lobbyIdQuery || isSubmitting}
+              disabled={!inputLobbyId || isSubmitting}
             >
               Join Lobby
             </Button>
           </div>
-          <div>{lobbyIdQuery}</div>
+          <div>{inputLobbyId}</div>
           <div>{isSubmitting}</div>
-          <div>{emptyLobby.isFetching.toString()}</div>
+          <div>{aLobby.isFetching.toString()}</div>
         </form>
       </main>
     </>

@@ -17,8 +17,8 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen flex-col items-center justify-center">
-        <div className="h-3/5 w-2/5 max-sm:w-4/5">
+      <main className="h-full">
+        <div className="">
           <Deck />
         </div>
       </main>

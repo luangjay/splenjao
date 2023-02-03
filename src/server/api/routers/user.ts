@@ -13,4 +13,18 @@ export const userRouter = createTRPCRouter({
           },
         });
     }),
+
+  lobbyByUserId: publicProcedure
+    .input(z.string().optional())
+    .query(({ ctx, input }) => {
+      if (input)
+        return ctx.prisma.user
+          .findUnique({
+            where: {
+              id: input,
+            },
+          })
+          .player()
+          .lobby();
+    }),
 });

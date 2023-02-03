@@ -2,30 +2,31 @@ import { api } from "../utils/api";
 
 export default function Card({ id }: CardProps) {
   const cardData = api.card.findById.useQuery(id).data;
+  if (!cardData) return <></>;
   return (
-    <div className="h-full w-full rounded-md border-2 border-black drop-shadow-md">
-      <div className="flex h-full w-full flex-row justify-between p-1">
-        <div className="flex h-full w-[30%] flex-col justify-between">
+    <div className=" rounded-lg border-2 border-black">
+      <div className="flex flex-row justify-between p-[4%]">
+        <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
           <div
             className={
-              cardData && cardData.score
-                ? "flex aspect-square w-full items-center justify-center rounded-md text-xl"
+              cardData.score
+                ? "flex aspect-square w-full items-center justify-center rounded-lg "
                 : undefined
             }
           >
-            <code className="number text-sm font-extrabold">
-              {cardData && cardData.score ? cardData.score : ""}
+            <code className="number text-3xl font-black">
+              {cardData.score || ""}
             </code>
           </div>
           <div>
             {(["white", "blue", "green", "red", "black"] as Color[]).map(
               (color) => (
-                <PriceLabel color={color} price={cardData?.price[color]} />
+                <PriceLabel color={color} price={cardData.price[color]} />
               )
             )}
           </div>
         </div>
-        <div className="flex w-[30%] flex-col justify-between">
+        <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
           <ColorLabel color={cardData?.color} />
         </div>
       </div>
@@ -66,7 +67,7 @@ function ColorLabel({ color }: ColorProps) {
   if (colorClass)
     return (
       <div
-        className={`${colorClass} flex aspect-square w-full items-center justify-center rounded-md border-2`}
+        className={`${colorClass} flex aspect-square w-full items-center justify-center rounded-lg drop-shadow-lg`}
       ></div>
     );
   return <></>;
@@ -82,19 +83,27 @@ function PriceLabel({ color, price }: PriceProps) {
     return (
       <div
         className={`flex aspect-square w-full items-center justify-center rounded-full border-2 ${
-          color
+          color && price
             ? color === "black"
               ? "bg-black"
               : color === "white"
               ? "bg-white"
-              : `bg-${color}-500`
+              : ` bg-${color}-500`
             : undefined
         }`}
       >
-        <code className="number px-1 text-sm font-extrabold">
-          {price ? price : -1}
-        </code>
+        <code className="number text-2xl font-black">{price || -1}</code>
       </div>
     );
   return <></>;
+}
+
+function TailwindBugFix() {
+  return (
+    <>
+      <div className="hidden bg-red-500"></div>
+      <div className="hidden bg-green-500"></div>
+      <div className="hidden bg-blue-500"></div>
+    </>
+  );
 }

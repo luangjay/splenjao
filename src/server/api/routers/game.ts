@@ -19,6 +19,7 @@ export const gameRouter = createTRPCRouter({
   createOne: publicProcedure
     .input(
       z.object({
+        hostId: z.string(),
         playerCount: z.number(),
         playerIds: z.array(z.string()),
         shuffle: z.object({
@@ -33,6 +34,7 @@ export const gameRouter = createTRPCRouter({
     .mutation(({ ctx, input }) =>
       ctx.prisma.game.create({
         data: {
+          hostId: input.hostId,
           playerCount: input.playerCount,
           playerIds: input.playerIds,
           shuffle: input.shuffle,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../utils/api";
+import { useState } from "react";
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -63,8 +64,22 @@ const AuthShowcase: React.FC = () => {
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: sessionData?.user !== undefined },
+    { enabled: sessionData?.user !== undefined }
   );
+
+  const user = api.home.findUserById.useQuery(sessionData?.user.id);
+  const upsertPlayer = api.home.upsertPlayer.useMutation();
+
+  const [isUpsertDone, setUpsertDone] = useState(false);
+  if (!isUpsertDone && user.data) {
+    const playerData = {
+      id: user.data.id,
+      name: user.data.name,
+      image: user.data.image,
+    };
+    upsertPlayer.mutate(playerData);
+    setUpsertDone(true);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">

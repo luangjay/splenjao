@@ -5,6 +5,9 @@ import { gameRouter } from "./routers/game";
 import { playerRouter } from "./routers/player";
 import { userRouter } from "./routers/user";
 import { lobbyRouter } from "./routers/lobby";
+import { playRouter } from "./routers/play";
+import { homeRouter } from "./routers/home";
+import { lobbyxRouter } from "./routers/lobbyx";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +17,9 @@ import { lobbyRouter } from "./routers/lobby";
 export const appRouter = createTRPCRouter({
   example: exampleRouter,
   user: userRouter,
+  home: homeRouter,
+  play: playRouter,
+  lobbyx: lobbyxRouter,
   player: playerRouter,
   lobby: lobbyRouter,
   game: gameRouter,

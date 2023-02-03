@@ -6,7 +6,7 @@ for (let i = 0; i < 10; i++) x[i] = (Math.random() * 90) | 0;
 
 export default function Deck() {
   return (
-    <div className="grid h-full grid-rows-3 gap-2">
+    <div className="grid w-[750px] grid-rows-3 gap-2">
       <div className="grid grid-cols-5 gap-2">
         <Card id={7} />
         <Card id={17} />
