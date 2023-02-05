@@ -20,6 +20,15 @@ model Example {
     updatedAt DateTime @updatedAt
 }
 
+model Lobby {
+    id              String    @id @default(auto()) @map("_id") @db.ObjectId
+    hostId          String?   @db.ObjectId @unique
+    playerCount     Int
+    playerIds       String[]  @db.ObjectId
+    players         Player[]
+    // host            Player    @relation(fields: [hostId], references: [id], name: "hostLobby")
+}
+
 enum Color {
     white
     blue
@@ -44,59 +53,86 @@ model Card {
     score   Int
 }
 
-model Noble {
+model Tile {
     id      Int       @id @map("_id")
     price   Price
     score   Int
 }
 
-type CardShuffle {
-    lv1_ids      Int[]
-    lv2_ids      Int[]
-    lv3_ids      Int[]
-    noble_ids    Int[]
+type Shuffle {
+    cardLv1_ids   Int[]
+    cardLv2_ids   Int[]
+    cardLv3_ids   Int[]
+    tile_ids      Int[]
 }
 
-enum GameStatus {
-    starting
-    playing
-    ended
+enum Status {
+    initial
+    active
+    inactive
+    final
 }
 
-model Lobby {
-    id              String    @id @default(auto()) @map("_id") @db.ObjectId
-    playerCount     Int
-    playerIds       String[]  @db.ObjectId
-    players         Player[]
-    hostId          String?   @db.ObjectId @unique
-    // host            Player    @relation(fields: [hostId], references: [id], name: "hostLobby")
+type Turn {
+    playerIdx       Int
+    startTime       DateTime
+}
+
+type PlayerCard {
+    idx0_cardIds    Int[]
+    idx1_cardIds    Int[]
+    idx2_cardIds    Int[]
+    idx3_cardIds    Int[]
+}
+
+type PlayerTile {
+    idx0_tileIds    Int[]
+    idx1_tileIds    Int[]
+    idx2_tileIds    Int[]
+    idx3_tileIds    Int[]
+}
+
+type Token {
+    white   Int
+    blue    Int
+    green   Int
+    red     Int
+    black   Int
+    gold    Int
 }
 
 model Game {
-    id              String    @id @default(auto()) @map("_id") @db.ObjectId
+    id              String      @id @default(auto()) @map("_id") @db.ObjectId
+    hostId          String      @db.ObjectId @unique
     playerCount     Int
-    playerIds       String[]  @db.ObjectId
-    players         Player[]  @relation(fields: [playerIds], references: [id])
-    hostId          String    @db.ObjectId @unique
-    // host            Player    @relation(fields: [hostId], references: [id], name: "hostGame")
-    shuffle         CardShuffle
-    status          GameStatus
+    playerIds       String[]    @db.ObjectId
+    // host            Player       @relation(fields: [hostId], references: [id], name: "hostGame")
+    shuffle         Shuffle
+    status          Status
+    currentTurn     Turn
+    nextTurn        Turn
+    scores          Int[]
+    playerCards     PlayerCard
+    playerTiles     PlayerTile
+    playerTokens    Token[]
+    players         Player[]    @relation(fields: [playerIds], references: [id])
 }
 
 model Player {
     id              String      @id @map("_id") @db.ObjectId
-    user            User        @relation(fields: [id], references: [id])
     name            String?
     image           String?
     lobbyId         String?     @db.ObjectId
-    lobby           Lobby?      @relation(fields: [lobbyId], references: [id])
     // hostLobbyId     String
     // hostLobby       Lobby?      @relation(name: "hostLobby")
     gameCount       Int
     gameIds         String[]    @db.ObjectId
-    games           Game[]      @relation(fields: [gameIds], references: [id])
+    lastPlayed      DateTime?
     // hostGameId      String?
     // hostGame        Game?       @relation(name: "hostGame")
+    user            User        @relation(fields: [id], references: [id])
+    lobby           Lobby?      @relation(fields: [lobbyId], references: [id])
+    games           Game[]      @relation(fields: [gameIds], references: [id])
 }
 
 // Necessary for Next auth

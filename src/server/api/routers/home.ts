@@ -38,6 +38,7 @@ export const homeRouter = createTRPCRouter({
           gameCount: 0,
           gameIds: Array<string>(),
           lobbyId: null,
+          lastPlayed: null,
         },
       })
     ),

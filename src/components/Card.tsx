@@ -4,7 +4,7 @@ export default function Card({ id }: CardProps) {
   const cardData = api.card.findById.useQuery(id).data;
   if (!cardData) return <></>;
   return (
-    <div className=" rounded-lg border-2 border-black">
+    <div className="rounded-lg border-2 border-black drop-shadow-md">
       <div className="flex flex-row justify-between p-[4%]">
         <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
           <div

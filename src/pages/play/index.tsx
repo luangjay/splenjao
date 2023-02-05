@@ -1,15 +1,17 @@
-import { GameStatus, Lobby } from "@prisma/client";
+import { Lobby } from "@prisma/client";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FieldValues, useForm, UseFormRegister } from "react-hook-form";
 
 import { api } from "../../utils/api";
 
 export default function Play() {
   // const hello = api.user.findAll.useQuery().data;
+
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -18,13 +20,15 @@ export default function Play() {
     formState: { isSubmitting, isDirty, isValid },
   } = useForm({ mode: "onChange" });
 
-  const router = useRouter();
   const { data: sessionData } = useSession();
   const inputLobbyId: string = watch("lobbyId");
 
   // const player = api.play.findPlayerById.useQuery(sessionData?.user.id, {
   //   refetchInterval: 2000
   // });
+
+  const playerGames = api.play.findPlayerGames.useQuery(sessionData?.user.id);
+  const playerLobby = api.play.findPlayerLobby.useQuery(sessionData?.user.id);
   const createLobby = api.play.createLobby.useMutation();
   const aLobby = api.play.findLobby.useQuery(undefined, {
     refetchInterval: 2000,
@@ -34,13 +38,33 @@ export default function Play() {
   const updatePlayer = api.play.updatePlayer.useMutation();
   const updateLobby = api.play.updateLobby.useMutation();
 
+  // const handleTabClosing = () => {
+  //   removePlayerFromGame();
+  // };
+
+  // const alertUser = (event: any) => {
+  //   event.preventDefault();
+  //   event.returnValue = "";
+  // };
+
+  useEffect(() => {
+    if (playerGames.data) {
+      const playerLastGame = playerGames.data[playerGames.data.length - 1];
+      if (playerLastGame && playerLastGame.status !== "final")
+        router.replace(`/play/game/${playerLastGame.id}`);
+    }
+    if (playerLobby.data) {
+      router.replace(`/play/lobby/${playerLobby.data.id}`);
+    }
+  }, [playerGames.data, playerLobby.data]);
+
   const handleNewLobby = handleSubmit(async () => {
     // await player.refetch();
     if (sessionData?.user) {
       // await aLobby.refetch();
       if (aLobby.data) {
         await addPlayerToLobby(aLobby.data);
-        router.push(`/play/lobby/${aLobby.data.id}`);
+        // router.push(`/play/lobby/${aLobby.data.id}`);
       } /*else {
       const newLobby = await createLobby.mutateAsync();
       router.push(`/play/lobby/${newLobby.id}`);
@@ -63,7 +87,7 @@ export default function Play() {
         //   playerId: user.data.id,
         // };
         await addPlayerToLobby(theLobby.data);
-        router.push(`/play/lobby/${theLobby.data.id}`);
+        // router.push(`/play/lobby/${theLobby.data.id}`);
       } /*else {
       const newLobby = await createLobby.mutateAsync();
       router.push(`/play/lobby/${newLobby.id}`);
@@ -79,7 +103,7 @@ export default function Play() {
         playerId: sessionData.user.id,
       };
       let goLobby = await updateLobby.mutateAsync(lobbyData);
-      alert(`XXXX ${JSON.stringify(goLobby)} XXXX`);
+      // alert(`XXXX ${JSON.stringify(goLobby)} XXXX`);
       if (goLobby) {
         const playerData = {
           id: sessionData?.user.id,
@@ -87,7 +111,7 @@ export default function Play() {
         };
         // const player = await upsertPlayer.mutateAsync(playerData);
         await updatePlayer.mutateAsync(playerData);
-        alert(`XXXX ${sessionData.user.id} XXXX`);
+        // alert(`XXXX ${sessionData.user.id} XXXX`);
       }
     }
   };

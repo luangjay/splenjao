@@ -1,3 +1,4 @@
+import { Lobby } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -45,6 +46,30 @@ export const playRouter = createTRPCRouter({
       })
   ),
 
+  findPlayerGames: protectedProcedure
+    .input(z.string().optional())
+    .query(({ ctx, input }) =>
+      ctx.prisma.player
+        .findUnique({
+          where: {
+            id: input,
+          },
+        })
+        .games()
+    ),
+
+  findPlayerLobby: protectedProcedure
+    .input(z.string().optional())
+    .query(({ ctx, input }) =>
+      ctx.prisma.player
+        .findUnique({
+          where: {
+            id: input,
+          },
+        })
+        .lobby()
+    ),
+
   findLobbyById: protectedProcedure
     .input(z.string().optional())
     .query(({ ctx, input }) =>
@@ -63,7 +88,7 @@ export const playRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const lobby = await ctx.prisma.lobby.findUniqueOrThrow({
+      const lobby: Lobby = await ctx.prisma.lobby.findUniqueOrThrow({
         where: {
           id: input.id,
         },
