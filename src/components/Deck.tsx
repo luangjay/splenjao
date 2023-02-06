@@ -2,14 +2,11 @@ import { Shuffle } from "@prisma/client";
 import { useState } from "react";
 import Card from "./Card";
 
-const x = Array(10);
-for (let i = 0; i < 10; i++) x[i] = (Math.random() * 90) | 0;
-
-interface GameProps {
+interface DeckProps {
   shuffle: Shuffle;
 }
 
-export default function Deck({ shuffle }: GameProps) {
+export default function Deck({ shuffle }: DeckProps) {
   return (
     <div className="grid w-[750px] grid-rows-3 gap-2">
       <div className="grid grid-cols-5 gap-2">

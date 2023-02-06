@@ -64,8 +64,8 @@ export const gamexRouter = createTRPCRouter({
   updateNextTurn: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
-        playerId: z.string(),
+        id: z.string().optional(),
+        playerId: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

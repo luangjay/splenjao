@@ -37,6 +37,12 @@ enum Color {
     black
 }
 
+enum TokenColor {
+    abcd
+    efgh
+    ijkl
+}
+
 type Price {
     white   Int
     blue    Int
@@ -78,6 +84,28 @@ type Turn {
     startTime       DateTime
 }
 
+enum ActionType {
+    takeThree
+    takeTwo
+    purchase
+    reserve
+}
+
+type Token {
+    white   Int
+    blue    Int
+    green   Int
+    red     Int
+    black   Int
+    gold    Int
+}
+
+type Action {
+    type    ActionType?
+    token   Token
+    cardId  Int?
+}
+
 type PlayerCard {
     idx0_cardIds    Int[]
     idx1_cardIds    Int[]
@@ -92,15 +120,6 @@ type PlayerTile {
     idx3_tileIds    Int[]
 }
 
-type Token {
-    white   Int
-    blue    Int
-    green   Int
-    red     Int
-    black   Int
-    gold    Int
-}
-
 model Game {
     id              String      @id @default(auto()) @map("_id") @db.ObjectId
     hostId          String      @db.ObjectId @unique
@@ -111,6 +130,8 @@ model Game {
     status          Status
     currentTurn     Turn
     nextTurn        Turn
+    currentAction   Action
+    token           Token
     scores          Int[]
     playerCards     PlayerCard
     playerTiles     PlayerTile

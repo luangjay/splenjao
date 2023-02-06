@@ -1,4 +1,4 @@
-import { Lobby, Status, Turn } from "@prisma/client";
+import { Lobby, Status, Turn, Action } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
@@ -80,6 +80,12 @@ export const lobbyxRouter = createTRPCRouter({
             playerIdx: 0,
             startTime: addSeconds(new Date(), 30),
           },
+          currentAction: {
+            type: null,
+            token: { white: 0, blue: 0, green: 0, red: 0, black: 0, gold: 0 },
+            cardId: null,
+          },
+          token: { white: 0, blue: 0, green: 0, red: 0, black: 0, gold: 0 },
           scores: Array.from({ length: input.playerCount }, () => 0),
           playerCards: {
             idx0_cardIds: Array<number>(),

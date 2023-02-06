@@ -38,15 +38,6 @@ export default function Play() {
   const updatePlayer = api.play.updatePlayer.useMutation();
   const updateLobby = api.play.updateLobby.useMutation();
 
-  // const handleTabClosing = () => {
-  //   removePlayerFromGame();
-  // };
-
-  // const alertUser = (event: any) => {
-  //   event.preventDefault();
-  //   event.returnValue = "";
-  // };
-
   useEffect(() => {
     if (playerGames.data) {
       const playerLastGame = playerGames.data[playerGames.data.length - 1];
