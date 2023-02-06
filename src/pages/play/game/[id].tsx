@@ -4,12 +4,24 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../../utils/api";
-import Card from "../../../components/Card";
-import Deck from "../../../components/Deck";
+import CardComponent from "../../../components/Card";
+import DeckComponent from "../../../components/Deck";
+import TokenComponent from "../../../components/Token";
 import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
-import { Action } from "@prisma/client";
+import { Action, ActionType, Token } from "@prisma/client";
+
+type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
+
+const allTokenColors = [
+  "white",
+  "blue",
+  "green",
+  "red",
+  "black",
+  "gold",
+] as TokenColor[];
 
 export default function Game() {
   // ROUTER HOOKS
@@ -20,15 +32,15 @@ export default function Game() {
   const { data: sessionData } = useSession();
 
   // STATE HOOKS
-  const [frame, setFrame] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [isValidTab, setValidTab] = useState(false);
-  const [message, setMessage] = useState("");
-  const [action, setAction] = useState<Action>({
-    type: null,
-    token: { white: 0, blue: 0, green: 0, red: 0, black: 0, gold: 0 },
-    cardId: null,
-  });
+  const [takeToken, setTakeToken] = useState<TokenColor>();
+  const [returnToken, setReturnToken] = useState<TokenColor>();
+  const [actionType, setActionType] = useState<ActionType | null>();
+  const [message, setMessage] = useState<string>();
+
+  const [action, setAction] = useState<Action>();
+  const [token, setToken] = useState<Token>();
 
   // CONTEXT HOOKS
   const utils = api.useContext();
@@ -57,8 +69,30 @@ export default function Game() {
       utils.gamex.findPlayerById.invalidate();
     },
   });
+  const updateToken = api.gamex.updateToken.useMutation({
+    async onSettled() {
+      utils.gamex.findAndAuthorize.invalidate();
+    },
+  });
+  const updateCurrentActionToken =
+    api.gamex.updateCurrentActionToken.useMutation({
+      async onSettled() {
+        utils.gamex.findAndAuthorize.invalidate();
+      },
+    });
+  const updateCurrentActionType = api.gamex.updateCurrentActionType.useMutation(
+    {
+      async onSettled() {
+        utils.gamex.findAndAuthorize.invalidate();
+      },
+    }
+  );
 
-  //
+  const isPlayerTurn =
+    sessionData?.user.id ===
+    game.data?.playerIds[game.data?.currentTurn.playerIdx];
+
+  // APP PROTOCOL HOOKS
   useEffect(() => {
     if (
       player.data &&
@@ -77,7 +111,7 @@ export default function Game() {
     }
   }, 5000);
 
-  // LOGIC HOOKS
+  // GAME PROTOCOL HOOKS
   useEffect(() => {
     if (game.data && isValidTab) {
       const startTime = game.data.nextTurn.startTime;
@@ -101,6 +135,53 @@ export default function Game() {
     }
   }, [game.data]);
 
+  // GAME LOGIC HOOKS
+  useEffect(() => {
+    if (game.data) {
+      setToken(game.data.token);
+      setAction(game.data.currentAction);
+    }
+  }, [game.data]);
+
+  useEffect(() => {
+    if (game.data && takeToken) {
+      updateCurrentActionToken.mutate({
+        id: game.data.id,
+        color: takeToken,
+        inc: 1,
+      });
+      updateToken.mutate({
+        id: game.data.id,
+        color: takeToken,
+        inc: -1,
+      });
+    }
+  }, [takeToken]);
+
+  useEffect(() => {
+    if (game.data && returnToken) {
+      updateCurrentActionToken.mutate({
+        id: game.data.id,
+        color: returnToken,
+        inc: -1,
+      });
+      updateToken.mutate({
+        id: game.data.id,
+        color: returnToken,
+        inc: 1,
+      });
+    }
+  }, [returnToken]);
+
+  useEffect(() => {
+    if (game.data && actionType) {
+      updateCurrentActionType.mutate({
+        id: game.data.id,
+        type: actionType,
+      });
+    }
+  }, [actionType]);
+
   if (game.isLoading || !sessionData?.user) return <></>;
   if (!isValidTab)
     return (
@@ -110,9 +191,6 @@ export default function Game() {
       </>
     );
   if (game.isError) return <Error statusCode={404} />;
-  const isTurn =
-    sessionData.user.id ===
-    game.data.playerIds[game.data.currentTurn.playerIdx];
   return (
     <>
       <Head>
@@ -120,19 +198,67 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen justify-between border-2 border-green-400 text-4xl">
-        <div className="flex w-1/5 flex-col border-2">
+      <main className="flex min-h-screen justify-between border-2 border-green-400 text-xl">
+        <div className="flex w-1/5 flex-col justify-between border-2">
           <div className="flex flex-col">
             <div>{Math.max(Math.ceil(countdown), 0)}</div>
             <div>{game.data.currentTurn.playerIdx}</div>
           </div>
+          <div>
+            {allTokenColors.map((tokenColor) => (
+              <TokenComponent
+                color={tokenColor}
+                take={true}
+                action={action}
+                gameToken={token}
+                setTakeToken={setTakeToken}
+                setReturnToken={setReturnToken}
+                setActionType={setActionType}
+                setMessage={setMessage}
+                // test={updateNextTurn.mutate}
+              />
+            ))}
+          </div>
+          <div>
+            {allTokenColors.map((tokenColor) => (
+              <TokenComponent
+                color={tokenColor}
+                take={false}
+                action={action}
+                gameToken={action?.token}
+                setTakeToken={setTakeToken}
+                setReturnToken={setReturnToken}
+                setActionType={setActionType}
+                setMessage={setMessage}
+                // test={updateNextTurn.mutate}
+              />
+            ))}
+          </div>
+          <button
+            className="bg-cyan-400"
+            onClick={() => {
+              updateToken.mutate({
+                id: game.data.id,
+                color: "green",
+                inc: -1,
+              });
+            }}
+          >
+            abcd
+          </button>
         </div>
         <div className="grid place-content-center border-2 border-red-500">
           <div className="w-fit border-2">
-            <Deck shuffle={game.data.shuffle} />
+            <DeckComponent shuffle={game.data.shuffle} />
           </div>
         </div>
-        <div className="w-1/5 border-2">{isTurn && "This is your turn."}</div>
+        <div className="flex w-1/5 flex-col border-2">
+          <div>{isPlayerTurn && "This is your turn."}</div>
+          <div>{takeToken}</div>
+          <div>{returnToken}</div>
+          <div>{actionType}</div>
+          <div>{message}</div>
+        </div>
       </main>
     </>
   );

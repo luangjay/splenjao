@@ -1,7 +1,15 @@
 import { z } from "zod";
-import { Game, Status } from "@prisma/client";
+import { ActionType, Game, Status } from "@prisma/client";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+
+enum TokenColor {
+  white,
+  blue,
+  green,
+  red,
+  black,
+}
 
 const addSeconds = (date: Date, seconds: number) => {
   date.setSeconds(date.getSeconds() + seconds);
@@ -91,4 +99,111 @@ export const gamexRouter = createTRPCRouter({
           },
         });
     }),
+
+  updateToken: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        color: z.string(),
+        inc: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          token: {
+            update: {
+              [input.color]: {
+                increment: input.inc,
+              },
+            },
+          },
+        },
+      })
+    ),
+
+  updateCurrentActionToken: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        color: z.string(),
+        inc: z.number(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          currentAction: {
+            update: {
+              token: {
+                update: {
+                  [input.color]: {
+                    increment: input.inc,
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+    ),
+
+  updateCurrentActionType: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        type: z.nativeEnum(ActionType).nullable(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          currentAction: {
+            update: {
+              type: input.type,
+            },
+          },
+        },
+      })
+    ),
+
+  updateCurrentCardId: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        color: z.string().optional(),
+        inc: z.string(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          currentAction: {
+            update: {
+              token: {
+                update: input.color
+                  ? {
+                      [input.color]: {
+                        increment: input.inc,
+                      },
+                    }
+                  : undefined,
+              },
+            },
+          },
+        },
+      })
+    ),
 });

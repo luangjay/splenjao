@@ -85,7 +85,7 @@ export const lobbyxRouter = createTRPCRouter({
             token: { white: 0, blue: 0, green: 0, red: 0, black: 0, gold: 0 },
             cardId: null,
           },
-          token: { white: 0, blue: 0, green: 0, red: 0, black: 0, gold: 0 },
+          token: { white: 7, blue: 7, green: 7, red: 7, black: 7, gold: 5 },
           scores: Array.from({ length: input.playerCount }, () => 0),
           playerCards: {
             idx0_cardIds: Array<number>(),

@@ -1,20 +1,45 @@
-import { Shuffle, Token, Action } from "@prisma/client";
+import { Shuffle, Action, ActionType } from "@prisma/client";
 import { SetStateAction, useState } from "react";
 import Card from "./Card";
 
+type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
+type Token = {
+  white: number;
+  blue: number;
+  green: number;
+  red: number;
+  black: number;
+  gold: number;
+};
+
 interface TokenProps {
   color: TokenColor;
-  action: Action;
-  setAction: (value: SetStateAction<Action>) => void;
-  setMessage: (value: SetStateAction<string>) => void;
+  take: boolean | null;
+  action: Action | undefined;
+  // setAction: (value: SetStateAction<Action>) => void;
+  gameToken: Token | undefined;
+  setTakeToken: (value: SetStateAction<TokenColor | undefined>) => void;
+  setReturnToken: (value: SetStateAction<TokenColor | undefined>) => void;
+  setActionType: (value: SetStateAction<ActionType | null | undefined>) => void;
+  // setGameToken: (value: SetStateAction<Token>) => void;
+  setMessage: (value: SetStateAction<string | undefined>) => void;
+  // test?: Function;
 }
 
-export default function Deck({
+export default function Token({
   color,
+  take,
   action,
-  setAction,
+  // setAction,
+  gameToken,
+  setTakeToken,
+  setReturnToken,
+  setActionType,
   setMessage,
-}: TokenProps) {
+}: // setGameToken,
+
+// test,
+TokenProps) {
   let colorClass: string;
   switch (color) {
     case "white":
@@ -38,39 +63,155 @@ export default function Deck({
   }
 
   return (
-    <button
-      className={`aspect-square w-[50px] rounded-full border-2 ${colorClass}`}
-      onClick={() => {}}
-    >
-      T
-    </button>
+    <div className="flex">
+      {gameToken && gameToken[color] > 0 && (
+        <button
+          className={`aspect-square w-[30px] rounded-full border-2 ${colorClass}`}
+          onClick={async () => {
+            // const updateData = {
+            //   id: "32132121",
+            //   playerId: "312313",
+            // };
+            // if (test) test(updateData);
+            updateToken({
+              color,
+              take,
+              action,
+              // setAction,
+              gameToken,
+              setTakeToken,
+              setReturnToken,
+              setActionType,
+              // setGameToken,
+              setMessage,
+              // test,
+            });
+          }}
+        >
+          T
+        </button>
+      )}
+      <div>{gameToken && gameToken[color]}</div>
+    </div>
   );
 }
 
-function TokenLogic({ color, action, setAction, setMessage }: TokenProps) {
-  if (action.type !== null) {
-    setMessage("You cannot take any more tokens. Consider returing one.");
-    return;
-  }
+function updateToken({
+  color,
+  take,
+  action,
+  // setAction
+  gameToken,
+  setTakeToken,
+  setReturnToken,
+  setActionType,
+  setMessage,
+}: // setGameToken,
+TokenProps) {
+  if (take === null || !action || !gameToken) return;
   const sumTokenColors = Object.values(action.token).reduce((a, b) => a + b, 0);
-  if (sumTokenColors === 3) {
-    setMessage("You cannot take any more tokens. Consider returing one.");
+  setMessage("455");
+  if (take) {
+    // TAKE TOKEN
+    if (action.type !== null) {
+      setMessage("You cannot take any more tokens. Consider returing one.");
+      return;
+    }
+    switch (sumTokenColors) {
+      // case 3:
+      //   setMessage("You cannot take any more tokens. Consider returing one.");
+      //   return;
+      case 2:
+        // if (
+        //   action.token.white === 2 ||
+        //   action.token.blue === 2 ||
+        //   action.token.green === 2 ||
+        //   action.token.red === 2 ||
+        //   action.token.black === 2
+        // ) {
+        //   setMessage("You cannot take any more tokens. Consider returing one.");
+        // } else {
+        if (action.token[color] === 1) {
+          setMessage("You cannot pick token of this color now");
+        } else {
+          // setAction((prev) => ({
+          //   ...prev,
+          //   type: "takeThree",
+          //   token: { ...prev.token, [color]: prev.token[color] + 1 },
+          // }));
+          // setGameToken((prev) => ({
+          //   ...prev,
+          //   [color]: prev[color] - 1,
+          // }));
+          setTakeToken(color);
+          setActionType("takeThree");
+          setMessage("Take token success");
+        }
+        // }
+        return;
+      case 1:
+        if (action.token.gold === 1) {
+          setMessage("You can only reserve card now");
+        } else {
+          if (action.token[color] === 1) {
+            if (gameToken[color] < 3) {
+              setMessage("Not enough tokens left for double pick");
+            } else {
+              // setAction((prev) => ({
+              //   ...prev,
+              //   type: "takeTwo",
+              //   token: { ...prev.token, [color]: prev.token[color] + 1 },
+              // }));
+              // setGameToken((prev) => ({
+              //   ...prev,
+              //   [color]: prev[color] - 1,
+              // }));
+              setTakeToken(color);
+              setActionType("takeTwo");
+              setMessage("Take token success");
+            }
+          } else {
+            // setAction((prev) => ({
+            //   ...prev,
+            //   token: { ...prev.token, [color]: prev.token[color] + 1 },
+            // }));
+            // setGameToken((prev) => ({
+            //   ...prev,
+            //   [color]: prev[color] - 1,
+            // }));
+            setTakeToken(color);
+            setMessage("Take token success");
+          }
+        }
+        return;
+      case 0:
+        // setAction((prev) => ({
+        //   ...prev,
+        //   token: { ...prev.token, [color]: prev.token[color] + 1 },
+        // }));
+        // setGameToken((prev) => ({
+        //   ...prev,
+        //   [color]: prev[color] - 1,
+        // }));
+        setTakeToken(color);
+        setMessage("Take token success");
+        return;
+    }
     return;
   }
-  if (sumTokenColors === 2) {
-    if (
-      action.token.white === 2 ||
-      action.token.blue === 2 ||
-      action.token.green === 2 ||
-      action.token.red === 2 ||
-      action.token.black === 2
-    ) {
-      setMessage("You cannot take any more tokens. Consider returing one.");
-    } else {
-      setAction((prev) => ({
-        ...prev,
-        token: { ...prev.token, [color]: prev.token[color] + 1 },
-      }));
-    }
+  // RETURN TOKEN
+  if ([1, 2, 3].includes(sumTokenColors)) {
+    // setAction((prev) => ({
+    //   ...prev,
+    //   type: null,
+    //   token: { ...prev.token, [color]: prev.token[color] - 1 },
+    // }));
+    // setGameToken((prev) => ({
+    //   ...prev,
+    //   [color]: prev[color] + 1,
+    // }));
+    setActionType(null);
+    setReturnToken(color);
+    setMessage("Return token success");
   }
 }

@@ -37,12 +37,6 @@ enum Color {
     black
 }
 
-enum TokenColor {
-    abcd
-    efgh
-    ijkl
-}
-
 type Price {
     white   Int
     blue    Int
