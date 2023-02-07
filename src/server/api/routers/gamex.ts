@@ -125,6 +125,58 @@ export const gamexRouter = createTRPCRouter({
       })
     ),
 
+  updateServerState: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        state: z.object({
+          take: z.boolean().nullable().optional(),
+          color: z.string().optional(),
+          type: z.nativeEnum(ActionType).nullable().optional(),
+          cardId: z.number().min(0).max(89).optional(),
+        }),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          currentAction: {
+            update: {
+              type: input.state.type,
+              token: {
+                update: input.state.color
+                  ? {
+                      [input.state.color]: {
+                        increment:
+                          input.state.take === null
+                            ? 0
+                            : input.state.take
+                            ? 1
+                            : -1,
+                      },
+                    }
+                  : undefined,
+              },
+              cardId: input.state.cardId,
+            },
+          },
+          token: {
+            update: input.state.color
+              ? {
+                  [input.state.color]: {
+                    increment:
+                      input.state.take === null ? 0 : input.state.take ? -1 : 1,
+                  },
+                }
+              : undefined,
+          },
+        },
+      })
+    ),
+
   updateCurrentActionToken: protectedProcedure
     .input(
       z.object({

@@ -13,6 +13,17 @@ import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Action, ActionType, Token } from "@prisma/client";
 
 type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
+interface ClientState {
+  color?: TokenColor;
+  take?: boolean | null;
+  type?: ActionType | null;
+  cardId?: number;
+}
+
+interface ServerState {
+  token: Token | undefined;
+  action: Action | undefined;
+}
 
 const allTokenColors = [
   "white",
@@ -34,13 +45,15 @@ export default function Game() {
   // STATE HOOKS
   const [countdown, setCountdown] = useState(0);
   const [isValidTab, setValidTab] = useState(false);
-  const [takeToken, setTakeToken] = useState<TokenColor>();
-  const [returnToken, setReturnToken] = useState<TokenColor>();
-  const [actionType, setActionType] = useState<ActionType | null>();
+  // const [takeToken, setTakeToken] = useState<TokenColor>();
+  // const [returnToken, setReturnToken] = useState<TokenColor>();
+  // const [actionType, setActionType] = useState<ActionType | null>();
+  const [clientState, setClientState] = useState<ClientState>();
+  const [serverState, setServerState] = useState<ServerState>();
   const [message, setMessage] = useState<string>();
 
-  const [action, setAction] = useState<Action>();
-  const [token, setToken] = useState<Token>();
+  // const [action, setAction] = useState<Action>();
+  // const [token, setToken] = useState<Token>();
 
   // CONTEXT HOOKS
   const utils = api.useContext();
@@ -69,24 +82,29 @@ export default function Game() {
       utils.gamex.findPlayerById.invalidate();
     },
   });
-  const updateToken = api.gamex.updateToken.useMutation({
+  const updateServerState = api.gamex.updateServerState.useMutation({
     async onSettled() {
       utils.gamex.findAndAuthorize.invalidate();
     },
   });
-  const updateCurrentActionToken =
-    api.gamex.updateCurrentActionToken.useMutation({
-      async onSettled() {
-        utils.gamex.findAndAuthorize.invalidate();
-      },
-    });
-  const updateCurrentActionType = api.gamex.updateCurrentActionType.useMutation(
-    {
-      async onSettled() {
-        utils.gamex.findAndAuthorize.invalidate();
-      },
-    }
-  );
+  // const updateToken = api.gamex.updateToken.useMutation({
+  //   async onSettled() {
+  //     utils.gamex.findAndAuthorize.invalidate();
+  //   },
+  // });
+  // const updateCurrentActionToken =
+  //   api.gamex.updateCurrentActionToken.useMutation({
+  //     async onSettled() {
+  //       utils.gamex.findAndAuthorize.invalidate();
+  //     },
+  //   });
+  // const updateCurrentActionType = api.gamex.updateCurrentActionType.useMutation(
+  //   {
+  //     async onSettled() {
+  //       utils.gamex.findAndAuthorize.invalidate();
+  //     },
+  //   }
+  // );
 
   const isPlayerTurn =
     sessionData?.user.id ===
@@ -138,49 +156,60 @@ export default function Game() {
   // GAME LOGIC HOOKS
   useEffect(() => {
     if (game.data) {
-      setToken(game.data.token);
-      setAction(game.data.currentAction);
+      setServerState({
+        action: game.data.currentAction,
+        token: game.data.token,
+      });
     }
   }, [game.data]);
 
-  useEffect(() => {
-    if (game.data && takeToken) {
-      updateCurrentActionToken.mutate({
-        id: game.data.id,
-        color: takeToken,
-        inc: 1,
-      });
-      updateToken.mutate({
-        id: game.data.id,
-        color: takeToken,
-        inc: -1,
-      });
-    }
-  }, [takeToken]);
+  // useEffect(() => {
+  //   if (game.data && takeToken) {
+  //     updateCurrentActionToken.mutate({
+  //       id: game.data.id,
+  //       color: takeToken,
+  //       inc: 1,
+  //     });
+  //     updateToken.mutate({
+  //       id: game.data.id,
+  //       color: takeToken,
+  //       inc: -1,
+  //     });
+  //   }
+  // }, [takeToken]);
+
+  // useEffect(() => {
+  //   if (game.data && returnToken) {
+  //     updateCurrentActionToken.mutate({
+  //       id: game.data.id,
+  //       color: returnToken,
+  //       inc: -1,
+  //     });
+  //     updateToken.mutate({
+  //       id: game.data.id,
+  //       color: returnToken,
+  //       inc: 1,
+  //     });
+  //   }
+  // }, [returnToken]);
+
+  // useEffect(() => {
+  //   if (game.data && actionType) {
+  //     updateCurrentActionType.mutate({
+  //       id: game.data.id,
+  //       type: actionType,
+  //     });
+  //   }
+  // }, [actionType]);
 
   useEffect(() => {
-    if (game.data && returnToken) {
-      updateCurrentActionToken.mutate({
+    if (isPlayerTurn && clientState && game.data) {
+      updateServerState.mutate({
         id: game.data.id,
-        color: returnToken,
-        inc: -1,
-      });
-      updateToken.mutate({
-        id: game.data.id,
-        color: returnToken,
-        inc: 1,
+        state: { ...clientState },
       });
     }
-  }, [returnToken]);
-
-  useEffect(() => {
-    if (game.data && actionType) {
-      updateCurrentActionType.mutate({
-        id: game.data.id,
-        type: actionType,
-      });
-    }
-  }, [actionType]);
+  }, [clientState]);
 
   if (game.isLoading || !sessionData?.user) return <></>;
   if (!isValidTab)
@@ -209,11 +238,10 @@ export default function Game() {
               <TokenComponent
                 color={tokenColor}
                 take={true}
-                action={action}
-                gameToken={token}
-                setTakeToken={setTakeToken}
-                setReturnToken={setReturnToken}
-                setActionType={setActionType}
+                clientState={clientState}
+                setClientState={setClientState}
+                serverState={serverState}
+                setServerState={setServerState}
                 setMessage={setMessage}
                 // test={updateNextTurn.mutate}
               />
@@ -224,11 +252,10 @@ export default function Game() {
               <TokenComponent
                 color={tokenColor}
                 take={false}
-                action={action}
-                gameToken={action?.token}
-                setTakeToken={setTakeToken}
-                setReturnToken={setReturnToken}
-                setActionType={setActionType}
+                clientState={clientState}
+                setClientState={setClientState}
+                serverState={serverState}
+                setServerState={setServerState}
                 setMessage={setMessage}
                 // test={updateNextTurn.mutate}
               />
@@ -237,11 +264,11 @@ export default function Game() {
           <button
             className="bg-cyan-400"
             onClick={() => {
-              updateToken.mutate({
-                id: game.data.id,
-                color: "green",
-                inc: -1,
-              });
+              // updateToken.mutate({
+              //   id: game.data.id,
+              //   color: "green",
+              //   inc: -1,
+              // });
             }}
           >
             abcd
@@ -254,9 +281,10 @@ export default function Game() {
         </div>
         <div className="flex w-1/5 flex-col border-2">
           <div>{isPlayerTurn && "This is your turn."}</div>
-          <div>{takeToken}</div>
-          <div>{returnToken}</div>
-          <div>{actionType}</div>
+          <div>
+            {clientState ? (clientState.take ? "take" : "return") : "nah"}
+          </div>
+          <div>{clientState && clientState.type}</div>
           <div>{message}</div>
         </div>
       </main>

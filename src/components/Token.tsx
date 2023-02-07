@@ -1,5 +1,5 @@
 import { Shuffle, Action, ActionType } from "@prisma/client";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import Card from "./Card";
 
 type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
@@ -12,34 +12,42 @@ type Token = {
   gold: number;
 };
 
+interface ClientState {
+  color?: TokenColor;
+  take?: boolean | null;
+  type?: ActionType | null;
+  cardId?: number;
+}
+
+interface ServerState {
+  token: Token | undefined;
+  action: Action | undefined;
+}
+
 interface TokenProps {
   color: TokenColor;
   take: boolean | null;
-  action: Action | undefined;
-  // setAction: (value: SetStateAction<Action>) => void;
-  gameToken: Token | undefined;
-  setTakeToken: (value: SetStateAction<TokenColor | undefined>) => void;
-  setReturnToken: (value: SetStateAction<TokenColor | undefined>) => void;
-  setActionType: (value: SetStateAction<ActionType | null | undefined>) => void;
-  // setGameToken: (value: SetStateAction<Token>) => void;
+  clientState: ClientState | undefined;
+  setClientState: (value: SetStateAction<ClientState | undefined>) => void;
+  serverState: ServerState | undefined;
+  setServerState: (value: SetStateAction<ServerState | undefined>) => void;
   setMessage: (value: SetStateAction<string | undefined>) => void;
-  // test?: Function;
 }
 
 export default function Token({
   color,
   take,
-  action,
-  // setAction,
-  gameToken,
-  setTakeToken,
-  setReturnToken,
-  setActionType,
+  clientState,
+  setClientState,
+  serverState,
+  setServerState,
   setMessage,
 }: // setGameToken,
 
 // test,
 TokenProps) {
+  const [disabled, setDisabled] = useState(false);
+
   let colorClass: string;
   switch (color) {
     case "white":
@@ -62,9 +70,46 @@ TokenProps) {
       break;
   }
 
+  if (!serverState || !serverState.action) return <></>;
+  if (take)
+    return (
+      <div className="flex">
+        {serverState.token && serverState.token[color] > 0 && (
+          <button
+            className={`aspect-square w-[30px] rounded-full border-2 ${
+              !disabled ? colorClass : "bg-gray-400"
+            }`}
+            onClick={async () => {
+              // const updateData = {
+              //   id: "32132121",
+              //   playerId: "312313",
+              // };
+              // if (test) test(updateData);
+              updateClientToken({
+                color,
+                take,
+                clientState,
+                setClientState,
+                serverState,
+                setServerState,
+                setMessage,
+              });
+              setDisabled(true);
+              await new Promise((resolve) => {
+                setTimeout(resolve, 500);
+              });
+              setDisabled(false);
+            }}
+          >
+            T
+          </button>
+        )}
+        <div>{serverState.token && serverState.token[color]}</div>
+      </div>
+    );
   return (
     <div className="flex">
-      {gameToken && gameToken[color] > 0 && (
+      {serverState.action.token && serverState.action.token[color] > 0 && (
         <button
           className={`aspect-square w-[30px] rounded-full border-2 ${colorClass}`}
           onClick={async () => {
@@ -73,48 +118,55 @@ TokenProps) {
             //   playerId: "312313",
             // };
             // if (test) test(updateData);
-            updateToken({
+            updateClientToken({
               color,
               take,
-              action,
-              // setAction,
-              gameToken,
-              setTakeToken,
-              setReturnToken,
-              setActionType,
-              // setGameToken,
+              clientState,
+              setClientState,
+              serverState,
+              setServerState,
               setMessage,
-              // test,
             });
+            setDisabled(true);
+            await new Promise((resolve) => {
+              setTimeout(resolve, 300);
+            });
+            setDisabled(false);
           }}
         >
           T
         </button>
       )}
-      <div>{gameToken && gameToken[color]}</div>
+      <div>{serverState.action.token && serverState.action.token[color]}</div>
     </div>
   );
 }
 
-function updateToken({
+function updateClientToken({
   color,
   take,
-  action,
-  // setAction
-  gameToken,
-  setTakeToken,
-  setReturnToken,
-  setActionType,
+  clientState,
+  setClientState,
+  serverState,
+  setServerState,
   setMessage,
 }: // setGameToken,
 TokenProps) {
-  if (take === null || !action || !gameToken) return;
-  const sumTokenColors = Object.values(action.token).reduce((a, b) => a + b, 0);
-  setMessage("455");
+  if (
+    take === null ||
+    !serverState ||
+    !serverState.action ||
+    !serverState.token
+  )
+    return;
+  const sumTokenColors = Object.values(serverState.action.token).reduce(
+    (a, b) => a + b,
+    0
+  );
   if (take) {
     // TAKE TOKEN
-    if (action.type !== null) {
-      setMessage("You cannot take any more tokens. Consider returing one.");
+    if (serverState.action.type !== null) {
+      setMessage("You cannot take any more tokens.");
       return;
     }
     switch (sumTokenColors) {
@@ -131,8 +183,10 @@ TokenProps) {
         // ) {
         //   setMessage("You cannot take any more tokens. Consider returing one.");
         // } else {
-        if (action.token[color] === 1) {
-          setMessage("You cannot pick token of this color now");
+        if (serverState.action.token[color] === 1) {
+          setMessage("You cannot pick token of this color now.");
+        } else if (color === "gold") {
+          setMessage("You cannot pick gold token now.");
         } else {
           // setAction((prev) => ({
           //   ...prev,
@@ -143,19 +197,25 @@ TokenProps) {
           //   ...prev,
           //   [color]: prev[color] - 1,
           // }));
-          setTakeToken(color);
-          setActionType("takeThree");
-          setMessage("Take token success");
+          setClientState((prev) => ({
+            ...prev,
+            take,
+            color,
+            type: "takeThree",
+          }));
+          setMessage("Take token success.");
         }
         // }
         return;
       case 1:
-        if (action.token.gold === 1) {
-          setMessage("You can only reserve card now");
+        if (serverState.action.token.gold === 1) {
+          setMessage("You can only reserve card now.");
+        } else if (color === "gold") {
+          setMessage("You cannot pick gold token now.");
         } else {
-          if (action.token[color] === 1) {
-            if (gameToken[color] < 3) {
-              setMessage("Not enough tokens left for double pick");
+          if (serverState.action.token[color] === 1) {
+            if (serverState.token[color] < 3) {
+              setMessage("Not enough tokens left for double take.");
             } else {
               // setAction((prev) => ({
               //   ...prev,
@@ -166,9 +226,13 @@ TokenProps) {
               //   ...prev,
               //   [color]: prev[color] - 1,
               // }));
-              setTakeToken(color);
-              setActionType("takeTwo");
-              setMessage("Take token success");
+              setClientState((prev) => ({
+                ...prev,
+                take,
+                color,
+                type: "takeTwo",
+              }));
+              setMessage("Take token success.");
             }
           } else {
             // setAction((prev) => ({
@@ -179,8 +243,12 @@ TokenProps) {
             //   ...prev,
             //   [color]: prev[color] - 1,
             // }));
-            setTakeToken(color);
-            setMessage("Take token success");
+            setClientState((prev) => ({
+              ...prev,
+              take,
+              color,
+            }));
+            setMessage("Take token success.");
           }
         }
         return;
@@ -193,8 +261,12 @@ TokenProps) {
         //   ...prev,
         //   [color]: prev[color] - 1,
         // }));
-        setTakeToken(color);
-        setMessage("Take token success");
+        setClientState((prev) => ({
+          ...prev,
+          take,
+          color,
+        }));
+        setMessage("Take token success.");
         return;
     }
     return;
@@ -210,8 +282,12 @@ TokenProps) {
     //   ...prev,
     //   [color]: prev[color] + 1,
     // }));
-    setActionType(null);
-    setReturnToken(color);
+    setClientState((prev) => ({
+      ...prev,
+      take,
+      color,
+      type: null,
+    }));
     setMessage("Return token success");
   }
 }
