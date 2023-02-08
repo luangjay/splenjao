@@ -27,27 +27,35 @@ export default function Play() {
   //   refetchInterval: 2000
   // });
 
-  const playerGames = api.play.findPlayerGames.useQuery(sessionData?.user.id);
-  const playerLobby = api.play.findPlayerLobby.useQuery(sessionData?.user.id);
+  const utils = api.useContext();
+
+  const player = api.play.findPlayer.useQuery(sessionData?.user.id);
   const createLobby = api.play.createLobby.useMutation();
   const aLobby = api.play.findLobby.useQuery(undefined, {
     refetchInterval: 2000,
   });
   const theLobby = api.play.findLobbyById.useQuery(inputLobbyId);
   // const upsertPlayer = api.player.upsertOneOnLobbyJoin.useMutation();
-  const updatePlayer = api.play.updatePlayer.useMutation();
-  const updateLobby = api.play.updateLobby.useMutation();
+  const updatePlayer = api.play.updatePlayer.useMutation({
+    async onSettled() {
+      utils.play.findPlayer.invalidate();
+    },
+  });
+  const updateLobby = api.play.updateLobby.useMutation({
+    async onSettled() {},
+  });
 
   useEffect(() => {
-    if (playerGames.data) {
-      const playerLastGame = playerGames.data[playerGames.data.length - 1];
+    if (player.data?.games) {
+      const playerLastGame =
+        player.data.games[player.data.games.length - 1];
       if (playerLastGame && playerLastGame.status !== "final")
         router.replace(`/play/game/${playerLastGame.id}`);
     }
-    if (playerLobby.data) {
-      router.replace(`/play/lobby/${playerLobby.data.id}`);
+    if (player.data?.lobby) {
+      router.replace(`/play/lobby/${player.data.lobby.id}`);
     }
-  }, [playerGames.data, playerLobby.data]);
+  }, [player.data]);
 
   const handleNewLobby = handleSubmit(async () => {
     // await player.refetch();

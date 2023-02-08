@@ -46,28 +46,18 @@ export const playRouter = createTRPCRouter({
       })
   ),
 
-  findPlayerGames: protectedProcedure
+  findPlayer: protectedProcedure
     .input(z.string().optional())
     .query(({ ctx, input }) =>
-      ctx.prisma.player
-        .findUnique({
-          where: {
-            id: input,
-          },
-        })
-        .games()
-    ),
-
-  findPlayerLobby: protectedProcedure
-    .input(z.string().optional())
-    .query(({ ctx, input }) =>
-      ctx.prisma.player
-        .findUnique({
-          where: {
-            id: input,
-          },
-        })
-        .lobby()
+      ctx.prisma.player.findUnique({
+        where: {
+          id: input,
+        },
+        include: {
+          games: true,
+          lobby: true,
+        },
+      })
     ),
 
   findLobbyById: protectedProcedure

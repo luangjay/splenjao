@@ -29,18 +29,18 @@ export default function Lobby() {
       retry: false,
     }
   );
-  const playerGames = api.lobbyx.findPlayerGames.useQuery(sessionData?.user.id);
+  const player = api.lobbyx.findPlayer.useQuery(sessionData?.user.id);
   const createGame = api.lobbyx.createGame.useMutation();
   const updatePlayers = api.lobbyx.updatePlayers.useMutation();
   const clearThisLobby = api.lobbyx.clearThisLobby.useMutation();
 
   useEffect(() => {
-    if (playerGames.data) {
-      const playerLastGame = playerGames.data[playerGames.data.length - 1];
+    if (player.data?.games) {
+      const playerLastGame = player.data.games[player.data.games.length - 1];
       if (playerLastGame && playerLastGame.status !== "final")
         router.replace(`/play/game/${playerLastGame.id}`);
     }
-  }, [playerGames.data]);
+  }, [player.data]);
 
   const handleClick = async () => {
     if (sessionData && lobby.data) {
@@ -48,12 +48,6 @@ export default function Lobby() {
         hostId: sessionData?.user.id,
         playerCount: lobby.data.playerCount,
         playerIds: lobby.data.playerIds,
-        shuffle: {
-          cardLv1_ids: shuffleArray(shuffle(0, 40)),
-          cardLv2_ids: shuffleArray(shuffle(40, 70)),
-          cardLv3_ids: shuffleArray(shuffle(70, 90)),
-          tile_ids: shuffleArray(shuffle(0, 10)),
-        },
       };
       let game = await createGame.mutateAsync(gameData);
       // setMessage(`Create game success, game id: ${game.id}`);
