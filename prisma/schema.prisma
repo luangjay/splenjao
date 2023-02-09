@@ -96,7 +96,7 @@ type TokenList {
 }
 
 type Action {
-    turnEnding  Boolean
+    endTurn     Boolean
     type        ActionType?
     tokenList   TokenList
     cardId      Int
@@ -137,6 +137,13 @@ type PlayerDiscount {
     i3      Price
 }
 
+type PlayerReserve {
+    i0      Int[]
+    i1      Int[]
+    i2      Int[]
+    i3      Int[]
+}
+
 // type APlayerInfo {
 //     id          String
 //     score       Int  
@@ -170,6 +177,7 @@ model Game {
     playerTile      PlayerTile
     playerToken     PlayerToken
     playerDiscount  PlayerDiscount
+    playerReserve   PlayerReserve
     players         Player[]    @relation(fields: [playerIds], references: [id])
 }
 

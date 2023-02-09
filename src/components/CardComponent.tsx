@@ -5,8 +5,8 @@ import { IdxKey } from "../common/types";
 import { api } from "../utils/api";
 
 interface CardProps {
+  game: Game;
   id: number;
-  playerIdx: number;
   clientState: ClientState | undefined;
   setClientState: (value: SetStateAction<ClientState | undefined>) => void;
   serverState: ServerState | undefined;
@@ -17,49 +17,19 @@ interface CardProps {
 
 type Color = "white" | "blue" | "green" | "red" | "black";
 
-interface ColorProps {
-  color: Color | undefined;
-}
-
-interface PriceProps {
-  color: Color | undefined;
-  price: number | undefined;
-}
-
-export default function Card({
-  id,
-  playerIdx,
-  clientState,
-  setClientState,
-  serverState,
-  setServerState,
-  setMessage,
-  isTurnLoading,
-}: CardProps) {
-  const card = api.card.findById.useQuery(id);
-  const isPicked = id === serverState?.action.cardId;
+export default function CardComponent(props: CardProps) {
+  const card = api.card.findById.useQuery(props.id);
+  const isPicked = props.id === props.serverState?.action.cardId;
 
   if (!card.data || card.data.id === -1) return <></>;
   return (
     <button
-      className={`rounded-lg border-2 border-black drop-shadow-md hover:bg-gray-200 ${
-        isPicked && ""
+      className={`rounded-lg border-2 border-black drop-shadow-md hover:bg-gray-100 ${
+        isPicked && "bg-gray-200"
       }`}
-      disabled={isTurnLoading}
+      disabled={props.isTurnLoading}
       onClick={() => {
-        updateClientCard(
-          {
-            id,
-            playerIdx,
-            clientState,
-            setClientState,
-            serverState,
-            setServerState,
-            setMessage,
-            isTurnLoading,
-          },
-          card.data?.price
-        );
+        updateClientCard(props, card.data?.price);
       }}
     >
       <div className="flex flex-row justify-between p-[4%]">
@@ -91,53 +61,65 @@ export default function Card({
   );
 }
 
-function updateClientCard(
-  {
-    id,
-    playerIdx,
-    clientState,
-    setClientState,
-    serverState,
-    setServerState,
-    setMessage,
-    isTurnLoading,
-  }: CardProps,
-  price?: Price
-) {
-  if (!price || !serverState) return;
-  setMessage("4344");
-  const sumTokenColors = Object.values(serverState.action.tokenList).reduce(
-    (a, b) => a + b,
-    0
-  );
+function updateClientCard(props: CardProps, price?: Price) {
+  if (!props.serverState || !price) return;
+  if (props.serverState.action.endTurn) {
+    props.setMessage("You cannot purchase card this period");
+    return;
+  }
+  props.setMessage("4344");
+  const sumTokenColors = Object.values(
+    props.serverState.action.tokenList
+  ).reduce((a, b) => a + b, 0);
   if (sumTokenColors !== 0) {
-    if (serverState.action.tokenList.gold === 1) {
-      setMessage("Coming soon");
+    if (props.serverState.action.tokenList.gold === 1) {
+      props.setMessage("Coming soon");
     } else {
-      setMessage("You cannot purchase card right now.");
+      props.setMessage("You cannot purchase card right now.");
     }
     return;
   }
   // *** IMPORTANT ***
-  // if (
-  //   !(["white", "blue", "green", "red", "black"] as Color[]).every((color) => {
-  //     if (
-  //       serverState.playerToken[`i${playerIdx}` as IdxKey][color] < price[color]
-  //     ) {
-  //       setMessage("Not enough tokens.");
-  //       return false;
-  //     }
-  //     return true;
-  //   })
-  // )
-  //   return;
-  setClientState({
-    color: null,
-    take: null,
-    type: "purchase",
-    cardId: id,
+  const discountedPrice = { ...price };
+  (Object.keys(discountedPrice) as Color[]).forEach((color) => {
+    discountedPrice[color] =
+      price[color] -
+      props.game.playerDiscount[`i${props.game.turn.playerIdx}` as IdxKey][
+        color
+      ];
   });
-  setMessage("Purchase card success.");
+  if (
+    !(["white", "blue", "green", "red", "black"] as Color[]).every((color) => {
+      if (
+        props.serverState &&
+        props.serverState.playerToken[
+          `i${props.game.turn.playerIdx}` as IdxKey
+        ][color] < discountedPrice[color]
+      ) {
+        props.setMessage("Not enough tokens.");
+        return false;
+      }
+      return true;
+    })
+  ) {
+    return;
+  }
+  props.setClientState({
+    tokenColor: null,
+    effect: "purchase",
+    actionType: "purchase",
+    cardId: props.id,
+  });
+  props.setMessage("Purchase card success.");
+}
+
+interface ColorProps {
+  color: Color | undefined;
+}
+
+interface PriceProps {
+  color: Color | undefined;
+  price: number | undefined;
 }
 
 function ColorLabel({ color }: ColorProps) {

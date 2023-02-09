@@ -1,5 +1,5 @@
-import Deck from "../../components/Deck";
+import CardContainer from "../../components/CardContainer";
 
 export default function DextPage() {
-  return <Deck />;
+  return <CardContainer />;
 }

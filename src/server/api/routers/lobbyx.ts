@@ -103,7 +103,7 @@ export const lobbyxRouter = createTRPCRouter({
             startTime: addSeconds(new Date(), 32),
           },
           action: {
-            turnEnding: false,
+            endTurn: false,
             type: null,
             tokenList: {
               white: 0,
@@ -129,6 +129,12 @@ export const lobbyxRouter = createTRPCRouter({
             i3: { ...price },
           },
           playerCard: {
+            i0: Array<number>(),
+            i1: Array<number>(),
+            i2: Array<number>(),
+            i3: Array<number>(),
+          },
+          playerReserve: {
             i0: Array<number>(),
             i1: Array<number>(),
             i2: Array<number>(),

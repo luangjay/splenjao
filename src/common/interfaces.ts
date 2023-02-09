@@ -2,10 +2,11 @@ import {
   Action,
   ActionType,
   PlayerCard,
+  PlayerReserve,
   PlayerTile,
   PlayerToken,
 } from "@prisma/client";
-import { TokenColor } from "./types";
+import { Effect, Owner, TokenColor } from "./types";
 
 export interface TokenList {
   white: number;
@@ -17,16 +18,17 @@ export interface TokenList {
 }
 
 export interface ClientState {
-  color?: TokenColor | null;
-  take?: boolean | null;
-  type?: ActionType | null;
+  effect: Effect | null;
+  actionType: ActionType | null;
+  tokenColor?: TokenColor | null;
   cardId?: number;
 }
 
 export interface ServerState {
-  tokenList: TokenList;
   action: Action;
+  tokenList: TokenList;
   playerCard: PlayerCard;
   playerTile: PlayerTile;
   playerToken: PlayerToken;
+  playerReserve: PlayerReserve;
 }

@@ -4,15 +4,16 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../../utils/api";
-import CardComponent from "../../../components/Card";
-import DeckComponent from "../../../components/Deck";
-import TokenComponent from "../../../components/Token";
+import CardComponent from "../../../components/CardComponent";
+import CardContainer from "../../../components/CardContainer";
+import TokenComponent from "../../../components/TokenComponent";
 import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Action, ActionType, TokenList } from "@prisma/client";
 import { TokenColor } from "../../../common/types";
 import { ClientState, ServerState } from "../../../common/interfaces";
+import TokenContainer from "../../../components/TokenContainer";
 
 const allTokenColors = [
   "white",
@@ -51,7 +52,7 @@ export default function Game() {
     },
     {
       retry: false,
-      refetchInterval: 1000
+      refetchInterval: 1000,
     }
   );
   const player = api.gamex.findPlayerById.useQuery(sessionData?.user.id, {
@@ -102,45 +103,32 @@ export default function Game() {
 
   // GAME PROTOCOL HOOKS
   useEffect(() => {
-    if (sessionData && game.data && isValidTab) {
-      let startTime: Date;
-      if (!game.data.action.turnEnding) {
-        startTime = game.data.endTurn.startTime;
-      } else {
-        startTime = game.data.nextTurn.startTime;
-      }
-      setCountdown((startTime.getTime() - Date.now()) / 1000);
-    }
-  }, [game.data]);
-
-  useEffect(() => {
     (async () => {
-      if (
-        countdown < 0 &&
-        !isTurnLoading &&
-        game.data &&
-        sessionData &&
-        isValidTab
-      ) {
-        setTurnLoading(true);
-        setCountdown(0);
-        if (sessionData?.user.id === game.data?.hostId) {
-          const updateData = {
-            id: game.data.id,
-            playerId: sessionData.user.id,
-          };
-          if (!game.data.action.turnEnding) {
-            updateEndTurn.mutate(updateData);
-          } else {
-            updateNextTurn.mutate(updateData);
+      if (sessionData && isValidTab && game.data) {
+        const startTime = game.data.action.endTurn
+          ? game.data.nextTurn.startTime
+          : game.data.endTurn.startTime;
+        const cd = (startTime.getTime() - Date.now()) / 1000;
+        setCountdown(cd);
+        if (cd <= 0 && !isTurnLoading) {
+          setTurnLoading(true);
+          // setCountdown(0);
+          if (sessionData?.user.id === game.data?.hostId) {
+            const updateData = {
+              id: game.data.id,
+              playerId: sessionData.user.id,
+            };
+            if (!game.data.action.endTurn) {
+              updateEndTurn.mutate(updateData);
+            } else {
+              updateNextTurn.mutate(updateData);
+            }
           }
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+          setTurnLoading(false);
         }
-        // (async () => {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 1000);
-        });
-        // })();
-        setTurnLoading(false);
       }
     })();
   }, [game.data]);
@@ -154,6 +142,7 @@ export default function Game() {
         playerCard: game.data.playerCard,
         playerTile: game.data.playerTile,
         playerToken: game.data.playerToken,
+        playerReserve: game.data.playerReserve,
       });
     }
   }, [game.data]);
@@ -162,6 +151,8 @@ export default function Game() {
     if (isPlayerTurn && clientState && game.data && isValidTab) {
       updateServerState.mutate({
         id: game.data.id,
+        playerIdx: game.data.turn.playerIdx,
+        isEndTurn: game.data.action.endTurn,
         state: { ...clientState },
       });
     }
@@ -188,45 +179,22 @@ export default function Game() {
           <div className="flex flex-col">
             <div>{Math.max(Math.ceil(countdown), 0)}</div>
             <div>{game.data.turn.playerIdx}</div>
-            <div>{game.data.action.turnEnding.toString()}</div>
+            <div>{game.data.action.endTurn.toString()}</div>
           </div>
-          <div>
-            {allTokenColors.map((tokenColor) => (
-              <TokenComponent
-                color={tokenColor}
-                take={true}
-                clientState={clientState}
-                setClientState={setClientState}
-                serverState={serverState}
-                setServerState={setServerState}
-                setMessage={setMessage}
-                isTurnLoading={isTurnLoading}
-              />
-            ))}
-          </div>
-          <div>
-            {allTokenColors.map((tokenColor) => (
-              <TokenComponent
-                color={tokenColor}
-                take={false}
-                clientState={clientState}
-                setClientState={setClientState}
-                serverState={serverState}
-                setServerState={setServerState}
-                setMessage={setMessage}
-                isTurnLoading={isTurnLoading}
-              />
-            ))}
-          </div>
-          <button className="bg-cyan-400" onClick={() => {}}>
-            abcd
-          </button>
+          <TokenContainer
+            game={game.data}
+            clientState={clientState}
+            setClientState={setClientState}
+            serverState={serverState}
+            setServerState={setServerState}
+            setMessage={setMessage}
+            isTurnLoading={isTurnLoading}
+          />
         </div>
         <div className="grid place-content-center border-2 border-red-500">
           <div className="w-fit border-2">
-            <DeckComponent
-              shuffle={game.data.shuffle}
-              playerIdx={game.data.turn.playerIdx}
+            <CardContainer
+              game={game.data}
               clientState={clientState}
               setClientState={setClientState}
               serverState={serverState}
@@ -238,12 +206,11 @@ export default function Game() {
         </div>
         <div className="flex w-1/5 flex-col border-2">
           <div>{isPlayerTurn && "This is your turn."}</div>
-          <div>
-            {clientState ? (clientState.take ? "take" : "return") : "nah"}
-          </div>
-          <div>{clientState && clientState.type}</div>
+          <div>{clientState ? clientState.effect : "nah"}</div>
+          <div>{clientState && clientState.actionType}</div>
           <div>{message}</div>
           <div className="w-full">{JSON.stringify(clientState)}</div>
+          <button>Done</button>
         </div>
       </main>
     </>

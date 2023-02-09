@@ -1,7 +1,16 @@
 import { z } from "zod";
-import { ActionType, Card, Game, Shuffle, Status } from "@prisma/client";
+import {
+  ActionType,
+  Card,
+  Color,
+  Game,
+  Shuffle,
+  Status,
+  TokenList,
+} from "@prisma/client";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { IdxKey, TokenColor } from "../../../common/types";
 
 const addSeconds = (date: Date, seconds: number) => {
   date.setSeconds(date.getSeconds() + seconds);
@@ -49,6 +58,21 @@ const drawCards = (shuffle: Shuffle, cardId: number | null) => {
     ...shuffle,
     [name]: result,
   };
+};
+
+const opTokenCount = (
+  op: "increment" | "decrement",
+  tokenList1: TokenList,
+  tokenList2?: TokenList
+) => {
+  const result = { ...tokenList1 };
+  (Object.keys(result) as TokenColor[]).forEach((color) => {
+    result[color] =
+      op === "increment"
+        ? tokenList1[color] + (tokenList2 ? tokenList2[color] : 1)
+        : tokenList1[color] - (tokenList2 ? tokenList2[color] : 1);
+  });
+  return result;
 };
 
 export const gamexRouter = createTRPCRouter({
@@ -129,7 +153,7 @@ export const gamexRouter = createTRPCRouter({
         },
         data: {
           action: {
-            turnEnding: true,
+            endTurn: true,
             type: null,
             tokenList: {
               white: 0,
@@ -145,8 +169,60 @@ export const gamexRouter = createTRPCRouter({
             playerIdx: (game.nextTurn.playerIdx + 1) % game.playerCount,
             startTime: addSeconds(new Date(), 10),
           },
+          tokenList:
+            card && game.action.type === "purchase"
+              ? {
+                  update: {
+                    white: {
+                      increment: Math.max(
+                        card.price.white -
+                          game.playerDiscount[
+                            `i${game.turn.playerIdx}` as IdxKey
+                          ].white,
+                        0
+                      ),
+                    },
+                    blue: {
+                      increment: Math.max(
+                        card.price.blue -
+                          game.playerDiscount[
+                            `i${game.turn.playerIdx}` as IdxKey
+                          ].blue,
+                        0
+                      ),
+                    },
+                    green: {
+                      increment: Math.max(
+                        card.price.green -
+                          game.playerDiscount[
+                            `i${game.turn.playerIdx}` as IdxKey
+                          ].green,
+                        0
+                      ),
+                    },
+                    red: {
+                      increment: Math.max(
+                        card.price.red -
+                          game.playerDiscount[
+                            `i${game.turn.playerIdx}` as IdxKey
+                          ].red,
+                        0
+                      ),
+                    },
+                    black: {
+                      increment: Math.max(
+                        card.price.black -
+                          game.playerDiscount[
+                            `i${game.turn.playerIdx}` as IdxKey
+                          ].black,
+                        0
+                      ),
+                    },
+                  },
+                }
+              : undefined,
           playerCard:
-            game.action.cardId !== -1 && game.turn.playerIdx >= 0
+            game.turn.playerIdx !== 1 && game.action.cardId !== -1
               ? {
                   update: {
                     [`i${game.turn.playerIdx}`]: { push: game.action.cardId },
@@ -154,8 +230,9 @@ export const gamexRouter = createTRPCRouter({
                 }
               : undefined,
           playerToken:
-            game.action.tokenList && game.turn.playerIdx >= 0
-              ? {
+            game.turn.playerIdx !== -1 //&&
+              ? // (game.action.type === "takeTwo" || game.action.type === "takeThree")
+                {
                   update: {
                     [`i${game.turn.playerIdx}`]: {
                       update: {
@@ -165,6 +242,60 @@ export const gamexRouter = createTRPCRouter({
                         red: { increment: game.action.tokenList.red },
                         black: { increment: game.action.tokenList.black },
                         gold: { increment: game.action.tokenList.gold },
+                      },
+                    },
+                  },
+                }
+              : card && game.action.type === "purchase"
+              ? {
+                  update: {
+                    [`i${game.turn.playerIdx}`]: {
+                      update: {
+                        white: {
+                          decrement: Math.max(
+                            card.price.white -
+                              game.playerDiscount[
+                                `i${game.turn.playerIdx}` as IdxKey
+                              ].white,
+                            0
+                          ),
+                        },
+                        blue: {
+                          decrement: Math.max(
+                            card.price.blue -
+                              game.playerDiscount[
+                                `i${game.turn.playerIdx}` as IdxKey
+                              ].blue,
+                            0
+                          ),
+                        },
+                        green: {
+                          decrement: Math.max(
+                            card.price.green -
+                              game.playerDiscount[
+                                `i${game.turn.playerIdx}` as IdxKey
+                              ].green,
+                            0
+                          ),
+                        },
+                        red: {
+                          decrement: Math.max(
+                            card.price.red -
+                              game.playerDiscount[
+                                `i${game.turn.playerIdx}` as IdxKey
+                              ].red,
+                            0
+                          ),
+                        },
+                        black: {
+                          decrement: Math.max(
+                            card.price.black -
+                              game.playerDiscount[
+                                `i${game.turn.playerIdx}` as IdxKey
+                              ].black,
+                            0
+                          ),
+                        },
                       },
                     },
                   },
@@ -235,7 +366,7 @@ export const gamexRouter = createTRPCRouter({
           //   startTime: addSeconds(new Date(), 32),
           // },
           action: {
-            turnEnding: false,
+            endTurn: false,
             type: null,
             tokenList: {
               white: 0,
@@ -247,28 +378,24 @@ export const gamexRouter = createTRPCRouter({
             },
             cardId: -1,
           },
+          tokenList:
+            game.action.tokenList && game.turn.playerIdx >= 0
+              ? {
+                  update: {
+                    white: { increment: game.action.tokenList.white },
+                    blue: { increment: game.action.tokenList.blue },
+                    green: { increment: game.action.tokenList.green },
+                    red: { increment: game.action.tokenList.red },
+                    black: { increment: game.action.tokenList.black },
+                    gold: { increment: game.action.tokenList.gold },
+                  },
+                }
+              : undefined,
           playerCard:
             game.action.cardId !== -1 && game.turn.playerIdx >= 0
               ? {
                   update: {
                     [`i${game.turn.playerIdx}`]: { push: game.action.cardId },
-                  },
-                }
-              : undefined,
-          playerToken:
-            game.action.tokenList && game.turn.playerIdx >= 0
-              ? {
-                  update: {
-                    [`i${game.turn.playerIdx}`]: {
-                      update: {
-                        white: { increment: game.action.tokenList.white },
-                        blue: { increment: game.action.tokenList.blue },
-                        green: { increment: game.action.tokenList.green },
-                        red: { increment: game.action.tokenList.red },
-                        black: { increment: game.action.tokenList.black },
-                        gold: { increment: game.action.tokenList.gold },
-                      },
-                    },
                   },
                 }
               : undefined,
@@ -303,10 +430,12 @@ export const gamexRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        playerIdx: z.number(),
+        isEndTurn: z.boolean(),
         state: z.object({
-          take: z.boolean().nullable().optional(),
-          color: z.string().nullable().optional(),
-          type: z.nativeEnum(ActionType).nullable().optional(),
+          effect: z.string().nullable(),
+          actionType: z.nativeEnum(ActionType).nullable(),
+          tokenColor: z.string().nullable().optional(),
           cardId: z.number().min(-1).max(89).optional(),
         }),
       })
@@ -319,17 +448,17 @@ export const gamexRouter = createTRPCRouter({
         data: {
           action: {
             update: {
-              type: input.state.type,
-              tokenList: input.state.color
+              type: input.state.actionType,
+              tokenList: input.state.tokenColor
                 ? {
                     update: {
-                      [input.state.color]: {
+                      [input.state.tokenColor]: {
                         increment:
-                          input.state.take === null
-                            ? 0
-                            : input.state.take
+                          input.state.effect === "take"
                             ? 1
-                            : -1,
+                            : input.state.effect === "return"
+                            ? -1
+                            : 0,
                       },
                     },
                   }
@@ -337,16 +466,40 @@ export const gamexRouter = createTRPCRouter({
               cardId: input.state.cardId,
             },
           },
-          tokenList: input.state.color
-            ? {
-                update: {
-                  [input.state.color]: {
-                    increment:
-                      input.state.take === null ? 0 : input.state.take ? -1 : 1,
+          playerToken:
+            input.state.tokenColor && input.isEndTurn
+              ? {
+                  update: {
+                    [`i${input.playerIdx}`]: {
+                      update: {
+                        [input.state.tokenColor]: {
+                          increment:
+                            input.state.effect === "take"
+                              ? -1
+                              : input.state.effect === "return"
+                              ? 1
+                              : 0,
+                        },
+                      },
+                    },
                   },
-                },
-              }
-            : undefined,
+                }
+              : undefined,
+          tokenList:
+            input.state.tokenColor && !input.isEndTurn
+              ? {
+                  update: {
+                    [input.state.tokenColor]: {
+                      increment:
+                        input.state.effect === "take"
+                          ? -1
+                          : input.state.effect === "return"
+                          ? 1
+                          : 0,
+                    },
+                  },
+                }
+              : undefined,
         },
       })
     ),

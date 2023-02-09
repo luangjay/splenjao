@@ -4,8 +4,8 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../utils/api";
-import Card from "../../components/Card";
-import Deck from "../../components/Deck";
+import CardComponent from "../../components/CardComponent";
+import CardContainer from "../../components/CardContainer";
 
 export default function Game() {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -19,7 +19,7 @@ export default function Game() {
       </Head>
       <main className="h-full">
         <div className="">
-          <Deck />
+          <CardContainer />
         </div>
       </main>
     </>
