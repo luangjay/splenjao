@@ -1,4 +1,3 @@
-import { Status } from "@prisma/client";
 import { GetServerSidePropsContext, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Error from "next/error";
@@ -20,6 +19,7 @@ export default function Lobby() {
   //   refetchInterval: 1000,
   // });
 
+  const utils = api.useContext();
   const lobby = api.lobbyx.findAndAuthorize.useQuery(
     {
       id,
@@ -30,14 +30,22 @@ export default function Lobby() {
     }
   );
   const player = api.lobbyx.findPlayer.useQuery(sessionData?.user.id);
-  const createGame = api.lobbyx.createGame.useMutation();
-  const updatePlayers = api.lobbyx.updatePlayers.useMutation();
+  const createGame = api.lobbyx.createGame.useMutation({
+    async onSettled() {
+      utils.lobbyx.findPlayer.invalidate();
+    },
+  });
+  const updatePlayers = api.lobbyx.updatePlayers.useMutation({
+    async onSettled() {
+      utils.lobbyx.findPlayer.invalidate();
+    },
+  });
   const clearThisLobby = api.lobbyx.clearThisLobby.useMutation();
 
   useEffect(() => {
     if (player.data?.games) {
       const playerLastGame = player.data.games[player.data.games.length - 1];
-      if (playerLastGame && playerLastGame.status !== "final")
+      if (playerLastGame && playerLastGame.status !== "end")
         router.replace(`/play/game/${playerLastGame.id}`);
     }
   }, [player.data]);
@@ -52,13 +60,13 @@ export default function Lobby() {
       let game = await createGame.mutateAsync(gameData);
       // setMessage(`Create game success, game id: ${game.id}`);
       // alert(`XXXX ${game.id} XXXX`);
-      await updatePlayers.mutateAsync({
+      updatePlayers.mutate({
         ids: lobby.data.playerIds,
         playerId: sessionData.user.id,
         lobbyId: lobby.data.id,
         gameId: game.id,
       });
-      await clearThisLobby.mutateAsync({
+      clearThisLobby.mutate({
         id: lobby.data.id,
         playerId: sessionData.user.id,
       });

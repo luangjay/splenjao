@@ -1,7 +1,15 @@
-export type Owner = "game" | "action" | "player";
-
-export type Effect = "take" | "return" | "purchase" | "reserve";
+export type CardColor = "white" | "blue" | "green" | "red" | "black";
 
 export type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
 
-export type IdxKey = "i0" | "i1" | "i2" | "i3";
+export type Action = "take" | "purchase" | "reserve";
+
+export type Reference = "resource" | "player" | "inventory";
+
+export type Effect = "take" | "return";
+
+export type InventoryKey =
+  | "inventory0"
+  | "inventory1"
+  | "inventory2"
+  | "inventory3";

@@ -15,7 +15,7 @@ interface CardContainerProps {
 
 export default function CardContainer(props: CardContainerProps) {
   return (
-    <div className="grid w-[660px] grid-rows-3 gap-3">
+    <div className="relative grid w-[660px] grid-rows-3 gap-3">
       <div className="grid grid-cols-5 gap-3">
         {props.game.shuffle.card3_ids.map(
           (id, idx) => idx < 5 && <CardComponent id={id} {...props} />
@@ -26,10 +26,13 @@ export default function CardContainer(props: CardContainerProps) {
           (id, idx) => idx < 5 && <CardComponent id={id} {...props} />
         )}
       </div>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="-z-10 grid grid-cols-5 gap-3 backdrop-blur-xl">
         {props.game.shuffle.card1_ids.map(
           (id, idx) => idx < 5 && <CardComponent id={id} {...props} />
         )}
+      </div>
+      <div className="absolute left-0 top-0 hidden h-full w-full bg-black opacity-80">
+        <button>abcd</button>
       </div>
     </div>
   );

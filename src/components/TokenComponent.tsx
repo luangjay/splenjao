@@ -1,72 +1,87 @@
-import { Shuffle, Action, ActionType, Game } from "@prisma/client";
+import { Game, Tokens } from "@prisma/client";
 import { SetStateAction, useEffect, useState } from "react";
 // import Card from "./Card";
-import { Effect, IdxKey, Owner, TokenColor } from "../common/types";
-import { TokenList, ClientState, ServerState } from "../common/interfaces";
+import { Effect, InventoryKey, Reference, TokenColor } from "../common/types";
+import { UserState, PlayerState } from "../common/interfaces";
 
-interface TokenProps {
+interface TokenComponentProps {
+  userState: UserState;
+  setUserState: (value: SetStateAction<UserState>) => void;
+  playerState: PlayerState;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
   game: Game;
-  owner: Owner;
+  reference: Reference;
   effect: Effect | null;
   tokenColor: TokenColor;
-  clientState: ClientState | undefined;
-  setClientState: (value: SetStateAction<ClientState | undefined>) => void;
-  serverState: ServerState | undefined;
-  setServerState: (value: SetStateAction<ServerState | undefined>) => void;
-  setMessage: (value: SetStateAction<string | undefined>) => void;
-  isTurnLoading: boolean;
 }
 
-export default function TokenComponent(props: TokenProps) {
+export default function TokenComponent({
+  userState,
+  setUserState,
+  playerState,
+  setPlayerState,
+  game,
+  reference,
+  effect,
+  tokenColor,
+}: TokenComponentProps) {
   const [disabled, setDisabled] = useState(false);
 
-  let colorClass =
-    props.tokenColor === "white"
+  const colorClass =
+    tokenColor === "white"
       ? "bg-white"
-      : props.tokenColor === "blue"
+      : tokenColor === "blue"
       ? "bg-blue-500"
-      : props.tokenColor === "green"
+      : tokenColor === "green"
       ? "bg-green-500"
-      : props.tokenColor === "red"
+      : tokenColor === "red"
       ? "bg-red-500"
-      : props.tokenColor === "black"
+      : tokenColor === "black"
       ? "bg-black"
-      : props.tokenColor === "gold"
+      : tokenColor === "gold"
       ? "bg-yellow-300"
       : "";
 
-  if (props.game.turn.playerIdx === -1 || !props.serverState) return <></>;
-
   const tokenCount =
-    props.owner === "game" && props.serverState.tokenList
-      ? props.serverState.tokenList[props.tokenColor]
-      : props.owner === "action" && props.serverState.action.tokenList
-      ? props.serverState.action.tokenList[props.tokenColor]
-      : props.owner === "player" && props.serverState.playerToken
-      ? props.serverState.playerToken[`i${props.game.turn.playerIdx}` as IdxKey][
-          props.tokenColor
-        ]
-      : 0;
+    // game.status === "created" ||
+    reference === "resource"
+      ? playerState.resourceTokens[tokenColor]
+      : reference === "inventory"
+      ? game.status !== "created"
+        ? playerState.inventoryTokens[tokenColor]
+        : 0
+      : playerState.playerTokens[tokenColor];
 
   return (
     <div className="flex">
       {tokenCount > 0 && (
         <button
           className={`aspect-square w-[30px] rounded-full border-2 ${
-            !(props.isTurnLoading || disabled) ? colorClass : "bg-gray-400"
+            !disabled ? colorClass : "bg-gray-400"
           }`}
-          disabled={props.isTurnLoading || !props.effect || disabled}
+          disabled={disabled}
           onClick={async () => {
             // const updateData = {
             //   id: "32132121",
             //   playerId: "312313",
             // };
             // if (test) test(updateData);
-            updateClientToken(props);
-            setDisabled(true);
-            await new Promise((resolve) => {
-              setTimeout(resolve, 700);
+            // updateClientToken(props);
+            // alert("322");
+            updatePlayerToken({
+              userState,
+              setUserState,
+              playerState,
+              setPlayerState,
+              game,
+              reference,
+              effect,
+              tokenColor,
             });
+            setDisabled(true);
+            // await new Promise((resolve) => {
+            //   setTimeout(resolve, 700);
+            // });
             setDisabled(false);
           }}
         >
@@ -78,77 +93,61 @@ export default function TokenComponent(props: TokenProps) {
   );
 }
 
-function updateClientToken({ effect, tokenColor, ...props }: TokenProps) {
-  if (!props.serverState) return;
-
-  if (!props.serverState.action.endTurn) {
-    const sumTokenColors = Object.values(
-      props.serverState.action.tokenList
-    ).reduce((a, b) => a + b, 0);
+async function updatePlayerToken({
+  game,
+  userState,
+  setUserState,
+  playerState,
+  setPlayerState,
+  reference,
+  effect,
+  tokenColor,
+}: TokenComponentProps) {
+  // alert(playerState.action)
+  if (playerState.action === "take") {
+    // if (playerState.action === null) {
+    const sumTokenColors = Object.values(playerState.playerTokens).reduce(
+      (a, b) => a + b,
+      0
+    );
     if (effect === "take") {
       // TAKE TOKEN
-      if (props.serverState.action.type !== null) {
-        props.setMessage("You cannot take any more tokens.");
+      if (playerState.success) {
+        setMessage(setUserState, "Unable to take any more tokens.");
+        return;
+      }
+      if (tokenColor === "gold") {
+        setMessage(setUserState, "Unable to take any gold tokens.");
         return;
       }
       switch (sumTokenColors) {
         case 2:
-          if (props.serverState.action.tokenList[tokenColor] === 1) {
-            props.setMessage("You cannot take token of this color now.");
+          if (playerState.playerTokens[tokenColor] === 1) {
+            setMessage(setUserState, "Unable to take token of this color now.");
             return;
           }
-          if (tokenColor === "gold") {
-            props.setMessage("You cannot take gold token now.");
-            return;
-          }
-          props.setClientState({
-            effect,
-            tokenColor,
-            actionType: "takeThree",
-            cardId: -1,
-          });
-          props.setMessage("Take token success.");
+          takeToken(setPlayerState, tokenColor, "resource", "player", true);
+          setMessage(setUserState, "Take token success.");
           return;
         case 1:
-          if (props.serverState.action.tokenList.gold === 1) {
-            props.setMessage("You can only reserve card now.");
-            return;
-          }
-          if (tokenColor === "gold") {
-            props.setMessage("You cannot take gold token now.");
-            return;
-          }
-          if (props.serverState.action.tokenList[tokenColor] === 1) {
-            if (props.serverState.tokenList[tokenColor] < 3) {
-              props.setMessage("Not enough tokens left for double take.");
+          if (playerState.playerTokens[tokenColor] === 1) {
+            if (game.resource.tokens[tokenColor] < 4) {
+              setMessage(
+                setUserState,
+                "Not enough tokens left for double take."
+              );
               return;
             }
-            props.setClientState({
-              effect,
-              tokenColor,
-              actionType: "takeTwo",
-              cardId: -1,
-            });
-            props.setMessage("Take token success.");
+            takeToken(setPlayerState, tokenColor, "resource", "player", true);
+            setMessage(setUserState, "Take token success.");
             return;
           }
-          props.setClientState({
-            effect,
-            tokenColor,
-            actionType: null,
-            cardId: -1,
-          });
-          props.setMessage("Take token success.");
+          takeToken(setPlayerState, tokenColor, "resource", "player", false);
+          setMessage(setUserState, "Take token success.");
           return;
-
         case 0:
-          props.setClientState({
-            effect,
-            tokenColor,
-            actionType: null,
-            cardId: -1,
-          });
-          props.setMessage("Take token success.");
+          takeToken(setPlayerState, tokenColor, "resource", "player", false);
+          setMessage(setUserState, "Take token success.");
           return;
       }
       return;
@@ -156,47 +155,182 @@ function updateClientToken({ effect, tokenColor, ...props }: TokenProps) {
     if (effect === "return") {
       // RETURN TOKEN
       if ([1, 2, 3].includes(sumTokenColors)) {
-        props.setClientState({
-          effect,
-          tokenColor,
-          actionType: null,
-          cardId: -1,
-        });
-        props.setMessage("Return token success");
+        takeToken(setPlayerState, tokenColor, "player", "resource", false);
+        setMessage(setUserState, "Return token success");
         return;
       }
       return;
     }
     return;
   }
-
-  const sumTokenColors = Object.values(
-    props.serverState.playerToken[`i${props.game.turn.playerIdx}` as IdxKey]
-  ).reduce((a, b) => a + b, 0);
-  if (props.serverState.action.type !== "return" && sumTokenColors <= 10)
-    return;
-  if (effect === "take") {
-    if (sumTokenColors > 10) {
-      props.setClientState({
-        effect,
-        tokenColor,
-        actionType: "return",
-        cardId: -1,
-      });
-      props.setMessage("Return token success.");
-      return;
-    }
-    props.setMessage("You will need to have exactly 10 tokens left!");
-    return;
-  }
-  if (effect === "return") {
-    props.setClientState({
-      effect,
-      tokenColor,
-      actionType: null,
-      cardId: -1,
-    });
-    props.setMessage("Take token success.");
-    return;
-  }
 }
+
+async function takeToken(
+  setPlayerState: (value: SetStateAction<PlayerState>) => void,
+  tokenColor: TokenColor,
+  from: Reference,
+  to: Reference,
+  success: boolean
+) {
+  setPlayerState((prev) => ({
+    ...prev,
+    [`${from}Tokens`]: {
+      ...prev[`${from}Tokens`],
+      [tokenColor]: prev[`${from}Tokens`][tokenColor] - 1,
+    },
+    [`${to}Tokens`]: {
+      ...prev[`${to}Tokens`],
+      [tokenColor]: prev[`${to}Tokens`][tokenColor] + 1,
+    },
+    success,
+  }));
+}
+
+// async function returnToken(
+//   setPlayerState: (value: SetStateAction<PlayerState>) => void,
+//   reference: Reference,
+//   tokenColor: TokenColor,
+//   success: boolean
+// ) {
+//   setPlayerState((prev) => ({
+//     ...prev,
+//     tokens: {
+//       ...prev.playerTokens,
+//       [tokenColor]: prev.playerTokens[tokenColor] - 1,
+//     },
+//     success,
+//   }));
+// }
+
+async function setMessage(
+  setUserState: (value: SetStateAction<UserState>) => void,
+  message: string
+) {
+  setUserState((prev) => ({
+    ...prev,
+    message,
+  }));
+}
+
+// function updateClientToken({ effect, tokenColor, ...props }: TokenProps) {
+//   if (!serverState) return;
+
+//   if (!serverState.action.endTurn) {
+//     const sumTokenColors = Object.values(serverState.action.tokenList).reduce(
+//       (a, b) => a + b,
+//       0
+//     );
+//     if (effect === "take") {
+//       // TAKE TOKEN
+//       if (serverState.action.type !== null) {
+//         setMessage("You cannot take any more tokens.");
+//         return;
+//       }
+//       switch (sumTokenColors) {
+//         case 2:
+//           if (serverState.action.tokenList[tokenColor] === 1) {
+//             setMessage("You cannot take token of this color now.");
+//             return;
+//           }
+//           if (tokenColor === "gold") {
+//             setMessage("You cannot take gold token now.");
+//             return;
+//           }
+//           setClientState({
+//             effect,
+//             tokenColor,
+//             actionType: "takeThree",
+//             cardId: -1,
+//           });
+//           setMessage("Take token success.");
+//           return;
+//         case 1:
+//           if (serverState.action.tokenList.gold === 1) {
+//             setMessage("You can only reserve card now.");
+//             return;
+//           }
+//           if (tokenColor === "gold") {
+//             setMessage("You cannot take gold token now.");
+//             return;
+//           }
+//           if (serverState.action.tokenList[tokenColor] === 1) {
+//             if (serverState.tokenList[tokenColor] < 3) {
+//               setMessage("Not enough tokens left for double take.");
+//               return;
+//             }
+//             setClientState({
+//               effect,
+//               tokenColor,
+//               actionType: "takeTwo",
+//               cardId: -1,
+//             });
+//             setMessage("Take token success.");
+//             return;
+//           }
+//           setClientState({
+//             effect,
+//             tokenColor,
+//             actionType: null,
+//             cardId: -1,
+//           });
+//           setMessage("Take token success.");
+//           return;
+
+//         case 0:
+//           setClientState({
+//             effect,
+//             tokenColor,
+//             actionType: null,
+//             cardId: -1,
+//           });
+//           setMessage("Take token success.");
+//           return;
+//       }
+//       return;
+//     }
+//     if (effect === "return") {
+//       // RETURN TOKEN
+//       if ([1, 2, 3].includes(sumTokenColors)) {
+//         setClientState({
+//           effect,
+//           tokenColor,
+//           actionType: null,
+//           cardId: -1,
+//         });
+//         setMessage("Return token success");
+//         return;
+//       }
+//       return;
+//     }
+//     return;
+//   }
+
+//   const sumTokenColors = Object.values(
+//     serverState.playerToken[`i${game.turn.playerIdx}` as IdxKey]
+//   ).reduce((a, b) => a + b, 0);
+//   if (serverState.action.type !== "return" && sumTokenColors <= 10) return;
+//   if (effect === "take") {
+//     if (sumTokenColors > 10) {
+//       setClientState({
+//         effect,
+//         tokenColor,
+//         actionType: "return",
+//         cardId: -1,
+//       });
+//       setMessage("Return token success.");
+//       return;
+//     }
+//     setMessage("You will need to have exactly 10 tokens left!");
+//     return;
+//   }
+//   if (effect === "return") {
+//     setClientState({
+//       effect,
+//       tokenColor,
+//       actionType: null,
+//       cardId: -1,
+//     });
+//     setMessage("Take token success.");
+//     return;
+//   }
+// }

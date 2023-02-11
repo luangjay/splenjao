@@ -1,4 +1,4 @@
-import { Lobby, Status, Turn, Action } from "@prisma/client";
+import { Lobby } from "@prisma/client";
 import { z } from "zod";
 import { shuffle } from "../../../common/functions";
 
@@ -16,7 +16,7 @@ const price = {
   red: 0,
   black: 0,
 };
-const tokenList = {
+const tokens = {
   white: 0,
   blue: 0,
   green: 0,
@@ -24,6 +24,29 @@ const tokenList = {
   black: 0,
   gold: 0,
 };
+const allTokens = {
+  white: 7,
+  blue: 7,
+  green: 7,
+  red: 7,
+  black: 7,
+  gold: 5,
+};
+
+const newResource = () => ({
+  cardsLv1: shuffle(0, 40),
+  cardsLv2: shuffle(40, 70),
+  cardsLv3: shuffle(70, 90),
+  tiles: shuffle(0, 10),
+  tokens: { ...allTokens },
+});
+
+const newInventory = () => ({
+  cards: Array<number>(),
+  reservedCards: Array<number>(),
+  tiles: Array<number>(),
+  tokens: { ...tokens },
+});
 
 export const lobbyxRouter = createTRPCRouter({
   // findAll: publicProcedure.query(({ ctx }) => {
@@ -83,75 +106,14 @@ export const lobbyxRouter = createTRPCRouter({
           hostId: input.hostId,
           playerCount: input.playerCount,
           playerIds: input.playerIds,
-          shuffle: {
-            card1_ids: shuffle(0, 40),
-            card2_ids: shuffle(40, 70),
-            card3_ids: shuffle(70, 90),
-            tile_ids: shuffle(0, 10),
-          },
-          status: "initial" as Status,
-          turn: {
-            playerIdx: -1,
-            startTime: new Date(),
-          },
-          endTurn: {
-            playerIdx: -1,
-            startTime: addSeconds(new Date(), 22),
-          },
-          nextTurn: {
-            playerIdx: 0,
-            startTime: addSeconds(new Date(), 32),
-          },
-          action: {
-            endTurn: false,
-            type: null,
-            tokenList: {
-              white: 0,
-              blue: 0,
-              green: 0,
-              red: 0,
-              black: 0,
-              gold: 0,
-            },
-            cardId: -1,
-          },
-          tokenList: { white: 7, blue: 7, green: 7, red: 7, black: 7, gold: 5 },
-          playerScore: {
-            i0: 0,
-            i1: 0,
-            i2: 0,
-            i3: 0,
-          },
-          playerDiscount: {
-            i0: { ...price },
-            i1: { ...price },
-            i2: { ...price },
-            i3: { ...price },
-          },
-          playerCard: {
-            i0: Array<number>(),
-            i1: Array<number>(),
-            i2: Array<number>(),
-            i3: Array<number>(),
-          },
-          playerReserve: {
-            i0: Array<number>(),
-            i1: Array<number>(),
-            i2: Array<number>(),
-            i3: Array<number>(),
-          },
-          playerTile: {
-            i0: Array<number>(),
-            i1: Array<number>(),
-            i2: Array<number>(),
-            i3: Array<number>(),
-          },
-          playerToken: {
-            i0: { ...tokenList },
-            i1: { ...tokenList },
-            i2: { ...tokenList },
-            i3: { ...tokenList },
-          },
+          createdAt: new Date(),
+          status: "created",
+          turnIdx: -1,
+          resource: newResource(),
+          inventory0: newInventory(),
+          inventory1: newInventory(),
+          inventory2: newInventory(),
+          inventory3: newInventory(),
         },
       })
     ),

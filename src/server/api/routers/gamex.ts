@@ -1,16 +1,8 @@
-import { z } from "zod";
-import {
-  ActionType,
-  Card,
-  Color,
-  Game,
-  Shuffle,
-  Status,
-  TokenList,
-} from "@prisma/client";
+import { string, z } from "zod";
+import { Card, Game, Resource, Tokens } from "@prisma/client";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { IdxKey, TokenColor } from "../../../common/types";
+import { InventoryKey, TokenColor } from "../../../common/types";
 
 const addSeconds = (date: Date, seconds: number) => {
   date.setSeconds(date.getSeconds() + seconds);
@@ -30,50 +22,98 @@ const addSeconds = (date: Date, seconds: number) => {
 //   return result
 // };
 
-const drawCards = (shuffle: Shuffle, cardId: number | null) => {
-  if (cardId === null) return { ...shuffle };
-  let name;
-  let result;
+// const drawCards = (gameResource: GameResource, cardId: number | null) => {
+//   if (cardId === null) return { ...gameResource };
+//   let name;
+//   let result;
+//   if (0 <= cardId && cardId < 40) {
+//     name = "card1_ids";
+//     result = [...gameResource.card1_ids];
+//   } else if (40 <= cardId && cardId < 70) {
+//     name = "card2_ids";
+//     result = [...gameResource.card2_ids];
+//   } else if (70 <= cardId && cardId < 90) {
+//     name = "card3_ids";
+//     result = [...gameResource.card3_ids];
+//   } else {
+//     return { ...gameResource };
+//   }
+//   if (result.length > 5) {
+//     const drawIdx = result.indexOf(cardId);
+//     const drawCardId = result.splice(5, 1)[0] as number;
+//     result.splice(drawIdx, 1, drawCardId);
+//   } else {
+//     const drawIdx = result.indexOf(cardId);
+//     result.splice(drawIdx, 1);
+//   }
+//   return {
+//     ...gameResource,
+//     [name]: result,
+//   };
+// };
+
+function opTokenCount(
+  op: "increment" | "decrement" | null,
+  tokens1: Tokens,
+  tokens2?: Tokens
+): Tokens | undefined {
+  if (!op) return undefined;
+  const result: Tokens = { ...tokens1 };
+  (Object.keys(result) as TokenColor[]).forEach((color) => {
+    result[color] =
+      op === "increment"
+        ? tokens1[color] + (tokens2 ? tokens2[color] : 1)
+        : tokens1[color] - (tokens2 ? tokens2[color] : 1);
+  });
+  return result;
+}
+
+const drawCards = (resource: Resource, cardId: number | null) => {
+  if (cardId === null) return { cardsLv1: undefined };
+  let name: string;
+  let result: number[];
   if (0 <= cardId && cardId < 40) {
-    name = "card1_ids";
-    result = [...shuffle.card1_ids];
+    name = "cardsLv1";
+    result = [...resource.cardsLv1];
   } else if (40 <= cardId && cardId < 70) {
-    name = "card2_ids";
-    result = [...shuffle.card2_ids];
+    name = "cardsLv2";
+    result = [...resource.cardsLv2];
   } else if (70 <= cardId && cardId < 90) {
-    name = "card3_ids";
-    result = [...shuffle.card3_ids];
+    name = "cardsLv3";
+    result = [...resource.cardsLv3];
   } else {
-    return { ...shuffle };
+    return { cardsLv1: undefined };
   }
-  if (result.length > 5) {
-    const drawIdx = result.indexOf(cardId);
-    const drawCardId = result.splice(5, 1)[0] as number;
-    result.splice(drawIdx, 1, drawCardId);
+  const drawIdx = result.indexOf(cardId);
+  const drawCard = result.splice(5, 0);
+  if (drawIdx >= 5) return { cardsLv1: undefined };
+  if (drawCard[0]) {
+    result.splice(drawIdx, 1, drawCard[0]);
   } else {
-    const drawIdx = result.indexOf(cardId);
-    result.splice(drawIdx, 1);
+    result.splice(drawIdx, 1, -1);
   }
   return {
-    ...shuffle,
     [name]: result,
   };
 };
 
-const opTokenCount = (
-  op: "increment" | "decrement",
-  tokenList1: TokenList,
-  tokenList2?: TokenList
-) => {
-  const result = { ...tokenList1 };
-  (Object.keys(result) as TokenColor[]).forEach((color) => {
-    result[color] =
-      op === "increment"
-        ? tokenList1[color] + (tokenList2 ? tokenList2[color] : 1)
-        : tokenList1[color] - (tokenList2 ? tokenList2[color] : 1);
-  });
-  return result;
-};
+const zTokens = z.object({
+  white: z.number(),
+  blue: z.number(),
+  green: z.number(),
+  red: z.number(),
+  black: z.number(),
+  gold: z.number(),
+});
+
+// function drawCards(cards: number[], cardId: number) {
+//   const result = [...cards]
+//   const head = result.splice(0, 5)
+//   if (!head.includes(cardId)) {
+//     return result;
+//   }
+
+// };
 
 export const gamexRouter = createTRPCRouter({
   // findAll: publicProcedure.query(({ ctx }) => {
@@ -94,16 +134,18 @@ export const gamexRouter = createTRPCRouter({
         playerId: z.string().optional(),
       })
     )
-    .query(({ ctx, input }) =>
-      ctx.prisma.game.findFirstOrThrow({
+    .query(({ ctx, input }) => {
+      return ctx.prisma.game.findFirstOrThrow({
         where: {
           id: input.id,
-          playerIds: {
-            has: input.playerId,
-          },
+          playerIds: input.playerId
+            ? {
+                has: input.playerId,
+              }
+            : undefined,
         },
-      })
-    ),
+      });
+    }),
 
   findPlayerById: publicProcedure
     .input(z.string().optional())
@@ -128,211 +170,19 @@ export const gamexRouter = createTRPCRouter({
       })
     ),
 
-  updateEndTurn: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().optional(),
-        playerId: z.string().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const game: Game = await ctx.prisma.game.findUniqueOrThrow({
-        where: {
-          id: input.id,
-        },
-      });
-      if (input.playerId !== game.hostId) return;
-      const card: Card | null = await ctx.prisma.card.findUnique({
-        where: {
-          id: game.action.cardId,
-        },
-      });
-      return ctx.prisma.game.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          action: {
-            endTurn: true,
-            type: null,
-            tokenList: {
-              white: 0,
-              blue: 0,
-              green: 0,
-              red: 0,
-              black: 0,
-              gold: 0,
-            },
-            cardId: -1,
-          },
-          nextTurn: {
-            playerIdx: (game.nextTurn.playerIdx + 1) % game.playerCount,
-            startTime: addSeconds(new Date(), 10),
-          },
-          tokenList:
-            card && game.action.type === "purchase"
-              ? {
-                  update: {
-                    white: {
-                      increment: Math.max(
-                        card.price.white -
-                          game.playerDiscount[
-                            `i${game.turn.playerIdx}` as IdxKey
-                          ].white,
-                        0
-                      ),
-                    },
-                    blue: {
-                      increment: Math.max(
-                        card.price.blue -
-                          game.playerDiscount[
-                            `i${game.turn.playerIdx}` as IdxKey
-                          ].blue,
-                        0
-                      ),
-                    },
-                    green: {
-                      increment: Math.max(
-                        card.price.green -
-                          game.playerDiscount[
-                            `i${game.turn.playerIdx}` as IdxKey
-                          ].green,
-                        0
-                      ),
-                    },
-                    red: {
-                      increment: Math.max(
-                        card.price.red -
-                          game.playerDiscount[
-                            `i${game.turn.playerIdx}` as IdxKey
-                          ].red,
-                        0
-                      ),
-                    },
-                    black: {
-                      increment: Math.max(
-                        card.price.black -
-                          game.playerDiscount[
-                            `i${game.turn.playerIdx}` as IdxKey
-                          ].black,
-                        0
-                      ),
-                    },
-                  },
-                }
-              : undefined,
-          playerCard:
-            game.turn.playerIdx !== 1 && game.action.cardId !== -1
-              ? {
-                  update: {
-                    [`i${game.turn.playerIdx}`]: { push: game.action.cardId },
-                  },
-                }
-              : undefined,
-          playerToken:
-            game.turn.playerIdx !== -1 //&&
-              ? // (game.action.type === "takeTwo" || game.action.type === "takeThree")
-                {
-                  update: {
-                    [`i${game.turn.playerIdx}`]: {
-                      update: {
-                        white: { increment: game.action.tokenList.white },
-                        blue: { increment: game.action.tokenList.blue },
-                        green: { increment: game.action.tokenList.green },
-                        red: { increment: game.action.tokenList.red },
-                        black: { increment: game.action.tokenList.black },
-                        gold: { increment: game.action.tokenList.gold },
-                      },
-                    },
-                  },
-                }
-              : card && game.action.type === "purchase"
-              ? {
-                  update: {
-                    [`i${game.turn.playerIdx}`]: {
-                      update: {
-                        white: {
-                          decrement: Math.max(
-                            card.price.white -
-                              game.playerDiscount[
-                                `i${game.turn.playerIdx}` as IdxKey
-                              ].white,
-                            0
-                          ),
-                        },
-                        blue: {
-                          decrement: Math.max(
-                            card.price.blue -
-                              game.playerDiscount[
-                                `i${game.turn.playerIdx}` as IdxKey
-                              ].blue,
-                            0
-                          ),
-                        },
-                        green: {
-                          decrement: Math.max(
-                            card.price.green -
-                              game.playerDiscount[
-                                `i${game.turn.playerIdx}` as IdxKey
-                              ].green,
-                            0
-                          ),
-                        },
-                        red: {
-                          decrement: Math.max(
-                            card.price.red -
-                              game.playerDiscount[
-                                `i${game.turn.playerIdx}` as IdxKey
-                              ].red,
-                            0
-                          ),
-                        },
-                        black: {
-                          decrement: Math.max(
-                            card.price.black -
-                              game.playerDiscount[
-                                `i${game.turn.playerIdx}` as IdxKey
-                              ].black,
-                            0
-                          ),
-                        },
-                      },
-                    },
-                  },
-                }
-              : undefined,
-          playerScore: card
-            ? {
-                update: {
-                  [`i${game.turn.playerIdx}`]: {
-                    increment: card.score,
-                  },
-                },
-              }
-            : undefined,
-          playerDiscount: card
-            ? {
-                update: {
-                  [`i${game.turn.playerIdx}`]: {
-                    update: {
-                      [card.color]: {
-                        increment: 1,
-                      },
-                    },
-                  },
-                },
-              }
-            : undefined,
-          shuffle: drawCards(game.shuffle, game.action.cardId),
-        },
-      });
-    }),
-
   updateNextTurn: protectedProcedure
     .input(
       z.object({
-        id: z.string().optional(),
-        playerId: z.string().optional(),
+        id: z.string(),
+        playerId: z.string(),
+        playerState: z.object({
+          success: z.boolean(),
+          action: z.string().nullable(),
+          cardId: z.number().nullable(),
+          resourceTokens: zTokens,
+          playerTokens: zTokens,
+          inventoryTokens: zTokens,
+        }),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -341,166 +191,82 @@ export const gamexRouter = createTRPCRouter({
           id: input.id,
         },
       });
-      if (input.playerId !== game.hostId) return;
-      const card: Card | null = await ctx.prisma.card.findUnique({
-        where: {
-          id: game.action.cardId,
-        },
-      });
+      if (game.status === "created")
+        return ctx.prisma.game.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            status: "started",
+            turnIdx: (game.turnIdx + 1) % game.playerCount,
+          },
+        });
+      if (
+        !input.id ||
+        !input.playerState.success ||
+        input.playerId !== game.playerIds[game.turnIdx]
+      ) {
+        return;
+      }
       return ctx.prisma.game.update({
         where: {
           id: input.id,
         },
         data: {
-          turn: {
-            playerIdx: game.nextTurn.playerIdx,
-            // startTime: game.nextTurn.startTime,
-            startTime: new Date(),
-          },
-          endTurn: {
-            playerIdx: game.nextTurn.playerIdx,
-            startTime: addSeconds(new Date(), 20),
-          },
-          // nextTurn: {
-          //   playerIdx: (game.nextTurn.playerIdx + 1) % game.playerCount,
-          //   startTime: addSeconds(new Date(), 32),
-          // },
-          action: {
-            endTurn: false,
-            type: null,
-            tokenList: {
-              white: 0,
-              blue: 0,
-              green: 0,
-              red: 0,
-              black: 0,
-              gold: 0,
-            },
-            cardId: -1,
-          },
-          tokenList:
-            game.action.tokenList && game.turn.playerIdx >= 0
-              ? {
-                  update: {
-                    white: { increment: game.action.tokenList.white },
-                    blue: { increment: game.action.tokenList.blue },
-                    green: { increment: game.action.tokenList.green },
-                    red: { increment: game.action.tokenList.red },
-                    black: { increment: game.action.tokenList.black },
-                    gold: { increment: game.action.tokenList.gold },
-                  },
-                }
-              : undefined,
-          playerCard:
-            game.action.cardId !== -1 && game.turn.playerIdx >= 0
-              ? {
-                  update: {
-                    [`i${game.turn.playerIdx}`]: { push: game.action.cardId },
-                  },
-                }
-              : undefined,
-          playerScore: card
-            ? {
-                update: {
-                  [`i${game.turn.playerIdx}`]: {
-                    increment: card.score,
-                  },
-                },
-              }
-            : undefined,
-          playerDiscount: card
-            ? {
-                update: {
-                  [`i${game.turn.playerIdx}`]: {
-                    update: {
-                      [card.color]: {
-                        increment: 1,
-                      },
-                    },
-                  },
-                },
-              }
-            : undefined,
-          shuffle: drawCards(game.shuffle, game.action.cardId),
-        },
-      });
-    }),
-
-  updateServerState: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        playerIdx: z.number(),
-        isEndTurn: z.boolean(),
-        state: z.object({
-          effect: z.string().nullable(),
-          actionType: z.nativeEnum(ActionType).nullable(),
-          tokenColor: z.string().nullable().optional(),
-          cardId: z.number().min(-1).max(89).optional(),
-        }),
-      })
-    )
-    .mutation(({ ctx, input }) =>
-      ctx.prisma.game.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          action: {
-            update: {
-              type: input.state.actionType,
-              tokenList: input.state.tokenColor
+          // status: game.status === "created" ? "started" : undefined,
+          turnIdx: (game.turnIdx + 1) % game.playerCount,
+          resource: {
+            update:
+              input.playerState.action === "take"
                 ? {
-                    update: {
-                      [input.state.tokenColor]: {
-                        increment:
-                          input.state.effect === "take"
-                            ? 1
-                            : input.state.effect === "return"
-                            ? -1
-                            : 0,
-                      },
+                    tokens: opTokenCount(
+                      "decrement",
+                      game.resource.tokens,
+                      input.playerState.playerTokens
+                    ),
+                  }
+                : input.playerState.action === "purchase" ||
+                  input.playerState.action === "reserve"
+                ? {
+                    ...drawCards(game.resource, input.playerState.cardId),
+                  }
+                : undefined,
+          },
+          [`inventory${game.turnIdx}`]: {
+            update:
+              input.playerState.action === "take"
+                ? {
+                    tokens: opTokenCount(
+                      "increment",
+                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                      input.playerState.playerTokens
+                    ),
+                  }
+                : input.playerState.action === "purchase"
+                ? {
+                    tokens: opTokenCount(
+                      "decrement",
+                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                      input.playerState.playerTokens
+                    ),
+                    cards: {
+                      push: input.playerState.cardId,
+                    },
+                  }
+                : input.playerState.action === "reserve"
+                ? {
+                    tokens: opTokenCount(
+                      "increment",
+                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                      input.playerState.playerTokens
+                    ),
+                    cards: {
+                      push: input.playerState.cardId,
                     },
                   }
                 : undefined,
-              cardId: input.state.cardId,
-            },
           },
-          playerToken:
-            input.state.tokenColor && input.isEndTurn
-              ? {
-                  update: {
-                    [`i${input.playerIdx}`]: {
-                      update: {
-                        [input.state.tokenColor]: {
-                          increment:
-                            input.state.effect === "take"
-                              ? -1
-                              : input.state.effect === "return"
-                              ? 1
-                              : 0,
-                        },
-                      },
-                    },
-                  },
-                }
-              : undefined,
-          tokenList:
-            input.state.tokenColor && !input.isEndTurn
-              ? {
-                  update: {
-                    [input.state.tokenColor]: {
-                      increment:
-                        input.state.effect === "take"
-                          ? -1
-                          : input.state.effect === "return"
-                          ? 1
-                          : 0,
-                    },
-                  },
-                }
-              : undefined,
         },
-      })
-    ),
+      });
+    }),
 });

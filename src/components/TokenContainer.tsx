@@ -1,8 +1,17 @@
 import { Game } from "@prisma/client";
-import { SetStateAction } from "react";
-import { ClientState, ServerState } from "../common/interfaces";
-import { Effect, Owner, TokenColor } from "../common/types";
+import { SetStateAction, useEffect, useState } from "react";
+import { PlayerState, UserState } from "../common/interfaces";
+import { Effect, InventoryKey, Reference, TokenColor } from "../common/types";
 import TokenComponent from "./TokenComponent";
+
+const tokens = {
+  white: 0,
+  blue: 0,
+  green: 0,
+  red: 0,
+  black: 0,
+  gold: 0,
+};
 
 const tokenColors = [
   "white",
@@ -14,24 +23,35 @@ const tokenColors = [
 ] as TokenColor[];
 
 interface TokenContainerProps {
+  userState: UserState;
+  setUserState: (value: SetStateAction<UserState>) => void;
+  playerState: PlayerState;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
   game: Game;
-  clientState: ClientState | undefined;
-  setClientState: (value: SetStateAction<ClientState | undefined>) => void;
-  serverState: ServerState | undefined;
-  setServerState: (value: SetStateAction<ServerState | undefined>) => void;
-  setMessage: (value: SetStateAction<string | undefined>) => void;
-  isTurnLoading: boolean;
 }
 
 export default function TokenContainer(props: TokenContainerProps) {
-  if (!props.serverState || !props.serverState.action) return <></>;
+  // useEffect(() => {
+  //   props.setPlayerState((prev) => ({
+  //     ...prev,
+  //     resourceTokens: props.game ? props.game.resource.tokens : { ...tokens },
+  //     playerTokens: { ...tokens },
+  //     inventoryTokens:
+  //       props.game && props.game.status !== "created"
+  //         ? props.game[`inventory${props.game.turnIdx}` as InventoryKey].tokens
+  //         : { ...tokens },
+  //   }));
+  // }, [props.game.turnIdx]);
+
   return (
-    <>
+    <div className="flex gap-8">
       <div>
         {tokenColors.map((tokenColor) => (
           <TokenComponent
-            owner="game"
-            effect={!props.serverState?.action.endTurn ? "take" : null}
+            // owner="game"
+            reference="resource"
+            // effect={!props.serverState?.action.endTurn ? "take" : null}
+            effect="take"
             tokenColor={tokenColor}
             {...props}
           />
@@ -40,7 +60,7 @@ export default function TokenContainer(props: TokenContainerProps) {
       <div>
         {tokenColors.map((tokenColor) => (
           <TokenComponent
-            owner="action"
+            reference="player"
             effect="return"
             tokenColor={tokenColor}
             {...props}
@@ -50,16 +70,25 @@ export default function TokenContainer(props: TokenContainerProps) {
       <div>
         {tokenColors.map((tokenColor) => (
           <TokenComponent
-            owner="player"
-            effect={!props.serverState?.action.endTurn ? null : "take"}
+            reference="inventory"
+            // effect={!props.serverState?.action.endTurn ? null : "take"}
+            effect={null}
             tokenColor={tokenColor}
             {...props}
           />
         ))}
       </div>
-      <button className="bg-cyan-400" onClick={() => {}}>
+      <button
+        className="bg-cyan-400"
+        onClick={() => {
+          props.setUserState((prev) => ({
+            ...prev,
+            nextTurn: true,
+          }));
+        }}
+      >
         abcd
       </button>
-    </>
+    </div>
   );
 }
