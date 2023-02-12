@@ -1,20 +1,16 @@
-import {} from "@prisma/client";
+import { Card } from "@prisma/client";
 import { Action, TokenColor } from "./types";
 import { Tokens } from "@prisma/client";
 
 export interface PlayerState {
+  // reset: boolean;
   success: boolean;
   action: Action | null;
-  cardId: number | null;
   resourceTokens: Tokens;
   playerTokens: Tokens;
   inventoryTokens: Tokens;
-}
-
-export interface UserState {
-  validTab: boolean;
-  countdown: number;
+  playerCard: Card | null;
+  extraTurn: boolean;
   nextTurn: boolean;
-  updating: boolean;
   message: string;
 }

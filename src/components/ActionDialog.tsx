@@ -1,25 +1,50 @@
-import { Game } from "@prisma/client";
+import { Card, Game, Player } from "@prisma/client";
 import { SetStateAction } from "react";
-import { PlayerState, UserState } from "../common/interfaces";
+import { PlayerState } from "../common/interfaces";
+import { InventoryKey } from "../common/types";
+import { api } from "../utils/api";
+import CardComponent from "./CardComponent";
 import TokenContainer from "./TokenContainer";
 
+const tokens = {
+  white: 0,
+  blue: 0,
+  green: 0,
+  red: 0,
+  black: 0,
+  gold: 0,
+};
 interface DialogProps {
-  userState: UserState;
-  setUserState: (value: SetStateAction<UserState>) => void;
+  game: Game;
+  player: Player;
   playerState: PlayerState;
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
-  game: Game;
 }
 
-export default function Dialog({
-  userState,
-  setUserState,
+export default function ActionDialog({
+  game,
+  player,
   playerState,
   setPlayerState,
-  game,
 }: DialogProps) {
   const close = () => {
-    setPlayerState((prev) => ({ ...prev, action: null }));
+    if (player && game) {
+      setPlayerState({
+        // reset: false,
+        success: false,
+        action: null,
+        resourceTokens: game ? game.resource.tokens : { ...tokens },
+        playerTokens: { ...tokens },
+        inventoryTokens:
+          game && game.status !== "created"
+            ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
+            : { ...tokens },
+        playerCard: null,
+        extraTurn: false,
+        nextTurn: false,
+        message: "",
+      });
+    }
   };
 
   if (playerState.action === null) return <></>;
@@ -30,9 +55,9 @@ export default function Dialog({
           className="fixed inset-0 h-full w-full bg-black opacity-40"
           onClick={close}
         ></div>
-        <div className="flex min-h-screen items-center px-4 py-8">
-          <div className="relative mx-auto w-full max-w-lg rounded-md bg-white p-4 shadow-lg">
-            <div className="mt-3 sm:flex">
+        <div className="flex min-h-screen items-center border-2 border-red-500 px-4 py-8">
+          <div className="relative mx-auto w-full max-w-lg rounded-md border-2 border-green-500 bg-white p-4 shadow-lg">
+            <div className="mt-2 mb-3 sm:flex">
               <div className="mx-auto flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-100">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -80,12 +105,49 @@ export default function Dialog({
                   {playerState.action === "take" && (
                     <TokenContainer
                       game={game}
-                      userState={userState}
-                      setUserState={setUserState}
+                      player={player}
                       playerState={playerState}
                       setPlayerState={setPlayerState}
                     />
                   )}
+                  {playerState.action === "purchase" &&
+                    playerState.playerCard && (
+                      <>
+                        <CardComponent
+                          game={game}
+                          player={player}
+                          cardId={playerState.playerCard.id}
+                          cardEffect={null}
+                          playerState={playerState}
+                          setPlayerState={setPlayerState}
+                        />
+                        <TokenContainer
+                          game={game}
+                          player={player}
+                          playerState={playerState}
+                          setPlayerState={setPlayerState}
+                        />
+                      </>
+                    )}
+                  {playerState.action === "reserve" &&
+                    playerState.playerCard && (
+                      <>
+                        <CardComponent
+                          game={game}
+                          player={player}
+                          cardId={playerState.playerCard.id}
+                          cardEffect={null}
+                          playerState={playerState}
+                          setPlayerState={setPlayerState}
+                        />
+                        <TokenContainer
+                          game={game}
+                          player={player}
+                          playerState={playerState}
+                          setPlayerState={setPlayerState}
+                        />
+                      </>
+                    )}
                 </div>
               </div>
             </div>

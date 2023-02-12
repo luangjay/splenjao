@@ -1,8 +1,13 @@
 import { string, z } from "zod";
-import { Card, Game, Resource, Tokens } from "@prisma/client";
+import { Card, Game, Price, Resource, Tokens } from "@prisma/client";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { InventoryKey, TokenColor } from "../../../common/types";
+import { InventoryKey, TokenColor, CardColor } from "../../../common/types";
+import {
+  opTokenCount,
+  opPriceWColor,
+  drawCards,
+} from "../../../common/functions";
 
 const addSeconds = (date: Date, seconds: number) => {
   date.setSeconds(date.getSeconds() + seconds);
@@ -52,50 +57,13 @@ const addSeconds = (date: Date, seconds: number) => {
 //   };
 // };
 
-function opTokenCount(
-  op: "increment" | "decrement" | null,
-  tokens1: Tokens,
-  tokens2?: Tokens
-): Tokens | undefined {
-  if (!op) return undefined;
-  const result: Tokens = { ...tokens1 };
-  (Object.keys(result) as TokenColor[]).forEach((color) => {
-    result[color] =
-      op === "increment"
-        ? tokens1[color] + (tokens2 ? tokens2[color] : 1)
-        : tokens1[color] - (tokens2 ? tokens2[color] : 1);
-  });
-  return result;
-}
-
-const drawCards = (resource: Resource, cardId: number | null) => {
-  if (cardId === null) return { cardsLv1: undefined };
-  let name: string;
-  let result: number[];
-  if (0 <= cardId && cardId < 40) {
-    name = "cardsLv1";
-    result = [...resource.cardsLv1];
-  } else if (40 <= cardId && cardId < 70) {
-    name = "cardsLv2";
-    result = [...resource.cardsLv2];
-  } else if (70 <= cardId && cardId < 90) {
-    name = "cardsLv3";
-    result = [...resource.cardsLv3];
-  } else {
-    return { cardsLv1: undefined };
-  }
-  const drawIdx = result.indexOf(cardId);
-  const drawCard = result.splice(5, 0);
-  if (drawIdx >= 5) return { cardsLv1: undefined };
-  if (drawCard[0]) {
-    result.splice(drawIdx, 1, drawCard[0]);
-  } else {
-    result.splice(drawIdx, 1, -1);
-  }
-  return {
-    [name]: result,
-  };
-};
+const zPrice = z.object({
+  white: z.number(),
+  blue: z.number(),
+  green: z.number(),
+  red: z.number(),
+  black: z.number(),
+});
 
 const zTokens = z.object({
   white: z.number(),
@@ -178,10 +146,21 @@ export const gamexRouter = createTRPCRouter({
         playerState: z.object({
           success: z.boolean(),
           action: z.string().nullable(),
-          cardId: z.number().nullable(),
           resourceTokens: zTokens,
           playerTokens: zTokens,
           inventoryTokens: zTokens,
+          playerCard: z
+            .object({
+              id: z.number(),
+              level: z.number(),
+              color: z.string(),
+              score: z.number(),
+              price: zPrice,
+            })
+            .nullable(),
+          extraTurn: z.boolean(),
+          nextTurn: z.boolean(),
+          message: z.string(),
         }),
       })
     )
@@ -191,6 +170,11 @@ export const gamexRouter = createTRPCRouter({
           id: input.id,
         },
       });
+      // const card: Card | null = await ctx.prisma.card.findUnique({
+      //   where: {
+      //     id: input.playerState.cardId,
+      //   },
+      // });
       if (game.status === "created")
         return ctx.prisma.game.update({
           where: {
@@ -220,15 +204,26 @@ export const gamexRouter = createTRPCRouter({
               input.playerState.action === "take"
                 ? {
                     tokens: opTokenCount(
-                      "decrement",
+                      !input.playerState.extraTurn ? "decrement" : "increment",
                       game.resource.tokens,
                       input.playerState.playerTokens
                     ),
                   }
-                : input.playerState.action === "purchase" ||
-                  input.playerState.action === "reserve"
+                : (input.playerState.action === "purchase" ||
+                    input.playerState.action === "reserve") &&
+                  input.playerState.playerCard
                 ? {
-                    ...drawCards(game.resource, input.playerState.cardId),
+                    tokens: opTokenCount(
+                      input.playerState.action === "purchase"
+                        ? "increment"
+                        : "decrement",
+                      game.resource.tokens,
+                      input.playerState.playerTokens
+                    ),
+                    ...drawCards(
+                      game.resource,
+                      input.playerState.playerCard.id
+                    ),
                   }
                 : undefined,
           },
@@ -237,7 +232,7 @@ export const gamexRouter = createTRPCRouter({
               input.playerState.action === "take"
                 ? {
                     tokens: opTokenCount(
-                      "increment",
+                      !input.playerState.extraTurn ? "increment" : "decrement",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
                       input.playerState.playerTokens
                     ),
@@ -249,9 +244,19 @@ export const gamexRouter = createTRPCRouter({
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
                       input.playerState.playerTokens
                     ),
-                    cards: {
-                      push: input.playerState.cardId,
-                    },
+                    cards: input.playerState.playerCard
+                      ? {
+                          push: input.playerState.playerCard.id,
+                        }
+                      : undefined,
+                    discount: input.playerState.playerCard
+                      ? opPriceWColor(
+                          "increment",
+                          game[`inventory${game.turnIdx}` as InventoryKey]
+                            .discount,
+                          input.playerState.playerCard.color as CardColor
+                        )
+                      : undefined,
                   }
                 : input.playerState.action === "reserve"
                 ? {
@@ -260,9 +265,11 @@ export const gamexRouter = createTRPCRouter({
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
                       input.playerState.playerTokens
                     ),
-                    cards: {
-                      push: input.playerState.cardId,
-                    },
+                    reserves: input.playerState.playerCard
+                      ? {
+                          push: input.playerState.playerCard.id,
+                        }
+                      : undefined,
                   }
                 : undefined,
           },

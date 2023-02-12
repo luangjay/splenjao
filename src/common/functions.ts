@@ -1,3 +1,6 @@
+import { Price, Resource, Tokens } from "@prisma/client";
+import { CardColor, TokenColor } from "./types";
+
 export const shuffle = (begin: number, end: number) => {
   return shuffleArray(Array.from({ length: end - begin }, (_, i) => begin + i));
 };
@@ -11,3 +14,93 @@ const shuffleArray = (array: number[]) => {
   }
   return result;
 };
+
+export function opTokenCount(
+  op: "increment" | "decrement" | null,
+  tokens1: Tokens,
+  tokens2?: Tokens
+): Tokens {
+  const result = { ...tokens1 };
+  if (op === null) return result;
+  (Object.keys(result) as TokenColor[]).forEach((color) => {
+    result[color] = Math.max(
+      op === "increment"
+        ? tokens1[color] + (tokens2 ? tokens2[color] : 1)
+        : tokens1[color] - (tokens2 ? tokens2[color] : 1),
+      0
+    );
+  });
+  return result;
+}
+
+export function opPrice(
+  op: "increment" | "decrement" | null,
+  price1: Price,
+  price2?: Price
+): Price {
+  const result = { ...price1 };
+  if (op === null) return result;
+  (Object.keys(result) as CardColor[]).forEach((color) => {
+    result[color] = Math.max(
+      op === "increment"
+        ? price1[color] + (price2 ? price2[color] : 1)
+        : price1[color] - (price2 ? price2[color] : 1),
+      0
+    );
+  });
+  return result;
+}
+
+export function opPriceWColor(
+  op: "increment" | "decrement" | null,
+  price: Price,
+  cardColor: CardColor
+): Price {
+  const result = { ...price };
+  if (op === null) return result;
+  (Object.keys(result) as CardColor[]).forEach((color) => {
+    result[color] = Math.max(
+      op === "increment"
+        ? price[color] + (color === cardColor ? 1 : 0)
+        : price[color] - (color === cardColor ? 1 : 0),
+      0
+    );
+  });
+  return result;
+}
+
+export function compPrice(price1: Price, price2: Price): boolean {
+  return (["white", "blue", "green", "red", "black"] as CardColor[]).every(
+    (color) => {
+      if (price1[color] !== price2[color]) return false;
+      return true;
+    }
+  );
+}
+
+export function drawCards(resource: Resource, cardId: number) {
+  // if (cardId === null) return { cardsLv1: undefined };
+  let name: string;
+  let result: number[];
+  if (0 <= cardId && cardId < 40) {
+    name = "cardsLv1";
+    result = [...resource.cardsLv1];
+  } else if (40 <= cardId && cardId < 70) {
+    name = "cardsLv2";
+    result = [...resource.cardsLv2];
+  } else if (70 <= cardId && cardId < 90) {
+    name = "cardsLv3";
+    result = [...resource.cardsLv3];
+  } else {
+    return { cardsLv1: undefined };
+  }
+  const drawIdx = result.indexOf(cardId);
+  const drawCard = result.splice(5, 1)[0];
+  if (drawIdx >= 5) {
+    return { cardsLv1: undefined };
+  }
+  result.splice(drawIdx, 1, drawCard || -1);
+  return {
+    [name]: result,
+  };
+}

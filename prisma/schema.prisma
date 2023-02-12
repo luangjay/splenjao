@@ -91,9 +91,10 @@ type Resource {
 
 type Inventory {
     cards           Int[]
-    reservedCards   Int[]
+    reserves        Int[]
     tiles           Int[]
     tokens          Tokens
+    discount        Price
 }
 
 model Game {

@@ -6,7 +6,9 @@ export type Action = "take" | "purchase" | "reserve";
 
 export type Reference = "resource" | "player" | "inventory";
 
-export type Effect = "take" | "return";
+export type TokenEffect = "take" | "return" | "special";
+
+export type CardEffect = "purchase";
 
 export type InventoryKey =
   | "inventory0"

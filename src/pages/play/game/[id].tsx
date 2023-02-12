@@ -11,19 +11,10 @@ import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
-import { PlayerState, UserState } from "../../../common/interfaces";
+import { PlayerState } from "../../../common/interfaces";
 import TokenContainer from "../../../components/TokenContainer";
-import Dialog from "../../../components/ActionDialog";
+import ActionDialog from "../../../components/ActionDialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
-
-const allTokenColors = [
-  "white",
-  "blue",
-  "green",
-  "red",
-  "black",
-  "gold",
-] as TokenColor[];
 
 const tokens = {
   white: 0,
@@ -50,17 +41,24 @@ export default function Game() {
   const utils = api.useContext();
 
   // REACT QUERY HOOKS
-  const player = api.gamex.findPlayerById.useQuery(session.data?.user.id, {
-    refetchInterval: 8000,
-  });
-  const game = api.gamex.findAndAuthorize.useQuery(
+  const { data: player } = api.gamex.findPlayerById.useQuery(
+    session.data?.user.id,
+    {
+      refetchInterval: 8000,
+    }
+  );
+  const {
+    data: game,
+    error: gameError,
+    refetch: gameRefetch,
+  } = api.gamex.findAndAuthorize.useQuery(
     {
       id,
       playerId: session.data?.user.id,
     },
     {
       retry: false,
-      refetchInterval: 1000,
+      // refetchInterval: 1000,
     }
   );
   const updatePlayerLastPlayed = api.gamex.updatePlayerLastPlayed.useMutation({
@@ -75,141 +73,112 @@ export default function Game() {
   });
 
   // STATE HOOKS
-  // const [isValidTab, setValidTab] = useState(false);
-  // const [countdown, setCountdown] = useState(0);
-  const [userState, setUserState] = useState<UserState>({
-    validTab: false,
-    countdown: 0,
+  const [validTab, setValidTab] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  // const [userState, setUserState] = useState<UserState>({
+  //   validTab: false,
+  //   countdown: 0,
+  //   message: "",
+  // });
+
+  const [playerState, setPlayerState] = useState<PlayerState>({
+    // reset: false,
+    success: false,
+    action: null,
+    resourceTokens: { ...tokens },
+    playerTokens: { ...tokens },
+    inventoryTokens: { ...tokens },
+    playerCard: null,
+    extraTurn: false,
     nextTurn: false,
-    updating: false,
     message: "",
   });
 
-  const [playerState, setPlayerState] = useState<PlayerState>({
-    success: false,
-    action: null,
-    cardId: null,
-    resourceTokens: game.data ? game.data.resource.tokens : { ...tokens },
-    playerTokens: { ...tokens },
-    inventoryTokens:
-      game.data && game.data.status !== "created"
-        ? game.data[`inventory${game.data.turnIdx}` as InventoryKey].tokens
-        : { ...tokens },
-  });
-
-  const resetPlayerState = async () => {
-    await game.refetch();
-    // alert(JSON.stringify(game.data?.resource.tokens));
-    // alert(game.isRefetchError);
-    if (player.data && game.data) {
-      setPlayerState({
-        success: false,
-        action: null,
-        cardId: null,
-        resourceTokens: game.data ? game.data.resource.tokens : { ...tokens },
-        playerTokens: { ...tokens },
-        inventoryTokens:
-          game.data && game.data.status !== "created"
-            ? game.data[`inventory${game.data.turnIdx}` as InventoryKey].tokens
-            : { ...tokens },
-      });
-    }
-  };
-
   // HELPER CONSTANTS
   const playerTurn =
-    player.data &&
-    game.data &&
-    player.data.id === game.data.playerIds[game.data.turnIdx];
+    player && game && player.id === game.playerIds[game.turnIdx];
 
-  const playerHost =
-    player.data && game.data && player.data.id === game.data.hostId;
+  const playerHost = player && game && player.id === game.hostId;
 
   // APP PROTOCOL HOOKS
   useEffect(() => {
     if (
-      player.data &&
-      game.data &&
-      (!player.data.lastPlayed ||
-        new Date() >= addSeconds(player.data.lastPlayed, 10))
+      player &&
+      game &&
+      (!player.lastPlayed || new Date() >= addSeconds(player.lastPlayed, 10))
     ) {
-      setUserState((prev) => ({ ...prev, validTab: true }));
-      updatePlayerLastPlayed.mutate(player.data.id);
+      setValidTab(true);
+      updatePlayerLastPlayed.mutate(player.id);
     }
-  }, [player.data, game.data]);
+  }, [player, game]);
 
   useInterval(() => {
-    if (userState.validTab && player.data && game.data) {
-      updatePlayerLastPlayed.mutate(player.data.id);
+    if (validTab && player && game) {
+      updatePlayerLastPlayed.mutate(player.id);
     }
   }, 5000);
 
   // GAME PROTOCOL HOOKS
   useEffect(() => {
-    (async () => {
-      if (
-        userState.validTab &&
-        player.data &&
-        game.data?.status === "created"
-      ) {
-        const cd = 30 + (game.data.createdAt.getTime() - Date.now()) / 1000;
-        setUserState((prev) => ({ ...prev, countdown: cd }));
-        if (playerHost && cd <= 0) {
-          // setUserState((prev) => ({ ...prev, updating: true }));
-          // setCountdown(0);
-          setUserState((prev) => ({ ...prev, nextTurn: true }));
-
-          // await new Promise((resolve) => {
-          //   setTimeout(resolve, 900);
-          // });
-          // setUserState((prev) => ({ ...prev, updating: false }));
-        }
+    if (validTab && player && game?.status === "created") {
+      const cd = 30 + (game.createdAt.getTime() - Date.now()) / 1000;
+      setCountdown(cd);
+      if (playerHost && cd <= 0) {
+        setPlayerState((prev) => ({ ...prev, nextTurn: true }));
       }
-    })();
-  }, [game.data]);
-
-  useEffect(() => {
-    resetPlayerState();
-  }, [userState.validTab, game.data?.resource]);
+    }
+  }, [game]);
 
   const [a, setA] = useState(0);
-
+  // GAME LOGIC HOOKS
   useEffect(() => {
     (async () => {
-      if (
-        userState.validTab &&
-        player.data &&
-        game.data &&
-        userState.nextTurn
-      ) {
-        await updateNextTurn.mutateAsync({
-          id: game.data.id,
-          playerId: player.data.id,
-          playerState,
+      // alert(JSON.stringify(game?.resource.tokens));
+      // alert(game.isRefetchError);
+      if (player && game) {
+        await gameRefetch();
+        setPlayerState({
+          // reset: false,
+          success: false,
+          action: null,
+          resourceTokens: game ? game.resource.tokens : { ...tokens },
+          playerTokens: { ...tokens },
+          inventoryTokens:
+            game && game.status !== "created"
+              ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
+              : { ...tokens },
+          playerCard: null,
+          extraTurn: false,
+          nextTurn: false,
+          message: "",
         });
-        await resetPlayerState();
-        // alert(JSON.stringify(game.data.resource.tokens));
-        setUserState((prev) => ({ ...prev, nextTurn: false }));
-        // await new Promise((resolve) => {
-        //   setTimeout(resolve, 900);
-        // });
-        // resetPlayerState();
-        setA((prev) => prev + 1);
       }
     })();
-  }, [userState.nextTurn]);
+    setA((prev) => prev + 1);
+  }, [/*validTab,*/ game?.turnIdx]);
 
-  // GAME LOGIC HOOKS
+  useEffect(() => {
+    if (validTab && player && game && playerState.nextTurn) {
+      updateNextTurn.mutateAsync({
+        id: game.id,
+        playerId: player.id,
+        playerState,
+      });
+      setPlayerState((prev) => ({ ...prev, nextTurn: false }));
+    }
+  }, [playerState.nextTurn]);
 
-  if (!player.data || !game.data) return <></>;
-  if (!userState.validTab)
+  // if (gameError) return <Error statusCode={404} />;
+  if (!player || !game) return <></>;
+  if (gameError) return <Error statusCode={404} />;
+  if (!validTab)
     return (
       <>
         <p>It looks like you are playing in another instance.</p>
         <p>If not, please wait a moment...</p>
       </>
     );
-  if (game.isError) return <Error statusCode={404} />;
+  // if (game.isError) return <Error statusCode={404} />;
   return (
     <>
       <Head>
@@ -220,48 +189,44 @@ export default function Game() {
       <main className="flex min-h-screen justify-between border-2 border-green-400 text-xl">
         <div className="flex w-1/5 flex-col justify-between border-2">
           <div className="flex flex-col">
-            <div>{userState.countdown}</div>
-            <div>{game.data.turnIdx}</div>
+            <div>{countdown}</div>
+            <div>{game.turnIdx}</div>
           </div>
-          <TokenContainer
-            game={game.data}
-            userState={userState}
-            setUserState={setUserState}
+          {/* <TokenContainer
+            game={game}
+            player={player}
             playerState={playerState}
             setPlayerState={setPlayerState}
-          />
+          /> */}
         </div>
         <div className="grid place-content-center border-2 border-red-500">
           <div className="w-fit border-2">
-            {/* <CardContainer
-              game={game.data}
-              clientState={clientState}
-              setClientState={setClientState}
-              serverState={serverState}
-              setServerState={setServerState}
-              isTurnLoading={isTurnLoading}
-              setMessage={setMessage}
-            /> */}
+            <CardContainer
+              game={game}
+              player={player}
+              cardEffect="purchase"
+              playerState={playerState}
+              setPlayerState={setPlayerState}
+            />
           </div>
         </div>
         <div className="flex w-1/5 flex-col border-2">
-          {!userState.nextTurn && playerTurn && (
+          {!playerState.nextTurn && playerTurn && (
             <div>
               <p>It's your turn</p>
               <button
                 onClick={() =>
-                  setUserState((prev) => ({ ...prev, nextTurn: true }))
+                  setPlayerState((prev) => ({ ...prev, nextTurn: true }))
                 }
               >
                 Next turn
               </button>
             </div>
           )}
-          <div>{userState.message}</div>
-          <div className="w-[50px]">{JSON.stringify(game.data.status)}</div>
-          <div className="w-[50px]">{JSON.stringify(player.data.id)}</div>
+          <div>{playerState.message}</div>
+          <div className="w-[50px]">{JSON.stringify(game.status)}</div>
+          <div className="w-[50px]">{JSON.stringify(player.id)}</div>
           <div className="w-[50px]">{JSON.stringify(playerState)}</div>
-          <div className="w-[50px]">{JSON.stringify(userState)}</div>
           {/* DUMMY begin */}
           <button
             className="border-2"
@@ -271,19 +236,6 @@ export default function Game() {
             }}
           >
             Take
-          </button>
-          <button
-            className="border-2"
-            onClick={() => {
-              if (playerTurn)
-                setPlayerState((prev) => ({
-                  ...prev,
-                  action: "purchase",
-                  cardId: 7,
-                }));
-            }}
-          >
-            Purchase
           </button>
           <button
             className="border-2"
@@ -302,10 +254,9 @@ export default function Game() {
           {/* DUMMY end */}
         </div>
         {/* DIALOG */}
-        <Dialog
-          game={game.data}
-          userState={userState}
-          setUserState={setUserState}
+        <ActionDialog
+          game={game}
+          player={player}
           playerState={playerState}
           setPlayerState={setPlayerState}
         />

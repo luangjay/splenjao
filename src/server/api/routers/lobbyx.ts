@@ -43,9 +43,10 @@ const newResource = () => ({
 
 const newInventory = () => ({
   cards: Array<number>(),
-  reservedCards: Array<number>(),
+  reserves: Array<number>(),
   tiles: Array<number>(),
   tokens: { ...tokens },
+  discount: { ...price },
 });
 
 export const lobbyxRouter = createTRPCRouter({

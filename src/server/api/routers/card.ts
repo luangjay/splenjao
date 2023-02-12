@@ -8,7 +8,7 @@ export const cardRouter = createTRPCRouter({
   }),
 
   findById: publicProcedure.input(z.number()).query(({ ctx, input }) =>
-    ctx.prisma.card.findUnique({
+    ctx.prisma.card.findUniqueOrThrow({
       where: {
         id: input,
       },

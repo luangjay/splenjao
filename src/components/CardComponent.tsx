@@ -1,124 +1,141 @@
-import { Game, Price } from "@prisma/client";
+import { Card, Game, Player, Price } from "@prisma/client";
 import { SetStateAction } from "react";
-import { ClientState, ServerState } from "../common/interfaces";
-import { IdxKey } from "../common/types";
+import { PlayerState } from "../common/interfaces";
+import { CardColor, CardEffect } from "../common/types";
 import { api } from "../utils/api";
 
 interface CardProps {
   game: Game;
-  id: number;
-  clientState: ClientState | undefined;
-  setClientState: (value: SetStateAction<ClientState | undefined>) => void;
-  serverState: ServerState | undefined;
-  setServerState: (value: SetStateAction<ServerState | undefined>) => void;
-  setMessage: (value: SetStateAction<string | undefined>) => void;
-  isTurnLoading: boolean;
+  player: Player;
+  cardId: number;
+  cardEffect: CardEffect | null;
+  playerState: PlayerState;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
 }
 
-type Color = "white" | "blue" | "green" | "red" | "black";
+export default function CardComponent({
+  game,
+  player,
+  cardId,
+  cardEffect,
+  playerState,
+  setPlayerState,
+}: CardProps) {
+  const { data: card } = api.card.findById.useQuery(cardId);
 
-export default function CardComponent(props: CardProps) {
-  const card = api.card.findById.useQuery(props.id);
-  const isPicked = props.id === props.serverState?.action.cardId;
-
-  if (!card.data || card.data.id === -1) return <></>;
+  if (!card || cardId === -1)
+    return (
+      <div className="mx-auto min-w-[120px] max-w-[240px] rounded-lg"></div>
+    );
   return (
-    <button
-      className={`rounded-lg border-2 border-black drop-shadow-md hover:bg-gray-100 ${
-        isPicked && "bg-gray-200"
+    <div
+      className={`mx-auto min-w-[120px] max-w-[240px] rounded-lg border-2 border-black drop-shadow-md ${
+        cardEffect && "cursor-pointer hover:bg-gray-100"
       }`}
-      disabled={props.isTurnLoading}
+      // disabled={props.isTurnLoading}
       onClick={() => {
-        updateClientCard(props, card.data?.price);
+        if (cardEffect === "purchase")
+          setPlayerState((prev) => ({
+            ...prev,
+            action: "purchase",
+            playerCard: card,
+          }));
       }}
     >
       <div className="flex flex-row justify-between p-[4%]">
         <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
           <div
             className={
-              card.data.score
+              card.score
                 ? "flex aspect-square w-full items-center justify-center rounded-lg "
                 : undefined
             }
           >
-            <code className="number text-2xl font-black">
-              {card.data.score || ""}
+            <code className="number text-[100%] font-black">
+              {card.score || ""}
             </code>
           </div>
           <div>
-            {(["white", "blue", "green", "red", "black"] as Color[]).map(
+            {(["white", "blue", "green", "red", "black"] as CardColor[]).map(
               (color) => (
-                <PriceLabel color={color} price={card.data?.price[color]} />
+                <PriceLabel color={color} price={card.price[color]} />
               )
             )}
           </div>
         </div>
         <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
-          <ColorLabel color={card.data?.color} />
+          <ColorLabel color={card.color as CardColor} />
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
-function updateClientCard(props: CardProps, price?: Price) {
-  if (!props.serverState || !price) return;
-  if (props.serverState.action.endTurn) {
-    props.setMessage("You cannot purchase card this period");
-    return;
-  }
-  props.setMessage("4344");
-  const sumTokenColors = Object.values(
-    props.serverState.action.tokenList
-  ).reduce((a, b) => a + b, 0);
-  if (sumTokenColors !== 0) {
-    if (props.serverState.action.tokenList.gold === 1) {
-      props.setMessage("Coming soon");
-    } else {
-      props.setMessage("You cannot purchase card right now.");
-    }
-    return;
-  }
-  // *** IMPORTANT ***
-  const discountedPrice = { ...price };
-  (Object.keys(discountedPrice) as Color[]).forEach((color) => {
-    discountedPrice[color] =
-      price[color] -
-      props.game.playerDiscount[`i${props.game.turn.playerIdx}` as IdxKey][
-        color
-      ];
-  });
-  if (
-    !(["white", "blue", "green", "red", "black"] as Color[]).every((color) => {
-      if (
-        props.serverState &&
-        props.serverState.playerToken[
-          `i${props.game.turn.playerIdx}` as IdxKey
-        ][color] < discountedPrice[color]
-      ) {
-        props.setMessage("Not enough tokens.");
-        return false;
-      }
-      return true;
-    })
-  ) {
-    return;
-  }
-  props.setClientState({
-    tokenColor: null,
-    effect: "purchase",
-    actionType: "purchase",
-    cardId: props.id,
-  });
-  props.setMessage("Purchase card success.");
-}
+// function setPlayerCard({
+//   game,
+//   player,
+//   cardId,
+//   cardEffect,
+//   playerState,
+//   setPlayerState,
+// }: CardProps) {
+//   if (!props.serverState || !price) return;
+//   if (props.serverState.action.endTurn) {
+//     props.setMessage("You cannot purchase card this period");
+//     return;
+//   }
+//   props.setMessage("4344");
+//   const sumTokenColors = Object.values(
+//     props.serverState.action.tokenList
+//   ).reduce((a, b) => a + b, 0);
+//   if (sumTokenColors !== 0) {
+//     if (props.serverState.action.tokenList.gold === 1) {
+//       props.setMessage("Coming soon");
+//     } else {
+//       props.setMessage("You cannot purchase card right now.");
+//     }
+//     return;
+//   }
+//   // *** IMPORTANT ***
+//   const discountedPrice = { ...price };
+//   (Object.keys(discountedPrice) as Color[]).forEach((color) => {
+//     discountedPrice[color] =
+//       price[color] -
+//       props.game.playerDiscount[`i${props.game.turn.playerIdx}` as IdxKey][
+//         color
+//       ];
+//   });
+//   if (
+//     !(["white", "blue", "green", "red", "black"] as Color[]).every((color) => {
+//       if (
+//         props.serverState &&
+//         props.serverState.playerToken[
+//           `i${props.game.turn.playerIdx}` as IdxKey
+//         ][color] < discountedPrice[color]
+//       ) {
+//         props.setMessage("Not enough tokens.");
+//         return false;
+//       }
+//       return true;
+//     })
+//   ) {
+//     return;
+//   }
+//   props.setClientState({
+//     tokenColor: null,
+//     effect: "purchase",
+//     actionType: "purchase",
+//     cardId: props.id,
+//   });
+//   props.setMessage("Purchase card success.");
+// }
 
 interface ColorProps {
-  color: Color | undefined;
+  color: CardColor | undefined;
 }
 
 interface PriceProps {
-  color: Color | undefined;
+  color: CardColor | undefined;
   price: number | undefined;
 }
 
