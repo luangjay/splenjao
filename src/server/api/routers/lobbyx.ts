@@ -47,6 +47,7 @@ const newInventory = () => ({
   tiles: Array<number>(),
   tokens: { ...tokens },
   discount: { ...price },
+  score: 0,
 });
 
 export const lobbyxRouter = createTRPCRouter({

@@ -1,7 +1,8 @@
 import { Card, Game, Player, Price } from "@prisma/client";
 import { SetStateAction } from "react";
+import { compPrice, opPrice, opPriceWColor } from "../common/functions";
 import { PlayerState } from "../common/interfaces";
-import { CardColor, CardEffect } from "../common/types";
+import { CardColor, CardEffect, InventoryKey } from "../common/types";
 import { api } from "../utils/api";
 
 interface CardProps {
@@ -34,12 +35,19 @@ export default function CardComponent({
       }`}
       // disabled={props.isTurnLoading}
       onClick={() => {
-        if (cardEffect === "purchase")
+        if (cardEffect === "purchase") {
+          const discountedPrice = opPrice(
+            "decrement",
+            card.price,
+            game[`inventory${game.turnIdx}` as InventoryKey].discount
+          );
           setPlayerState((prev) => ({
             ...prev,
+            success: compPrice(playerState.tokens, discountedPrice),
             action: "purchase",
-            playerCard: card,
+            card,
           }));
+        }
       }}
     >
       <div className="flex flex-row justify-between p-[4%]">

@@ -157,7 +157,7 @@ export default function TokenContainer(props: TokenContainerProps) {
       </div>
     );
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8">z
       <div>
         <TokenComponent
           tokenColor="gold"

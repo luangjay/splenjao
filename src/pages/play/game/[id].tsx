@@ -16,7 +16,15 @@ import TokenContainer from "../../../components/TokenContainer";
 import ActionDialog from "../../../components/ActionDialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
 
-const tokens = {
+const defaultPrice = {
+  white: 0,
+  blue: 0,
+  green: 0,
+  red: 0,
+  black: 0,
+};
+
+const defaultTokens = {
   white: 0,
   blue: 0,
   green: 0,
@@ -85,10 +93,11 @@ export default function Game() {
     // reset: false,
     success: false,
     action: null,
-    resourceTokens: { ...tokens },
-    playerTokens: { ...tokens },
-    inventoryTokens: { ...tokens },
-    playerCard: null,
+    resourceTokens: { ...defaultTokens },
+    inventoryTokens: { ...defaultTokens },
+    tokens: { ...defaultTokens },
+    replaces: { ...defaultPrice },
+    card: null,
     extraTurn: false,
     nextTurn: false,
     message: "",
@@ -141,13 +150,14 @@ export default function Game() {
           // reset: false,
           success: false,
           action: null,
-          resourceTokens: game ? game.resource.tokens : { ...tokens },
-          playerTokens: { ...tokens },
+          resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
           inventoryTokens:
             game && game.status !== "created"
               ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-              : { ...tokens },
-          playerCard: null,
+              : { ...defaultTokens },
+          tokens: { ...defaultTokens },
+          replaces: { ...defaultPrice },
+          card: null,
           extraTurn: false,
           nextTurn: false,
           message: "",

@@ -147,9 +147,10 @@ export const gamexRouter = createTRPCRouter({
           success: z.boolean(),
           action: z.string().nullable(),
           resourceTokens: zTokens,
-          playerTokens: zTokens,
           inventoryTokens: zTokens,
-          playerCard: z
+          tokens: zTokens,
+          replaces: zPrice,
+          card: z
             .object({
               id: z.number(),
               level: z.number(),
@@ -206,24 +207,21 @@ export const gamexRouter = createTRPCRouter({
                     tokens: opTokenCount(
                       !input.playerState.extraTurn ? "decrement" : "increment",
                       game.resource.tokens,
-                      input.playerState.playerTokens
+                      input.playerState.tokens
                     ),
                   }
                 : (input.playerState.action === "purchase" ||
                     input.playerState.action === "reserve") &&
-                  input.playerState.playerCard
+                  input.playerState.card
                 ? {
                     tokens: opTokenCount(
                       input.playerState.action === "purchase"
                         ? "increment"
                         : "decrement",
                       game.resource.tokens,
-                      input.playerState.playerTokens
+                      input.playerState.tokens
                     ),
-                    ...drawCards(
-                      game.resource,
-                      input.playerState.playerCard.id
-                    ),
+                    ...drawCards(game.resource, input.playerState.card.id),
                   }
                 : undefined,
           },
@@ -234,7 +232,7 @@ export const gamexRouter = createTRPCRouter({
                     tokens: opTokenCount(
                       !input.playerState.extraTurn ? "increment" : "decrement",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.playerTokens
+                      input.playerState.tokens
                     ),
                   }
                 : input.playerState.action === "purchase"
@@ -242,20 +240,25 @@ export const gamexRouter = createTRPCRouter({
                     tokens: opTokenCount(
                       "decrement",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.playerTokens
+                      input.playerState.tokens
                     ),
-                    cards: input.playerState.playerCard
+                    cards: input.playerState.card
                       ? {
-                          push: input.playerState.playerCard.id,
+                          push: input.playerState.card.id,
                         }
                       : undefined,
-                    discount: input.playerState.playerCard
+                    discount: input.playerState.card
                       ? opPriceWColor(
                           "increment",
                           game[`inventory${game.turnIdx}` as InventoryKey]
                             .discount,
-                          input.playerState.playerCard.color as CardColor
+                          input.playerState.card.color as CardColor
                         )
+                      : undefined,
+                    score: input.playerState.card
+                      ? {
+                          increment: input.playerState.card.score,
+                        }
                       : undefined,
                   }
                 : input.playerState.action === "reserve"
@@ -263,11 +266,11 @@ export const gamexRouter = createTRPCRouter({
                     tokens: opTokenCount(
                       "increment",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.playerTokens
+                      input.playerState.tokens
                     ),
-                    reserves: input.playerState.playerCard
+                    reserves: input.playerState.card
                       ? {
-                          push: input.playerState.playerCard.id,
+                          push: input.playerState.card.id,
                         }
                       : undefined,
                   }

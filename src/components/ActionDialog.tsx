@@ -6,7 +6,15 @@ import { api } from "../utils/api";
 import CardComponent from "./CardComponent";
 import TokenContainer from "./TokenContainer";
 
-const tokens = {
+const defaultPrice = {
+  white: 0,
+  blue: 0,
+  green: 0,
+  red: 0,
+  black: 0,
+};
+
+const defaultTokens = {
   white: 0,
   blue: 0,
   green: 0,
@@ -33,13 +41,14 @@ export default function ActionDialog({
         // reset: false,
         success: false,
         action: null,
-        resourceTokens: game ? game.resource.tokens : { ...tokens },
-        playerTokens: { ...tokens },
+        resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
         inventoryTokens:
           game && game.status !== "created"
             ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-            : { ...tokens },
-        playerCard: null,
+            : { ...defaultTokens },
+        tokens: { ...defaultTokens },
+        replaces: { ...defaultPrice },
+        card: null,
         extraTurn: false,
         nextTurn: false,
         message: "",
@@ -110,44 +119,42 @@ export default function ActionDialog({
                       setPlayerState={setPlayerState}
                     />
                   )}
-                  {playerState.action === "purchase" &&
-                    playerState.playerCard && (
-                      <>
-                        <CardComponent
-                          game={game}
-                          player={player}
-                          cardId={playerState.playerCard.id}
-                          cardEffect={null}
-                          playerState={playerState}
-                          setPlayerState={setPlayerState}
-                        />
-                        <TokenContainer
-                          game={game}
-                          player={player}
-                          playerState={playerState}
-                          setPlayerState={setPlayerState}
-                        />
-                      </>
-                    )}
-                  {playerState.action === "reserve" &&
-                    playerState.playerCard && (
-                      <>
-                        <CardComponent
-                          game={game}
-                          player={player}
-                          cardId={playerState.playerCard.id}
-                          cardEffect={null}
-                          playerState={playerState}
-                          setPlayerState={setPlayerState}
-                        />
-                        <TokenContainer
-                          game={game}
-                          player={player}
-                          playerState={playerState}
-                          setPlayerState={setPlayerState}
-                        />
-                      </>
-                    )}
+                  {playerState.action === "purchase" && playerState.card && (
+                    <>
+                      <CardComponent
+                        game={game}
+                        player={player}
+                        cardId={playerState.card.id}
+                        cardEffect={null}
+                        playerState={playerState}
+                        setPlayerState={setPlayerState}
+                      />
+                      <TokenContainer
+                        game={game}
+                        player={player}
+                        playerState={playerState}
+                        setPlayerState={setPlayerState}
+                      />
+                    </>
+                  )}
+                  {playerState.action === "reserve" && playerState.card && (
+                    <>
+                      <CardComponent
+                        game={game}
+                        player={player}
+                        cardId={playerState.card.id}
+                        cardEffect={null}
+                        playerState={playerState}
+                        setPlayerState={setPlayerState}
+                      />
+                      <TokenContainer
+                        game={game}
+                        player={player}
+                        playerState={playerState}
+                        setPlayerState={setPlayerState}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>

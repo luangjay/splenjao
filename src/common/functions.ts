@@ -1,4 +1,4 @@
-import { Price, Resource, Tokens } from "@prisma/client";
+import { Card, Price, Resource, Tokens } from "@prisma/client";
 import { CardColor, TokenColor } from "./types";
 
 export const shuffle = (begin: number, end: number) => {
@@ -69,6 +69,35 @@ export function opPriceWColor(
   return result;
 }
 
+// export function replacePrice(
+//   price: Price,
+//   cardPrice: Price
+// ): Price {
+//   const result = { ...price };
+//   (Object.keys(result) as CardColor[]).forEach((color) => {
+//     if (price[color] < cardPrice[color])
+//   });
+//   return result;
+// }
+
+// export function opPriceWReplace(
+//   op: "increment" | "decrement" | null,
+//   price: Price,
+//   replace: Price
+// ): Price {
+//   const result = { ...price };
+//   if (op === null) return result;
+//   (Object.keys(result) as CardColor[]).forEach((color) => {
+//     result[color] = Math.max(
+//       op === "increment"
+//         ? price[color] + (color === cardColor ? 1 : 0)
+//         : price[color] - (color === cardColor ? 1 : 0),
+//       0
+//     );
+//   });
+//   return result;
+// }
+
 export function compPrice(price1: Price, price2: Price): boolean {
   return (["white", "blue", "green", "red", "black"] as CardColor[]).every(
     (color) => {
@@ -77,6 +106,31 @@ export function compPrice(price1: Price, price2: Price): boolean {
     }
   );
 }
+
+// export function compPriceEmpty(price: Price, cardPrice: Price): boolean {
+//   alert(`${JSON.stringify(price)} xxxx ${JSON.stringify(cardPrice)}`);
+//   return (["white", "blue", "green", "red", "black"] as CardColor[]).every(
+//     (color) => {
+//       //price[tokenColor] >= cardPrice[tokenColor]
+//       if (
+//         cardPrice[color] === 0 //||
+//         // price[color] === 0 ||
+//         // price[color] > cardPrice[color]
+//       )
+//         return true;
+//       return false;
+//     }
+//   );
+// }
+
+// export function compPriceEnough(price: Price, cardPrice: Price): boolean {
+//   return (["white", "blue", "green", "red", "black"] as CardColor[]).every(
+//     (color) => {
+//       if (price[color] < cardPrice[color]) return false;
+//       return true;
+//     }
+//   );
+// }
 
 export function drawCards(resource: Resource, cardId: number) {
   // if (cardId === null) return { cardsLv1: undefined };

@@ -95,6 +95,7 @@ type Inventory {
     tiles           Int[]
     tokens          Tokens
     discount        Price
+    score           Int
 }
 
 model Game {
