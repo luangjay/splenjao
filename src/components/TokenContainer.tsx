@@ -1,31 +1,15 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useEffect, useState } from "react";
 import { PlayerState } from "../common/interfaces";
+import { tokenColors, cardColors } from "../common/constants";
 import {
   TokenEffect,
   InventoryKey,
   Reference,
   TokenColor,
+  CardColor,
 } from "../common/types";
 import TokenComponent from "./TokenComponent";
-
-const tokens = {
-  white: 0,
-  blue: 0,
-  green: 0,
-  red: 0,
-  black: 0,
-  gold: 0,
-};
-
-const tokenColors = [
-  "white",
-  "blue",
-  "green",
-  "red",
-  "black",
-  "gold",
-] as TokenColor[];
 
 interface TokenContainerProps {
   game: Game;
@@ -142,6 +126,21 @@ export default function TokenContainer(props: TokenContainerProps) {
             />
           ))}
         </div>
+        <div>
+          {cardColors.map((cardColor) => (
+            <button
+              className="border-2"
+              onClick={() => {
+                setPlayerState((prev) => ({
+                  ...prev,
+                  cardColor,
+                }));
+              }}
+            >
+              {cardColor.slice(0, 2)}
+            </button>
+          ))}
+        </div>
         <button
           className="bg-cyan-400"
           onClick={() => {
@@ -157,7 +156,8 @@ export default function TokenContainer(props: TokenContainerProps) {
       </div>
     );
   return (
-    <div className="flex gap-8">z
+    <div className="flex gap-8">
+      z
       <div>
         <TokenComponent
           tokenColor="gold"

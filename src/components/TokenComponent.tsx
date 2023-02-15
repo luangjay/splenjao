@@ -9,7 +9,7 @@ import {
   CardColor,
 } from "../common/types";
 import { PlayerState } from "../common/interfaces";
-import { compPrice, opPrice, opPriceWColor } from "../common/functions";
+import { compPrice, opPrice, opPriceWColor } from "../common/constants";
 import { api } from "../utils/api";
 
 const allTokens = {
@@ -43,17 +43,17 @@ export default function TokenComponent({
 
   const colorClass =
     tokenColor === "white"
-      ? "bg-white"
+      ? "fill-white hover:fill-gray-100"
       : tokenColor === "blue"
-      ? "bg-blue-500"
+      ? "fill-blue-500 hover:fill-blue-600"
       : tokenColor === "green"
-      ? "bg-green-500"
+      ? "fill-green-500 hover:fill-green-600"
       : tokenColor === "red"
-      ? "bg-red-500"
+      ? "fill-red-500 hover:fill-red-600"
       : tokenColor === "black"
-      ? "bg-black"
+      ? "fill-gray-800 hover:fill-black"
       : tokenColor === "gold"
-      ? "bg-yellow-300"
+      ? "fill-yellow-300 hover:fill-yellow-400"
       : "";
 
   const tokenCount =
@@ -70,9 +70,9 @@ export default function TokenComponent({
     <div className="flex">
       {tokenCount > 0 && (
         <button
-          className={`aspect-square w-[30px] rounded-full border-2 ${
-            !disabled ? colorClass : "bg-gray-400"
-          }`}
+          // className={`aspect-square w-[30px] rounded-full border-2 ${
+          //   !disabled ? colorClass : "bg-gray-400"
+          // }`}
           disabled={disabled}
           onClick={
             /*async*/ () => {
@@ -100,7 +100,16 @@ export default function TokenComponent({
             }
           }
         >
-          T
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            height="40px"
+            width="40px"
+            className={`drop-shadow-lg ${colorClass}`}
+          >
+            <path fill="none" d="M0 0h24v24H0z" />
+            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
+          </svg>
         </button>
       )}
       <div>{tokenCount}</div>
@@ -108,7 +117,7 @@ export default function TokenComponent({
   );
 }
 
-async function setPlayerTokens({
+function setPlayerTokens({
   game,
   player,
   tokenColor,
@@ -242,17 +251,7 @@ async function setPlayerTokens({
   }
   // ACTION: PURCHASE
   if (playerState.action === "purchase") {
-    if (!playerState.card) {
-      return;
-    }
-    const { gold: x1, ...tokens } = playerState.tokens;
-    const { gold: x2, ...inventoryTokens } = playerState.inventoryTokens;
-    const replacedTokens = opPrice("increment", tokens, playerState.replaces);
-    const discountedPrice = opPrice(
-      "decrement",
-      playerState.card.price,
-      game[`inventory${game.turnIdx}` as InventoryKey].discount
-    );
+    // CLICK TO RESERVE
     if (tokenEffect === "special") {
       if (tokenColor === "gold") {
         if (playerState.tokens.gold >= 3) {
@@ -275,6 +274,22 @@ async function setPlayerTokens({
       }
       return;
     }
+
+    if (!playerState.card || !playerState.cardColor) {
+      return;
+    }
+    if (tokenColor !== "gold" && tokenColor !== playerState.cardColor) {
+      return;
+    }
+    const { gold: x1, ...tokens } = playerState.tokens;
+    const { gold: x2, ...inventoryTokens } = playerState.inventoryTokens;
+    const replacedTokens = opPrice("increment", tokens, playerState.replaces);
+    const discountedPrice = opPrice(
+      "decrement",
+      playerState.card.price,
+      game[`inventory${game.turnIdx}` as InventoryKey].discount
+    );
+
     // alert(JSON.stringify(discountedPrice));
 
     // TAKE TOKEN
@@ -283,35 +298,51 @@ async function setPlayerTokens({
         setMessage(setPlayerState, "Requirements satisfied.");
         return;
       }
+      if (
+        replacedTokens[playerState.cardColor] >=
+        discountedPrice[playerState.cardColor]
+      ) {
+        setMessage(setPlayerState, "exceedzz");
+        return;
+      }
       // TODO: BUY WITH GOLD TOKEN
       if (tokenColor === "gold") {
-        if (playerState.tokens.gold >= 3) {
-          setMessage(setPlayerState, "Unable to take more than 3 gold tokens.");
-          return;
-        }
-        if (!compPriceEmpty(discountedPrice, tokens, inventoryTokens)) {
-          setMessage(setPlayerState, "Use normal tokens first.");
-          return;
-        }
+        // if (!compPriceEmpty(discountedPrice, tokens, inventoryTokens)) {
+        //   setMessage(setPlayerState, "Use normal tokens first.");
+        //   return;
+        // }
         // TODO: VALIDATE
-        exchangeGoldtoken(
-          playerState,
+        setPlayerState((prev) => ({
+          ...prev,
+          replaces: prev.cardColor
+            ? {
+                ...prev.replaces,
+                [prev.cardColor]: prev.replaces[prev.cardColor] + 1,
+              }
+            : prev.replaces,
+        }));
+        exchangeToken(
           setPlayerState,
-          replacedTokens,
-          discountedPrice,
-          false
+          "gold",
+          "inventory",
+          "player",
+          playerState.cardColor
+            ? compPrice(
+                replacedTokens,
+                opPriceWColor(
+                  "decrement",
+                  discountedPrice,
+                  playerState.cardColor
+                )
+              )
+            : false
         );
-        // exchangeToken(setPlayerState, tokenColor, "inventory", "player", false);
-        // setMessage(setPlayerState, `Take gold token success. `);
         return;
       }
 
       // BUY WITH NORMAL TOKENS
-      // exchangeToken(setPlayerState, tokenColor, "player", "inventory", false);
-      if (replacedTokens[tokenColor] >= discountedPrice[tokenColor]) {
-        setMessage(setPlayerState, "exceedzz");
-        return;
-      }
+
+      // TO REMOVE
       if (
         compPrice(
           replacedTokens,
@@ -322,32 +353,40 @@ async function setPlayerTokens({
         setMessage(setPlayerState, "maybezz");
         return;
       }
-      exchangeToken(setPlayerState, tokenColor, "inventory", "player", false);
+      //
+      exchangeToken(
+        setPlayerState,
+        tokenColor,
+        "inventory",
+        "player",
+        compPrice(
+          replacedTokens,
+          opPriceWColor("decrement", discountedPrice, tokenColor)
+        )
+      );
       setMessage(setPlayerState, "Take token success.");
       return;
     }
     if (tokenEffect === "return") {
       if (tokenColor === "gold") {
-        if (!compPriceEmpty(discountedPrice, tokens, inventoryTokens)) {
-          setMessage(setPlayerState, "Use normal tokens first.");
-          return;
-        }
-        // TODO: VALIDATE
-        exchangeGoldtoken(
-          playerState,
-          setPlayerState,
-          replacedTokens,
-          discountedPrice,
-          true
-        );
+        setPlayerState((prev) => ({
+          ...prev,
+          replaces: prev.cardColor
+            ? {
+                ...prev.replaces,
+                [prev.cardColor]: prev.replaces[prev.cardColor] - 1,
+              }
+            : prev.replaces,
+        }));
+        exchangeToken(setPlayerState, "gold", "player", "inventory", false);
         // exchangeToken(setPlayerState, tokenColor, "player", "inventory", false);
         // setMessage(setPlayerState, `Take gold token success. `);
         return;
       }
-      if (playerState.tokens.gold > 0) {
-        setMessage(setPlayerState, "Return gold tokens first.");
-        return;
-      }
+      // if (playerState.tokens.gold > 0) {
+      //   setMessage(setPlayerState, "Return gold tokens first.");
+      //   return;
+      // }
       exchangeToken(setPlayerState, tokenColor, "player", "inventory", false);
       setMessage(setPlayerState, "Return token success.");
       return;
@@ -397,77 +436,6 @@ async function exchangeToken(
     },
     success,
   }));
-}
-
-function exchangeGoldtoken(
-  playerState: PlayerState,
-  setPlayerState: (value: SetStateAction<PlayerState>) => void,
-  price: Price,
-  cardPrice: Price,
-  inverse: boolean
-) {
-  //const replacedTokens = opPrice("increment", tokens, playerState.replaces);
-  // const result = { ...price };
-  if (!inverse) {
-    (["white", "blue", "green", "red", "black"] as CardColor[]).every(
-      (color) => {
-        if (price[color] < cardPrice[color]) {
-          // alert(
-          //   `${JSON.stringify(price)} xxx ${JSON.stringify(
-          //     cardPrice
-          //   )} xxx ${compPrice(
-          //     price,
-          //     opPriceWColor("decrement", cardPrice, color)
-          //   )}`
-          // );
-          setPlayerState((prev) => ({
-            ...prev,
-            replaces: {
-              ...prev.replaces,
-              [color]: prev.replaces[color] + 1,
-            },
-          }));
-          exchangeToken(
-            setPlayerState,
-            "gold",
-            "inventory",
-            "player",
-            compPrice(price, opPriceWColor("decrement", cardPrice, color))
-          );
-          // alert(JSON.stringify(playerState));
-          // if (
-          //   compPrice(
-          //     price,
-          //     opPriceWColor("decrement", cardPrice, color)
-          //   )
-          // ) {
-          //   exchangeToken(setPlayerState, tokenColor, "inventory", "player", true);
-          //   setMessage(setPlayerState, "maybezz");
-          //   return;
-          // }
-          return false;
-        }
-        return true;
-      }
-    );
-  } else {
-    (["black", "red", "green", "blue", "white"] as CardColor[]).every(
-      (color) => {
-        if (playerState.replaces[color] > 0) {
-          setPlayerState((prev) => ({
-            ...prev,
-            replaces: {
-              ...prev.replaces,
-              [color]: prev.replaces[color] - 1,
-            },
-          }));
-          exchangeToken(setPlayerState, "gold", "player", "inventory", false);
-          return false;
-        }
-        return true;
-      }
-    );
-  }
 }
 
 export function compPriceEmpty(

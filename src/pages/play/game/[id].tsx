@@ -66,7 +66,7 @@ export default function Game() {
     },
     {
       retry: false,
-      // refetchInterval: 1000,
+      refetchInterval: 1000,
     }
   );
   const updatePlayerLastPlayed = api.gamex.updatePlayerLastPlayed.useMutation({
@@ -98,6 +98,7 @@ export default function Game() {
     tokens: { ...defaultTokens },
     replaces: { ...defaultPrice },
     card: null,
+    cardColor: null,
     extraTurn: false,
     nextTurn: false,
     message: "",
@@ -158,6 +159,7 @@ export default function Game() {
           tokens: { ...defaultTokens },
           replaces: { ...defaultPrice },
           card: null,
+          cardColor: null,
           extraTurn: false,
           nextTurn: false,
           message: "",

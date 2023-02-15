@@ -16,7 +16,7 @@ export default function CardContainer(props: CardContainerProps) {
   const { game, player, cardEffect, playerState, setPlayerState } = props;
 
   return (
-    <div className="relative grid w-[640px] grid-rows-3 gap-2">
+    <div className="grid min-w-max grid-rows-3 gap-2">
       <div className="grid grid-cols-5 gap-2">
         {game.resource.cardsLv3.map(
           (cardId, idx) =>

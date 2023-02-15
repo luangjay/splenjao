@@ -1,6 +1,6 @@
 import { Card, Game, Player, Price } from "@prisma/client";
 import { SetStateAction } from "react";
-import { compPrice, opPrice, opPriceWColor } from "../common/functions";
+import { compPrice, opPrice, opPriceWColor } from "../common/constants";
 import { PlayerState } from "../common/interfaces";
 import { CardColor, CardEffect, InventoryKey } from "../common/types";
 import { api } from "../utils/api";
@@ -30,8 +30,10 @@ export default function CardComponent({
     );
   return (
     <div
-      className={`mx-auto min-w-[120px] max-w-[240px] rounded-lg border-2 border-black drop-shadow-md ${
-        cardEffect && "cursor-pointer hover:bg-gray-100"
+      className={`mx-auto rounded-lg border-2 border-black drop-shadow-md ${
+        cardEffect
+          ? "min-w-[120px] max-w-[240px] cursor-pointer hover:bg-gray-100"
+          : "min-w-[144px] max-w-[288px]"
       }`}
       // disabled={props.isTurnLoading}
       onClick={() => {
@@ -52,21 +54,15 @@ export default function CardComponent({
     >
       <div className="flex flex-row justify-between p-[4%]">
         <div className="flex aspect-[0.185] w-[30%] flex-col justify-between">
-          <div
-            className={
-              card.score
-                ? "flex aspect-square w-full items-center justify-center rounded-lg "
-                : undefined
-            }
-          >
-            <code className="number text-[100%] font-black">
-              {card.score || ""}
-            </code>
-          </div>
+          <ScoreLabel score={card.score} cardEffect={cardEffect} />
           <div>
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(
               (color) => (
-                <PriceLabel color={color} price={card.price[color]} />
+                <PriceLabel
+                  color={color}
+                  price={card.price[color]}
+                  cardEffect={cardEffect}
+                />
               )
             )}
           </div>
@@ -79,119 +75,81 @@ export default function CardComponent({
   );
 }
 
-// function setPlayerCard({
-//   game,
-//   player,
-//   cardId,
-//   cardEffect,
-//   playerState,
-//   setPlayerState,
-// }: CardProps) {
-//   if (!props.serverState || !price) return;
-//   if (props.serverState.action.endTurn) {
-//     props.setMessage("You cannot purchase card this period");
-//     return;
-//   }
-//   props.setMessage("4344");
-//   const sumTokenColors = Object.values(
-//     props.serverState.action.tokenList
-//   ).reduce((a, b) => a + b, 0);
-//   if (sumTokenColors !== 0) {
-//     if (props.serverState.action.tokenList.gold === 1) {
-//       props.setMessage("Coming soon");
-//     } else {
-//       props.setMessage("You cannot purchase card right now.");
-//     }
-//     return;
-//   }
-//   // *** IMPORTANT ***
-//   const discountedPrice = { ...price };
-//   (Object.keys(discountedPrice) as Color[]).forEach((color) => {
-//     discountedPrice[color] =
-//       price[color] -
-//       props.game.playerDiscount[`i${props.game.turn.playerIdx}` as IdxKey][
-//         color
-//       ];
-//   });
-//   if (
-//     !(["white", "blue", "green", "red", "black"] as Color[]).every((color) => {
-//       if (
-//         props.serverState &&
-//         props.serverState.playerToken[
-//           `i${props.game.turn.playerIdx}` as IdxKey
-//         ][color] < discountedPrice[color]
-//       ) {
-//         props.setMessage("Not enough tokens.");
-//         return false;
-//       }
-//       return true;
-//     })
-//   ) {
-//     return;
-//   }
-//   props.setClientState({
-//     tokenColor: null,
-//     effect: "purchase",
-//     actionType: "purchase",
-//     cardId: props.id,
-//   });
-//   props.setMessage("Purchase card success.");
-// }
+interface ScoreProps {
+  score: number;
+  cardEffect: CardEffect | null;
+}
+
+function ScoreLabel({ score, cardEffect }: ScoreProps) {
+  return (
+    <div
+      className={
+        score
+          ? `number flex aspect-square w-full items-center justify-center rounded-lg font-mono text-xl font-black leading-tight ${
+              cardEffect ? "text-xl" : "text-2xl"
+            }`
+          : undefined
+      }
+    >
+      {score || ""}
+    </div>
+  );
+}
 
 interface ColorProps {
   color: CardColor | undefined;
 }
 
+function ColorLabel({ color }: ColorProps) {
+  const colorClass =
+    color === "white"
+      ? "bg-gray-100"
+      : color === "blue"
+      ? "bg-blue-600"
+      : color === "green"
+      ? "bg-green-600"
+      : color === "red"
+      ? "bg-red-600"
+      : color === "black"
+      ? "bg-black"
+      : "";
+
+  if (!colorClass) return <></>;
+  return (
+    <div
+      className={`${colorClass} flex aspect-square w-full items-center justify-center rounded-lg drop-shadow-lg`}
+    ></div>
+  );
+}
+
 interface PriceProps {
   color: CardColor | undefined;
   price: number | undefined;
+  cardEffect: CardEffect | null;
 }
 
-function ColorLabel({ color }: ColorProps) {
-  let colorClass;
-  switch (color) {
-    case "white":
-      colorClass = "bg-[#edf4f7]";
-      break;
-    case "blue":
-      colorClass = "bg-[#367ec4]";
-      break;
-    case "green":
-      colorClass = "bg-[#0faf60]";
-      break;
-    case "red":
-      colorClass = "bg-[#d2281a]";
-      break;
-    case "black":
-      colorClass = "bg-[#40231d]";
-      break;
-  }
+function PriceLabel({ color, price, cardEffect }: PriceProps) {
+  const colorClass =
+    color === "white"
+      ? "bg-white"
+      : color === "blue"
+      ? "bg-blue-500"
+      : color === "green"
+      ? "bg-green-500"
+      : color === "red"
+      ? "bg-red-500"
+      : color === "black"
+      ? "bg-gray-800"
+      : "";
 
-  if (colorClass)
-    return (
-      <div
-        className={`${colorClass} flex aspect-square w-full items-center justify-center rounded-lg drop-shadow-lg`}
-      ></div>
-    );
-  return <></>;
-}
-
-function PriceLabel({ color, price }: PriceProps) {
-  if (price)
-    return (
-      <div
-        className={`flex aspect-square w-full items-center justify-center rounded-full border-2 ${
-          color && price
-            ? color === "black"
-              ? "bg-black"
-              : color === "white"
-              ? "bg-white"
-              : ` bg-${color}-500`
-            : undefined
-        }`}
-      >
-        <code className="number text-xl font-black">{price || -1}</code>
-      </div>
-    );
-  return <></>;
+  if (!price) return <></>;
+  return (
+    <div
+      className={`number flex aspect-square w-full items-center justify-center rounded-full border-2 font-mono font-black leading-tight ${colorClass} ${
+        cardEffect ? "text-xl" : "text-2xl"
+      }`}
+    >
+      {price}
+    </div>
+  );
 }

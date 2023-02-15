@@ -1,6 +1,6 @@
 import { Lobby } from "@prisma/client";
 import { z } from "zod";
-import { shuffle } from "../../../common/functions";
+import { shuffle } from "../../../common/constants";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 

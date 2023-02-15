@@ -1,5 +1,5 @@
 import { Card, Price } from "@prisma/client";
-import { Action, TokenColor } from "./types";
+import { Action, CardColor } from "./types";
 import { Tokens } from "@prisma/client";
 
 export interface PlayerState {
@@ -7,6 +7,7 @@ export interface PlayerState {
   success: boolean;
   action: Action | null;
   card: Card | null;
+  cardColor: CardColor | null;
   resourceTokens: Tokens;
   inventoryTokens: Tokens;
   tokens: Tokens;

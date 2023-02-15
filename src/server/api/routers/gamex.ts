@@ -7,7 +7,7 @@ import {
   opTokenCount,
   opPriceWColor,
   drawCards,
-} from "../../../common/functions";
+} from "../../../common/constants";
 
 const addSeconds = (date: Date, seconds: number) => {
   date.setSeconds(date.getSeconds() + seconds);
@@ -73,7 +73,6 @@ const zTokens = z.object({
   black: z.number(),
   gold: z.number(),
 });
-
 // function drawCards(cards: number[], cardId: number) {
 //   const result = [...cards]
 //   const head = result.splice(0, 5)
@@ -146,10 +145,6 @@ export const gamexRouter = createTRPCRouter({
         playerState: z.object({
           success: z.boolean(),
           action: z.string().nullable(),
-          resourceTokens: zTokens,
-          inventoryTokens: zTokens,
-          tokens: zTokens,
-          replaces: zPrice,
           card: z
             .object({
               id: z.number(),
@@ -159,6 +154,11 @@ export const gamexRouter = createTRPCRouter({
               price: zPrice,
             })
             .nullable(),
+          cardColor: z.string().nullable(),
+          resourceTokens: zTokens,
+          inventoryTokens: zTokens,
+          tokens: zTokens,
+          replaces: zPrice,
           extraTurn: z.boolean(),
           nextTurn: z.boolean(),
           message: z.string(),
