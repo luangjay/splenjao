@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {},
     fontFamily: {
-      mono: "Source Code Pro",
+      mono: '"Source Code Pro"',
     },
   },
   plugins: [],

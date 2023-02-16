@@ -1,15 +1,15 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useEffect, useState } from "react";
-import { PlayerState } from "../common/interfaces";
-import { tokenColors, cardColors } from "../common/constants";
+import { PlayerState } from "../../common/types";
+import { tokenColors, cardColors } from "../../common/constants";
 import {
   TokenEffect,
   InventoryKey,
   Reference,
   TokenColor,
   CardColor,
-} from "../common/types";
-import TokenComponent from "./TokenComponent";
+} from "../../common/types";
+import Token from "./tokens/Token";
 
 interface TokenContainerProps {
   game: Game;
@@ -32,25 +32,23 @@ export default function TokenContainer(props: TokenContainerProps) {
   // }, [props.game.turnIdx]);
   const { playerState, setPlayerState } = props;
 
-  if (playerState.action === null) return <></>;
-  if (playerState.action === "take")
+  if (playerState.currentAction === null) return <></>;
+  if (playerState.currentAction === "take")
     return (
       <div className="flex gap-8">
         <div>
           {tokenColors.map((tokenColor) => (
-            <TokenComponent
-              // owner="game"
+            <Token
               tokenColor={tokenColor}
-              tokenEffect={!playerState.extraTurn ? "take" : null}
+              tokenEffect={!playerState.hasExtraTurn ? "take" : null}
               reference="resource"
-              // effect={!props.serverState?.action.endTurn ? "take" : null}
               {...props}
             />
           ))}
         </div>
         <div>
           {tokenColors.map((tokenColor) => (
-            <TokenComponent
+            <Token
               tokenColor={tokenColor}
               tokenEffect="return"
               reference="player"
@@ -60,11 +58,10 @@ export default function TokenContainer(props: TokenContainerProps) {
         </div>
         <div>
           {tokenColors.map((tokenColor) => (
-            <TokenComponent
+            <Token
               tokenColor={tokenColor}
-              tokenEffect={!playerState.extraTurn ? null : "take"}
+              tokenEffect={!playerState.hasExtraTurn ? null : "take"}
               reference="inventory"
-              // effect={!props.serverState?.action.endTurn ? null : "take"}
               {...props}
             />
           ))}
@@ -75,7 +72,7 @@ export default function TokenContainer(props: TokenContainerProps) {
             if (playerState.success)
               setPlayerState((prev) => ({
                 ...prev,
-                nextTurn: true,
+                isNextTurn: true,
               }));
           }}
         >
@@ -86,7 +83,7 @@ export default function TokenContainer(props: TokenContainerProps) {
           onClick={() => {
             setPlayerState((prev) => ({
               ...prev,
-              extraTurn: !prev.extraTurn,
+              hasExtraTurn: !prev.hasExtraTurn,
             }));
           }}
         >
@@ -94,11 +91,11 @@ export default function TokenContainer(props: TokenContainerProps) {
         </button>
       </div>
     );
-  if (playerState.action === "purchase")
+  if (playerState.currentAction === "purchase")
     return (
       <div className="flex gap-8">
         <div>
-          <TokenComponent
+          <Token
             tokenColor="gold"
             tokenEffect="special"
             reference="resource"
@@ -107,7 +104,7 @@ export default function TokenContainer(props: TokenContainerProps) {
         </div>
         <div>
           {tokenColors.map((tokenColor) => (
-            <TokenComponent
+            <Token
               tokenColor={tokenColor}
               tokenEffect="return"
               reference="player"
@@ -117,7 +114,7 @@ export default function TokenContainer(props: TokenContainerProps) {
         </div>
         <div>
           {tokenColors.map((tokenColor) => (
-            <TokenComponent
+            <Token
               tokenColor={tokenColor}
               tokenEffect="take"
               reference="inventory"
@@ -133,7 +130,7 @@ export default function TokenContainer(props: TokenContainerProps) {
               onClick={() => {
                 setPlayerState((prev) => ({
                   ...prev,
-                  cardColor,
+                  selectedCardColor: cardColor,
                 }));
               }}
             >
@@ -147,7 +144,7 @@ export default function TokenContainer(props: TokenContainerProps) {
             if (playerState.success)
               setPlayerState((prev) => ({
                 ...prev,
-                nextTurn: true,
+                isNextTurn: true,
               }));
           }}
         >
@@ -159,7 +156,7 @@ export default function TokenContainer(props: TokenContainerProps) {
     <div className="flex gap-8">
       z
       <div>
-        <TokenComponent
+        <Token
           tokenColor="gold"
           tokenEffect="special"
           reference="resource"
@@ -180,7 +177,7 @@ export default function TokenContainer(props: TokenContainerProps) {
           if (playerState.success)
             setPlayerState((prev) => ({
               ...prev,
-              nextTurn: true,
+              isNextTurn: true,
             }));
         }}
       >

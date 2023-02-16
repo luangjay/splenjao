@@ -4,16 +4,16 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../../utils/api";
-import CardComponent from "../../../components/CardComponent";
-import CardContainer from "../../../components/CardContainer";
-import TokenComponent from "../../../components/TokenComponent";
+import CardComponent from "../../../components/game/cards/Card";
+import CardContainer from "../../../components/game/deck/Deck";
+import Token from "../../../components/game/tokens/Token";
 import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
-import { PlayerState } from "../../../common/interfaces";
-import TokenContainer from "../../../components/TokenContainer";
-import ActionDialog from "../../../components/ActionDialog";
+import { PlayerState } from "../../../common/types";
+import TokenContainer from "../../../components/game/TokenContainer";
+import ActionDialog from "../../../components/game/dialog/Dialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
 
 const defaultPrice = {
@@ -92,15 +92,15 @@ export default function Game() {
   const [playerState, setPlayerState] = useState<PlayerState>({
     // reset: false,
     success: false,
-    action: null,
+    currentAction: null,
     resourceTokens: { ...defaultTokens },
     inventoryTokens: { ...defaultTokens },
-    tokens: { ...defaultTokens },
-    replaces: { ...defaultPrice },
-    card: null,
-    cardColor: null,
-    extraTurn: false,
-    nextTurn: false,
+    playerTokens: { ...defaultTokens },
+    priceToReplace: { ...defaultPrice },
+    selectedCard: null,
+    selectedCardColor: null,
+    hasExtraTurn: false,
+    isNextTurn: false,
     message: "",
   });
 
@@ -134,7 +134,7 @@ export default function Game() {
       const cd = 30 + (game.createdAt.getTime() - Date.now()) / 1000;
       setCountdown(cd);
       if (playerHost && cd <= 0) {
-        setPlayerState((prev) => ({ ...prev, nextTurn: true }));
+        setPlayerState((prev) => ({ ...prev, isNextTurn: true }));
       }
     }
   }, [game]);
@@ -150,18 +150,18 @@ export default function Game() {
         setPlayerState({
           // reset: false,
           success: false,
-          action: null,
+          currentAction: null,
           resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
           inventoryTokens:
             game && game.status !== "created"
               ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
               : { ...defaultTokens },
-          tokens: { ...defaultTokens },
-          replaces: { ...defaultPrice },
-          card: null,
-          cardColor: null,
-          extraTurn: false,
-          nextTurn: false,
+          playerTokens: { ...defaultTokens },
+          priceToReplace: { ...defaultPrice },
+          selectedCard: null,
+          selectedCardColor: null,
+          hasExtraTurn: false,
+          isNextTurn: false,
           message: "",
         });
       }
@@ -170,15 +170,15 @@ export default function Game() {
   }, [/*validTab,*/ game?.turnIdx]);
 
   useEffect(() => {
-    if (validTab && player && game && playerState.nextTurn) {
+    if (validTab && player && game && playerState.isNextTurn) {
       updateNextTurn.mutateAsync({
         id: game.id,
         playerId: player.id,
         playerState,
       });
-      setPlayerState((prev) => ({ ...prev, nextTurn: false }));
+      setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
     }
-  }, [playerState.nextTurn]);
+  }, [playerState.isNextTurn]);
 
   // if (gameError) return <Error statusCode={404} />;
   if (!player || !game) return <></>;
@@ -223,12 +223,12 @@ export default function Game() {
           </div>
         </div>
         <div className="flex w-1/5 flex-col border-2">
-          {!playerState.nextTurn && playerTurn && (
+          {!playerState.isNextTurn && playerTurn && (
             <div>
               <p>It's your turn</p>
               <button
                 onClick={() =>
-                  setPlayerState((prev) => ({ ...prev, nextTurn: true }))
+                  setPlayerState((prev) => ({ ...prev, isNextTurn: true }))
                 }
               >
                 Next turn
@@ -244,7 +244,7 @@ export default function Game() {
             className="border-2"
             onClick={() => {
               if (playerTurn)
-                setPlayerState((prev) => ({ ...prev, action: "take" }));
+                setPlayerState((prev) => ({ ...prev, currentAction: "take" }));
             }}
           >
             Take
@@ -255,7 +255,7 @@ export default function Game() {
               if (playerTurn)
                 setPlayerState((prev) => ({
                   ...prev,
-                  action: "reserve",
+                  currentAction: "reserve",
                   cardId: 7,
                 }));
             }}

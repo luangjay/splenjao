@@ -1,8 +1,8 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useState } from "react";
-import { PlayerState } from "../common/interfaces";
-import { CardEffect } from "../common/types";
-import CardComponent from "./CardComponent";
+import { PlayerState } from "../../../common/interfaces";
+import { CardEffect } from "../../../common/types";
+import CardComponent from "../cards/Card";
 
 interface CardContainerProps {
   game: Game;
@@ -35,9 +35,6 @@ export default function CardContainer(props: CardContainerProps) {
             idx < 5 && <CardComponent cardId={cardId} {...props} />
         )}
       </div>
-      {/* <div className="absolute left-0 top-0 hidden h-full w-full bg-black opacity-80">
-        <button>abcd</button>
-      </div> */}
     </div>
   );
 }

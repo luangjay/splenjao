@@ -4,8 +4,8 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../utils/api";
-import CardComponent from "../../components/CardComponent";
-import CardContainer from "../../components/CardContainer";
+import CardComponent from "../../components/game/cards/Card";
+import CardContainer from "../../components/game/deck/Deck";
 
 export default function Game() {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });

@@ -144,8 +144,8 @@ export const gamexRouter = createTRPCRouter({
         playerId: z.string(),
         playerState: z.object({
           success: z.boolean(),
-          action: z.string().nullable(),
-          card: z
+          currentAction: z.string().nullable(),
+          selectedCard: z
             .object({
               id: z.number(),
               level: z.number(),
@@ -154,13 +154,13 @@ export const gamexRouter = createTRPCRouter({
               price: zPrice,
             })
             .nullable(),
-          cardColor: z.string().nullable(),
+          selectedCardColor: z.string().nullable(),
           resourceTokens: zTokens,
           inventoryTokens: zTokens,
-          tokens: zTokens,
-          replaces: zPrice,
-          extraTurn: z.boolean(),
-          nextTurn: z.boolean(),
+          playerTokens: zTokens,
+          priceToReplace: zPrice,
+          hasExtraTurn: z.boolean(),
+          isNextTurn: z.boolean(),
           message: z.string(),
         }),
       })
@@ -202,75 +202,82 @@ export const gamexRouter = createTRPCRouter({
           turnIdx: (game.turnIdx + 1) % game.playerCount,
           resource: {
             update:
-              input.playerState.action === "take"
+              input.playerState.currentAction === "take"
                 ? {
                     tokens: opTokenCount(
-                      !input.playerState.extraTurn ? "decrement" : "increment",
+                      !input.playerState.hasExtraTurn
+                        ? "decrement"
+                        : "increment",
                       game.resource.tokens,
-                      input.playerState.tokens
+                      input.playerState.playerTokens
                     ),
                   }
-                : (input.playerState.action === "purchase" ||
-                    input.playerState.action === "reserve") &&
-                  input.playerState.card
+                : (input.playerState.currentAction === "purchase" ||
+                    input.playerState.currentAction === "reserve") &&
+                  input.playerState.selectedCard
                 ? {
                     tokens: opTokenCount(
-                      input.playerState.action === "purchase"
+                      input.playerState.currentAction === "purchase"
                         ? "increment"
                         : "decrement",
                       game.resource.tokens,
-                      input.playerState.tokens
+                      input.playerState.playerTokens
                     ),
-                    ...drawCards(game.resource, input.playerState.card.id),
+                    ...drawCards(
+                      game.resource,
+                      input.playerState.selectedCard.id
+                    ),
                   }
                 : undefined,
           },
           [`inventory${game.turnIdx}`]: {
             update:
-              input.playerState.action === "take"
+              input.playerState.currentAction === "take"
                 ? {
                     tokens: opTokenCount(
-                      !input.playerState.extraTurn ? "increment" : "decrement",
+                      !input.playerState.hasExtraTurn
+                        ? "increment"
+                        : "decrement",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.tokens
+                      input.playerState.playerTokens
                     ),
                   }
-                : input.playerState.action === "purchase"
+                : input.playerState.currentAction === "purchase"
                 ? {
                     tokens: opTokenCount(
                       "decrement",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.tokens
+                      input.playerState.playerTokens
                     ),
-                    cards: input.playerState.card
+                    cards: input.playerState.selectedCard
                       ? {
-                          push: input.playerState.card.id,
+                          push: input.playerState.selectedCard.id,
                         }
                       : undefined,
-                    discount: input.playerState.card
+                    discount: input.playerState.selectedCard
                       ? opPriceWColor(
                           "increment",
                           game[`inventory${game.turnIdx}` as InventoryKey]
                             .discount,
-                          input.playerState.card.color as CardColor
+                          input.playerState.selectedCard.color as CardColor
                         )
                       : undefined,
-                    score: input.playerState.card
+                    score: input.playerState.selectedCard
                       ? {
-                          increment: input.playerState.card.score,
+                          increment: input.playerState.selectedCard.score,
                         }
                       : undefined,
                   }
-                : input.playerState.action === "reserve"
+                : input.playerState.currentAction === "reserve"
                 ? {
                     tokens: opTokenCount(
                       "increment",
                       game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.tokens
+                      input.playerState.playerTokens
                     ),
-                    reserves: input.playerState.card
+                    reserves: input.playerState.selectedCard
                       ? {
-                          push: input.playerState.card.id,
+                          push: input.playerState.selectedCard.id,
                         }
                       : undefined,
                   }

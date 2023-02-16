@@ -1,3 +1,5 @@
+import { Card, Price, Tokens } from "@prisma/client";
+
 export type CardColor = "white" | "blue" | "green" | "red" | "black";
 
 export type TokenColor = "white" | "blue" | "green" | "red" | "black" | "gold";
@@ -15,3 +17,18 @@ export type InventoryKey =
   | "inventory1"
   | "inventory2"
   | "inventory3";
+
+export type PlayerState = {
+  // reset: boolean;
+  success: boolean;
+  currentAction: Action | null;
+  selectedCard: Card | null;
+  selectedCardColor: CardColor | null;
+  resourceTokens: Tokens;
+  inventoryTokens: Tokens;
+  playerTokens: Tokens;
+  priceToReplace: Price;
+  hasExtraTurn: boolean;
+  isNextTurn: boolean;
+  message: string;
+};

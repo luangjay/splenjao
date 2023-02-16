@@ -1,9 +1,9 @@
 import { Card, Game, Player, Price } from "@prisma/client";
 import { SetStateAction } from "react";
-import { compPrice, opPrice, opPriceWColor } from "../common/constants";
-import { PlayerState } from "../common/interfaces";
-import { CardColor, CardEffect, InventoryKey } from "../common/types";
-import { api } from "../utils/api";
+import { compPrice, opPrice, opPriceWColor } from "../../../common/constants";
+import { PlayerState } from "../../../common/types";
+import { CardColor, CardEffect, InventoryKey } from "../../../common/types";
+import { api } from "../../../utils/api";
 
 interface CardProps {
   game: Game;
@@ -30,7 +30,7 @@ export default function CardComponent({
     );
   return (
     <div
-      className={`mx-auto rounded-lg border-2 border-black drop-shadow-md ${
+      className={`mx-auto rounded-lg border-2 border-gray-300 shadow-sm drop-shadow-md ${
         cardEffect
           ? "min-w-[120px] max-w-[240px] cursor-pointer hover:bg-gray-100"
           : "min-w-[144px] max-w-[288px]"
@@ -45,9 +45,9 @@ export default function CardComponent({
           );
           setPlayerState((prev) => ({
             ...prev,
-            success: compPrice(playerState.tokens, discountedPrice),
-            action: "purchase",
-            card,
+            success: compPrice(playerState.playerTokens, discountedPrice),
+            currentAction: "purchase",
+            selectedCard: card,
           }));
         }
       }}

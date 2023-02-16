@@ -1,5 +1,5 @@
 import { Game, Player, Price, Tokens } from "@prisma/client";
-import { SetStateAction, useEffect, useState } from "react";
+import { MouseEvent, SetStateAction, useEffect, useState } from "react";
 // import Card from "./Card";
 import {
   TokenEffect,
@@ -7,30 +7,29 @@ import {
   Reference,
   TokenColor,
   CardColor,
-} from "../common/types";
-import { PlayerState } from "../common/interfaces";
-import { compPrice, opPrice, opPriceWColor } from "../common/constants";
-import { api } from "../utils/api";
+} from "../../../common/types";
+import { PlayerState } from "../../../common/types";
+import {
+  compPrice,
+  defaultTokens,
+  opPrice,
+  opPriceWColor,
+} from "../../../common/constants";
+import { api } from "../../../utils/api";
+import TokenIcon from "./TokenIcon";
 
-const allTokens = {
-  white: 0,
-  blue: 0,
-  green: 0,
-  red: 0,
-  black: 0,
-  gold: 0,
-};
-interface TokenComponentProps {
+interface TokenProps {
   game: Game;
   player: Player;
   tokenColor: TokenColor;
-  reference: Reference;
   tokenEffect: TokenEffect | null;
+  reference: Reference;
   playerState: PlayerState;
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
+  colorToReplace?: CardColor;
 }
 
-export default function TokenComponent({
+export default function Token({
   game,
   player,
   tokenColor,
@@ -38,7 +37,8 @@ export default function TokenComponent({
   reference,
   playerState,
   setPlayerState,
-}: TokenComponentProps) {
+  colorToReplace,
+}: TokenProps) {
   const [disabled, setDisabled] = useState(false);
 
   const colorClass =
@@ -64,43 +64,54 @@ export default function TokenComponent({
       ? game.status !== "created"
         ? playerState.inventoryTokens[tokenColor]
         : 0
-      : playerState.tokens[tokenColor];
+      : playerState.playerTokens[tokenColor];
 
+  if (
+    tokenCount === 0 ||
+    (colorToReplace &&
+      tokenColor === "gold" &&
+      reference === "player" &&
+      playerState.priceToReplace[colorToReplace] === 0)
+  )
+    return <></>;
   return (
-    <div className="flex">
-      {tokenCount > 0 && (
-        <button
-          // className={`aspect-square w-[30px] rounded-full border-2 ${
-          //   !disabled ? colorClass : "bg-gray-400"
-          // }`}
-          disabled={disabled}
-          onClick={
-            /*async*/ () => {
-              // const updateData = {
-              //   id: "32132121",
-              //   playerId: "312313",
-              // };
-              // if (test) test(updateData);
-              // updateClientToken(props);
-              // alert("322");
-              setPlayerTokens({
-                game,
-                player,
-                tokenColor,
-                tokenEffect,
-                reference,
-                playerState,
-                setPlayerState,
-              });
-              setDisabled(true);
-              // await new Promise((resolve) => {
-              //   setTimeout(resolve, 700);
-              // });
-              setDisabled(false);
-            }
+    <div className="m-auto ">
+      <button
+        // className={`aspect-square w-[30px] rounded-full border-2 ${
+        //   !disabled ? colorClass : "bg-gray-400"
+        // }`}
+        disabled={disabled}
+        onClick={
+          /*async*/ (e: MouseEvent<HTMLButtonElement>) => {
+            // const updateData = {
+            //   id: "32132121",
+            //   playerId: "312313",
+            // };
+            // if (test) test(updateData);
+            // updateClientToken(props);
+            // alert("322");
+            e.stopPropagation();
+            setDisabled(true);
+            setPlayerTokens({
+              game,
+              player,
+              tokenColor,
+              tokenEffect,
+              reference,
+              playerState,
+              setPlayerState,
+              colorToReplace,
+            });
+            // await new Promise((resolve) => {
+            //   setTimeout(resolve, 700);
+            // });
+            setDisabled(false);
           }
-        >
-          <svg
+        }
+      >
+        <TokenIcon className={colorClass} />
+        {/* {tokenCount} */}
+        {/* <svg
             viewBox="0 0 24 24"
             fill="currentColor"
             height="40px"
@@ -109,10 +120,8 @@ export default function TokenComponent({
           >
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
-          </svg>
-        </button>
-      )}
-      <div>{tokenCount}</div>
+          </svg> */}
+      </button>
     </div>
   );
 }
@@ -125,18 +134,19 @@ function setPlayerTokens({
   reference,
   playerState,
   setPlayerState,
-}: TokenComponentProps) {
+  colorToReplace,
+}: TokenProps) {
   // ACTION: TAKE
-  if (playerState.action === "take") {
+  if (playerState.currentAction === "take") {
     // if (playerState.action === null) {
 
     // NORMAL TURN
-    if (!playerState.extraTurn) {
+    if (!playerState.hasExtraTurn) {
       if (tokenColor === "gold") {
         setMessage(setPlayerState, "Unable to take any gold tokens.");
         return;
       }
-      const sumTokenColors = Object.values(playerState.tokens).reduce(
+      const sumTokenColors = Object.values(playerState.playerTokens).reduce(
         (a, b) => a + b,
         0
       );
@@ -149,7 +159,7 @@ function setPlayerTokens({
 
         switch (sumTokenColors) {
           case 2:
-            if (playerState.tokens[tokenColor] === 1) {
+            if (playerState.playerTokens[tokenColor] === 1) {
               setMessage(
                 setPlayerState,
                 "Unable to take token of this color now."
@@ -166,7 +176,7 @@ function setPlayerTokens({
             setMessage(setPlayerState, "Take token success.");
             return;
           case 1:
-            if (playerState.tokens[tokenColor] === 1) {
+            if (playerState.playerTokens[tokenColor] === 1) {
               if (game.resource.tokens[tokenColor] < 4) {
                 setMessage(
                   setPlayerState,
@@ -250,24 +260,24 @@ function setPlayerTokens({
     return;
   }
   // ACTION: PURCHASE
-  if (playerState.action === "purchase") {
+  if (playerState.currentAction === "purchase") {
     // CLICK TO RESERVE
     if (tokenEffect === "special") {
       if (tokenColor === "gold") {
-        if (playerState.tokens.gold >= 3) {
+        if (playerState.playerTokens.gold >= 3) {
           setMessage(setPlayerState, "Unable to take more than 3 gold tokens.");
           return;
         }
         setPlayerState((prev) => ({
           ...prev,
           success: true,
-          action: "reserve",
-          resourceTokens: game ? game.resource.tokens : { ...allTokens },
+          currentAction: "reserve",
+          resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
           inventoryTokens:
             game && game.status !== "created"
               ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-              : { ...allTokens },
-          tokens: { ...allTokens, gold: 1 },
+              : { ...defaultTokens },
+          playerTokens: { ...defaultTokens, gold: 1 },
         }));
         setMessage(setPlayerState, "Reserving.");
         return;
@@ -275,18 +285,23 @@ function setPlayerTokens({
       return;
     }
 
-    if (!playerState.card || !playerState.cardColor) {
+    if (
+      !playerState.selectedCard ||
+      !playerState.selectedCardColor ||
+      (tokenColor !== "gold" && tokenColor !== playerState.selectedCardColor)
+    ) {
       return;
     }
-    if (tokenColor !== "gold" && tokenColor !== playerState.cardColor) {
-      return;
-    }
-    const { gold: x1, ...tokens } = playerState.tokens;
-    const { gold: x2, ...inventoryTokens } = playerState.inventoryTokens;
-    const replacedTokens = opPrice("increment", tokens, playerState.replaces);
+
+    const { gold: _, ...price } = playerState.playerTokens;
+    const replacedPrice = opPrice(
+      "increment",
+      price,
+      playerState.priceToReplace
+    );
     const discountedPrice = opPrice(
       "decrement",
-      playerState.card.price,
+      playerState.selectedCard.price,
       game[`inventory${game.turnIdx}` as InventoryKey].discount
     );
 
@@ -299,8 +314,8 @@ function setPlayerTokens({
         return;
       }
       if (
-        replacedTokens[playerState.cardColor] >=
-        discountedPrice[playerState.cardColor]
+        replacedPrice[playerState.selectedCardColor] >=
+        discountedPrice[playerState.selectedCardColor]
       ) {
         setMessage(setPlayerState, "exceedzz");
         return;
@@ -314,25 +329,26 @@ function setPlayerTokens({
         // TODO: VALIDATE
         setPlayerState((prev) => ({
           ...prev,
-          replaces: prev.cardColor
+          priceToReplace: prev.selectedCardColor
             ? {
-                ...prev.replaces,
-                [prev.cardColor]: prev.replaces[prev.cardColor] + 1,
+                ...prev.priceToReplace,
+                [prev.selectedCardColor]:
+                  prev.priceToReplace[prev.selectedCardColor] + 1,
               }
-            : prev.replaces,
+            : prev.priceToReplace,
         }));
         exchangeToken(
           setPlayerState,
           "gold",
           "inventory",
           "player",
-          playerState.cardColor
+          playerState.selectedCardColor
             ? compPrice(
-                replacedTokens,
+                replacedPrice,
                 opPriceWColor(
                   "decrement",
                   discountedPrice,
-                  playerState.cardColor
+                  playerState.selectedCardColor
                 )
               )
             : false
@@ -342,25 +358,13 @@ function setPlayerTokens({
 
       // BUY WITH NORMAL TOKENS
 
-      // TO REMOVE
-      if (
-        compPrice(
-          replacedTokens,
-          opPriceWColor("decrement", discountedPrice, tokenColor)
-        )
-      ) {
-        exchangeToken(setPlayerState, tokenColor, "inventory", "player", true);
-        setMessage(setPlayerState, "maybezz");
-        return;
-      }
-      //
       exchangeToken(
         setPlayerState,
         tokenColor,
         "inventory",
         "player",
         compPrice(
-          replacedTokens,
+          replacedPrice,
           opPriceWColor("decrement", discountedPrice, tokenColor)
         )
       );
@@ -369,14 +373,18 @@ function setPlayerTokens({
     }
     if (tokenEffect === "return") {
       if (tokenColor === "gold") {
+        if (colorToReplace !== playerState.selectedCardColor) {
+          return;
+        }
         setPlayerState((prev) => ({
           ...prev,
-          replaces: prev.cardColor
+          priceToReplace: prev.selectedCardColor
             ? {
-                ...prev.replaces,
-                [prev.cardColor]: prev.replaces[prev.cardColor] - 1,
+                ...prev.priceToReplace,
+                [prev.selectedCardColor]:
+                  prev.priceToReplace[prev.selectedCardColor] - 1,
               }
-            : prev.replaces,
+            : prev.priceToReplace,
         }));
         exchangeToken(setPlayerState, "gold", "player", "inventory", false);
         // exchangeToken(setPlayerState, tokenColor, "player", "inventory", false);
@@ -399,13 +407,13 @@ function setPlayerTokens({
       setPlayerState((prev) => ({
         ...prev,
         success: false,
-        action: "purchase",
-        resourceTokens: game ? game.resource.tokens : { ...allTokens },
+        currentAction: "purchase",
+        resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
         inventoryTokens:
           game && game.status !== "created"
             ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-            : { ...allTokens },
-        tokens: { ...allTokens },
+            : { ...defaultTokens },
+        playerTokens: { ...defaultTokens },
       }));
       setMessage(setPlayerState, "Purchasing.");
       return;
@@ -421,20 +429,17 @@ async function exchangeToken(
   to: Reference,
   success: boolean
 ) {
-  type name = "resourceTokens" | "inventoryTokens" | "tokens";
-  const fromName: name = from === "player" ? "tokens" : `${from}Tokens`;
-  const toName: name = to === "player" ? "tokens" : `${to}Tokens`;
   setPlayerState((prev) => ({
     ...prev,
-    [fromName]: {
-      ...prev[fromName],
-      [tokenColor]: prev[fromName][tokenColor] - 1,
-    },
-    [toName]: {
-      ...prev[toName],
-      [tokenColor]: prev[toName][tokenColor] + 1,
-    },
     success,
+    [`${from}Tokens`]: {
+      ...prev[`${from}Tokens`],
+      [tokenColor]: prev[`${from}Tokens`][tokenColor] - 1,
+    },
+    [`${to}Tokens`]: {
+      ...prev[`${to}Tokens`],
+      [tokenColor]: prev[`${to}Tokens`][tokenColor] + 1,
+    },
   }));
 }
 

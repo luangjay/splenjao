@@ -1,8 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .number {
   color: white;
   -webkit-text-stroke: 0.05vh black;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;

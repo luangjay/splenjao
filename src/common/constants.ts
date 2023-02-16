@@ -90,17 +90,21 @@ export function opPriceWColor(
   price: Price,
   cardColor: CardColor
 ): Price {
-  const result = { ...price };
-  if (op === null) return result;
-  (Object.keys(result) as CardColor[]).forEach((color) => {
-    result[color] = Math.max(
-      op === "increment"
-        ? price[color] + (color === cardColor ? 1 : 0)
-        : price[color] - (color === cardColor ? 1 : 0),
-      0
-    );
-  });
+  if (op === null) return { ...price };
+  const result = {
+    ...price,
+    [cardColor]:
+      op === "increment" ? price[cardColor] + 1 : price[cardColor] - 1,
+  };
   return result;
+}
+
+export function opColorWPrice(
+  price1: Price,
+  price2: Price,
+  cardColor: CardColor
+): number {
+  return Math.max(price1[cardColor] - price2[cardColor], 0);
 }
 
 export function compPrice(price1: Price, price2: Price): boolean {
