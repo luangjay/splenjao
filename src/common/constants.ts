@@ -137,7 +137,7 @@ export function drawCards(resource: Resource, cardId: number) {
   if (drawIdx >= 4) {
     return { cardsLv1: undefined };
   }
-  result.splice(drawIdx, 1, drawCard || -1);
+  result.splice(drawIdx, 1, drawCard ?? -1);
   return {
     [name]: result,
   };

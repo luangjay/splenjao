@@ -23,6 +23,8 @@ export default function CardComponent({
   setPlayerState,
 }: CardProps) {
   const { data: card } = api.card.findById.useQuery(cardId);
+  const playerTurn =
+    player && game && player.id === game.playerIds[game.turnIdx];
 
   if (!card || cardId === -1)
     return (
@@ -30,14 +32,14 @@ export default function CardComponent({
     );
   return (
     <div
-      className={`mx-auto rounded-lg border-2 border-gray-300 shadow-sm drop-shadow-md ${
-        cardEffect
-          ? "min-w-[120px] max-w-[240px] cursor-pointer hover:bg-gray-100"
+      className={`mx-auto rounded-lg border border-gray-300 bg-gray-100 shadow-md drop-shadow-sm ${
+        playerTurn && cardEffect
+          ? "min-w-[120px] max-w-[240px] cursor-pointer hover:bg-gray-200"
           : "min-w-[144px] max-w-[288px]"
       }`}
       // disabled={props.isTurnLoading}
       onClick={() => {
-        if (cardEffect === "purchase") {
+        if (playerTurn && cardEffect === "purchase") {
           const discountedPrice = opPrice(
             "decrement",
             card.price,
@@ -85,8 +87,8 @@ function ScoreLabel({ score, cardEffect }: ScoreProps) {
     <div
       className={
         score
-          ? `number flex aspect-square w-full items-center justify-center rounded-lg font-mono text-xl font-black leading-tight ${
-              cardEffect ? "text-xl" : "text-2xl"
+          ? `number flex aspect-square w-full items-center justify-center rounded-lg font-mono font-black leading-tight ${
+              cardEffect ? "text-2xl" : "text-3xl"
             }`
           : undefined
       }
@@ -145,8 +147,8 @@ function PriceLabel({ color, price, cardEffect }: PriceProps) {
   if (!price) return <></>;
   return (
     <div
-      className={`number flex aspect-square w-full items-center justify-center rounded-full border-2 font-mono font-black leading-tight ${colorClass} ${
-        cardEffect ? "text-xl" : "text-2xl"
+      className={`number flex aspect-square w-full items-center justify-center rounded-full border-2 border-gray-100 font-mono font-black leading-none ${colorClass} ${
+        cardEffect ? "text-1xl" : "text-2xl"
       }`}
     >
       {price}

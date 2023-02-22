@@ -1,6 +1,6 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useState } from "react";
-import { PlayerState } from "../../../common/interfaces";
+import { PlayerState } from "../../../common/types";
 import { CardEffect } from "../../../common/types";
 import CardComponent from "../cards/Card";
 
@@ -20,19 +20,19 @@ export default function CardContainer(props: CardContainerProps) {
       <div className="grid grid-cols-5 gap-2">
         {game.resource.cardsLv3.map(
           (cardId, idx) =>
-            idx < 5 && <CardComponent cardId={cardId} {...props} />
+            idx < 4 && <CardComponent cardId={cardId} {...props} />
         )}
       </div>
       <div className="grid grid-cols-5 gap-2">
         {game.resource.cardsLv2.map(
           (cardId, idx) =>
-            idx < 5 && <CardComponent cardId={cardId} {...props} />
+            idx < 4 && <CardComponent cardId={cardId} {...props} />
         )}
       </div>
       <div className="grid grid-cols-5 gap-2">
         {game.resource.cardsLv1.map(
           (cardId, idx) =>
-            idx < 5 && <CardComponent cardId={cardId} {...props} />
+            idx < 4 && <CardComponent cardId={cardId} {...props} />
         )}
       </div>
     </div>

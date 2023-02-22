@@ -66,7 +66,7 @@ export default function Game() {
     },
     {
       retry: false,
-      refetchInterval: 1000,
+      // refetchInterval: 1000,
     }
   );
   const updatePlayerLastPlayed = api.gamex.updatePlayerLastPlayed.useMutation({
@@ -129,7 +129,7 @@ export default function Game() {
   }, 5000);
 
   // GAME PROTOCOL HOOKS
-  useEffect(() => {
+  useInterval(() => {
     if (validTab && player && game?.status === "created") {
       const cd = 30 + (game.createdAt.getTime() - Date.now()) / 1000;
       setCountdown(cd);
@@ -137,7 +137,7 @@ export default function Game() {
         setPlayerState((prev) => ({ ...prev, isNextTurn: true }));
       }
     }
-  }, [game]);
+  }, 500);
 
   const [a, setA] = useState(0);
   // GAME LOGIC HOOKS
@@ -198,7 +198,7 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen justify-between border-2 border-green-400 text-xl">
+      <main className="flex min-h-screen justify-between border-2 border-green-400 bg-white text-xl text-[#111827]">
         <div className="flex w-1/5 flex-col justify-between border-2">
           <div className="flex flex-col">
             <div>{countdown}</div>

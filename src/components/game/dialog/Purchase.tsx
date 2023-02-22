@@ -19,7 +19,8 @@ export default function Purchase(props: DialogProps) {
       ? "ring-black/[.5]"
       : "";
 
-  if (!playerState.selectedCard) return <></>;
+  if (!playerState.selectedCard || playerState.currentAction !== "purchase")
+    return <></>;
 
   const { gold: goldToken, ...price } = playerState.playerTokens;
   const replacedPrice = opPrice("increment", price, playerState.priceToReplace);
@@ -29,7 +30,7 @@ export default function Purchase(props: DialogProps) {
     game[`inventory${game.turnIdx}` as InventoryKey].discount
   );
   return (
-    <div className="flex w-full flex-col gap-8 border-2 border-green-500 sm:mx-16">
+    <div className="flex w-full flex-col gap-8 sm:mx-16">
       <Card cardId={playerState.selectedCard.id} cardEffect={null} {...props} />
       <div className="flex w-full justify-center gap-4">
         {(Object.keys(playerState.selectedCard.price) as CardColor[])
@@ -41,10 +42,10 @@ export default function Purchase(props: DialogProps) {
           .map((cardColor) => (
             <>
               <button
-                className={`h-20 w-20 rounded-md border-2 shadow-sm drop-shadow-md ${
+                className={`h-20 w-20 rounded-md shadow-sm drop-shadow-md ${
                   cardColor === playerState.selectedCardColor
                     ? `ring ${colorClass}`
-                    : ""
+                    : "border-2"
                 }`}
                 onClick={() => {
                   setPlayerState((prev) => ({
@@ -117,7 +118,7 @@ export default function Purchase(props: DialogProps) {
           {...props}
         />
       </div>
-      <div className="flex w-full justify-between">
+      {/* <div className="flex w-full">
         {tokenColors.map((tokenColor) => (
           <Token
             tokenColor={tokenColor}
@@ -126,20 +127,23 @@ export default function Purchase(props: DialogProps) {
             {...props}
           />
         ))}
-      </div>
-      <div className="flex w-full justify-between">
+      </div> */}
+      <div className="flex w-full border-2">
         {tokenColors.map((tokenColor) => (
-          <Token
-            tokenColor={tokenColor}
-            tokenEffect="take"
-            reference="inventory"
-            // effect={!props.serverState?.action.endTurn ? null : "take"}
-            {...props}
-          />
+          <div className="w-1/6">
+            <Token
+              tokenColor={tokenColor}
+              tokenEffect="take"
+              reference="inventory"
+              showCount={true}
+              // effect={!props.serverState?.action.endTurn ? null : "take"}
+              {...props}
+            />
+          </div>
         ))}
       </div>
       <button
-        className="bg-cyan-400"
+        className="w-1/2 bg-cyan-400 p-2"
         onClick={() => {
           if (playerState.success)
             setPlayerState((prev) => ({

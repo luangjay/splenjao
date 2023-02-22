@@ -27,6 +27,7 @@ interface TokenProps {
   playerState: PlayerState;
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
   colorToReplace?: CardColor;
+  showCount?: boolean;
 }
 
 export default function Token({
@@ -38,6 +39,7 @@ export default function Token({
   playerState,
   setPlayerState,
   colorToReplace,
+  showCount,
 }: TokenProps) {
   const [disabled, setDisabled] = useState(false);
 
@@ -75,7 +77,7 @@ export default function Token({
   )
     return <></>;
   return (
-    <div className="m-auto ">
+    <div className="flex items-center text-sm">
       <button
         // className={`aspect-square w-[30px] rounded-full border-2 ${
         //   !disabled ? colorClass : "bg-gray-400"
@@ -110,7 +112,6 @@ export default function Token({
         }
       >
         <TokenIcon className={colorClass} />
-        {/* {tokenCount} */}
         {/* <svg
             viewBox="0 0 24 24"
             fill="currentColor"
@@ -122,6 +123,7 @@ export default function Token({
             <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
           </svg> */}
       </button>
+      {showCount && `×${tokenCount}`}
     </div>
   );
 }

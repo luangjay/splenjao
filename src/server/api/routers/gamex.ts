@@ -192,7 +192,7 @@ export const gamexRouter = createTRPCRouter({
         input.playerId !== game.playerIds[game.turnIdx]
       ) {
         return;
-      }
+      }z
       return ctx.prisma.game.update({
         where: {
           id: input.id,

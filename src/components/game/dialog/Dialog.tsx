@@ -13,6 +13,7 @@ import CardComponent from "../cards/Card";
 import Purchase from "./Purchase";
 import Token from "../tokens/Token";
 import TokenContainer from "../TokenContainer";
+import Take from "./Take";
 
 export interface DialogProps {
   game: Game;
@@ -82,11 +83,8 @@ export default function ActionDialog(props: DialogProps) {
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p> */}
                 <div className="mt-3 items-center gap-2 sm:flex">
-                  {playerState.currentAction === "take" && (
-                    <TokenContainer {...props} />
-                  )}
-                  {playerState.currentAction === "purchase" &&
-                    playerState.selectedCard && <Purchase {...props} />}
+                  <Take {...props} />
+                  <Purchase {...props} />
                   {playerState.currentAction === "reserve" &&
                     playerState.selectedCard && (
                       <>
@@ -102,7 +100,7 @@ export default function ActionDialog(props: DialogProps) {
               </div>
               <button
                 type="button"
-                className="mx-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                className="mx-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900"
                 onClick={close}
               >
                 <svg
@@ -124,110 +122,5 @@ export default function ActionDialog(props: DialogProps) {
         </div>
       </div>
     </>
-  );
-}
-
-function TakeActionContent({
-  game,
-  player,
-  playerState,
-  setPlayerState,
-}: DialogProps) {
-  return (
-    <TokenContainer
-      game={game}
-      player={player}
-      playerState={playerState}
-      setPlayerState={setPlayerState}
-    />
-  );
-}
-
-function PurchaseActionContent(props: DialogProps) {
-  const { game, player, playerState, setPlayerState } = props;
-  if (!playerState.selectedCard) return <></>;
-  return (
-    <div className="mx-16 flex w-full flex-col gap-8 border-2">
-      <CardComponent
-        cardId={playerState.selectedCard.id}
-        cardEffect={null}
-        {...props}
-      />
-      <div>
-        <Token
-          tokenColor="gold"
-          tokenEffect="special"
-          reference="resource"
-          {...props}
-        />
-      </div>
-      <div className="flex w-full justify-evenly">
-        {/* {cardColors.map((cardColor) => (
-          <button
-            className="border-2"
-            onClick={() => {
-              setPlayerState((prev) => ({
-                ...prev,
-                cardColor,
-              }));
-            }}
-          >
-            {cardColor.slice(0, 2)}
-          </button>
-        ))} */}
-        {(Object.keys(playerState.selectedCard.price) as CardColor[])
-          .filter(
-            (cardColor) =>
-              playerState.selectedCard &&
-              playerState.selectedCard.price[cardColor as CardColor] !== 0
-          )
-          .map((cardColor) => (
-            <button
-              className="border-2"
-              onClick={() => {
-                setPlayerState((prev) => ({
-                  ...prev,
-                  selectedCardColor: cardColor,
-                }));
-              }}
-            >
-              {cardColor.slice(0, 2)}
-            </button>
-          ))}
-      </div>
-      <div className="flex w-full justify-evenly">
-        {tokenColors.map((tokenColor) => (
-          <Token
-            tokenColor={tokenColor}
-            tokenEffect="return"
-            reference="player"
-            {...props}
-          />
-        ))}
-      </div>
-      <div className="flex w-full justify-evenly">
-        {tokenColors.map((tokenColor) => (
-          <Token
-            tokenColor={tokenColor}
-            tokenEffect="take"
-            reference="inventory"
-            // effect={!props.serverState?.action.endTurn ? null : "take"}
-            {...props}
-          />
-        ))}
-      </div>
-      <button
-        className="bg-cyan-400"
-        onClick={() => {
-          if (playerState.success)
-            setPlayerState((prev) => ({
-              ...prev,
-              isNextTurn: true,
-            }));
-        }}
-      >
-        NEXT TURN
-      </button>
-    </div>
   );
 }
