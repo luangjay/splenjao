@@ -1,7 +1,12 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useEffect, useState } from "react";
 import { PlayerState } from "../../../common/types";
-import { tokenColors, cardColors } from "../../../common/constants";
+import {
+  tokenColors,
+  cardColors,
+  opTokenCount,
+  defaultTokens,
+} from "../../../common/constants";
 import {
   TokenEffect,
   InventoryKey,
@@ -30,7 +35,7 @@ export default function Take(props: TakeProps) {
   //         : { ...tokens },
   //   }));
   // }, [props.game.turnIdx]);
-  const { playerState, setPlayerState } = props;
+  const { game, player, playerState, setPlayerState } = props;
 
   if (playerState.currentAction !== "take") return <></>;
   return (
@@ -93,9 +98,11 @@ export default function Take(props: TakeProps) {
     //   </button>
     // </div>
     // );
-    <div className="flex w-full flex-col gap-8 sm:mx-16">
-      <div className="flex gap-8">
-        <div>
+    <div className="flex w-full flex-col items-center justify-center gap-8 sm:mx-16">
+      <div className="flex w-full flex-col gap-1">
+        <div className="">Available tokens</div>
+        <hr className="h-[2px] w-full bg-gray-700"></hr>
+        <div className="flex h-max min-h-[40px] w-full justify-between">
           {tokenColors.map((tokenColor) => (
             <Token
               tokenColor={tokenColor}
@@ -106,7 +113,11 @@ export default function Take(props: TakeProps) {
             />
           ))}
         </div>
-        <div>
+      </div>
+      <div className="flex w-full flex-col gap-1">
+        <div className="">Action tokens</div>
+        <hr className="h-[2px] w-full bg-gray-700"></hr>
+        <div className="flex min-h-[40px] w-full justify-between">
           {tokenColors.map((tokenColor) => (
             <Token
               tokenColor={tokenColor}
@@ -117,7 +128,11 @@ export default function Take(props: TakeProps) {
             />
           ))}
         </div>
-        <div>
+      </div>
+      <div className="flex w-full flex-col gap-1">
+        <div className="">Your tokens</div>
+        <hr className="h-[2px] w-full bg-gray-700"></hr>
+        <div className="flex min-h-[40px] w-full justify-between">
           {tokenColors.map((tokenColor) => (
             <Token
               tokenColor={tokenColor}
@@ -128,30 +143,43 @@ export default function Take(props: TakeProps) {
             />
           ))}
         </div>
-        <button
-          className="bg-cyan-400"
-          onClick={() => {
-            if (playerState.success)
+      </div>
+
+      <button
+        className="w-1/4 rounded-md bg-[#28a745] py-2 font-semibold text-gray-100"
+        onClick={() => {
+          if (playerState.success) {
+            const tokens = !playerState.hasExtraTurn
+              ? opTokenCount(
+                  "increment",
+                  game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                  playerState.playerTokens
+                )
+              : playerState.inventoryTokens;
+            const sumTokenColors = Object.values(tokens).reduce(
+              (a, b) => a + b,
+              0
+            );
+            if (sumTokenColors > 10) {
               setPlayerState((prev) => ({
                 ...prev,
-                isNextTurn: true,
+                success: false,
+                hasExtraTurn: true,
+                message: "Return tokens to 10.",
+                playerTokens: defaultTokens,
+                inventoryTokens: tokens,
               }));
-          }}
-        >
-          NEXT TURN
-        </button>
-        <button
-          className="bg-cyan-400"
-          onClick={() => {
+              return;
+            }
             setPlayerState((prev) => ({
               ...prev,
-              hasExtraTurn: !prev.hasExtraTurn,
+              isNextTurn: true,
             }));
-          }}
-        >
-          RETURN
-        </button>
-      </div>
+          }
+        }}
+      >
+        TAKE
+      </button>
     </div>
   );
 }

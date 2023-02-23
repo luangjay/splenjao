@@ -1,4 +1,4 @@
-import { Card, Game, Player } from "@prisma/client";
+import { Game, Player } from "@prisma/client";
 import { SetStateAction } from "react";
 import {
   defaultPrice,
@@ -9,9 +9,9 @@ import {
 import { PlayerState } from "../../../common/types";
 import { CardColor, InventoryKey } from "../../../common/types";
 import { api } from "../../../utils/api";
-import CardComponent from "../cards/Card";
+import Card from "../cards/Card";
 import Purchase from "./Purchase";
-import Token from "../tokens/Token";
+import Claim from "./Claim";
 import TokenContainer from "../TokenContainer";
 import Take from "./Take";
 
@@ -82,13 +82,14 @@ export default function ActionDialog(props: DialogProps) {
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p> */}
-                <div className="mt-3 items-center gap-2 sm:flex">
+                <div className="mt-3 h-[500px] items-center gap-2 sm:flex">
                   <Take {...props} />
                   <Purchase {...props} />
+                  <Claim {...props} />
                   {playerState.currentAction === "reserve" &&
                     playerState.selectedCard && (
                       <>
-                        <CardComponent
+                        <Card
                           cardId={playerState.selectedCard.id}
                           cardEffect={null}
                           {...props}

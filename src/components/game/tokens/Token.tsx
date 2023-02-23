@@ -16,7 +16,25 @@ import {
   opPriceWColor,
 } from "../../../common/constants";
 import { api } from "../../../utils/api";
-import TokenIcon from "./TokenIcon";
+
+interface TokenIconProps {
+  className?: string | undefined;
+}
+
+function TokenIcon({ className }: TokenIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      height="40px"
+      width="40px"
+      className={`drop-shadow-lg ${className || "fill-slate-50"}`}
+    >
+      <path fill="none" d="M0 0h24v24H0z" />
+      <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
+    </svg>
+  );
+}
 
 interface TokenProps {
   game: Game;
@@ -45,17 +63,19 @@ export default function Token({
 
   const colorClass =
     tokenColor === "white"
-      ? "fill-white hover:fill-gray-100"
+      ? `fill-white ${tokenEffect && "cursor-pointer hover:fill-gray-100"}`
       : tokenColor === "blue"
-      ? "fill-blue-500 hover:fill-blue-600"
+      ? `fill-blue-500 ${tokenEffect && "cursor-pointer hover:fill-blue-600"}`
       : tokenColor === "green"
-      ? "fill-green-500 hover:fill-green-600"
+      ? `fill-green-500 ${tokenEffect && "cursor-pointer hover:fill-green-600"}`
       : tokenColor === "red"
-      ? "fill-red-500 hover:fill-red-600"
+      ? `fill-red-500 ${tokenEffect && "cursor-pointer hover:fill-red-600"}`
       : tokenColor === "black"
-      ? "fill-gray-800 hover:fill-black"
+      ? `fill-gray-800 ${tokenEffect && "cursor-pointer hover:fill-black"}`
       : tokenColor === "gold"
-      ? "fill-yellow-300 hover:fill-yellow-400"
+      ? `fill-yellow-300 ${
+          tokenEffect && "cursor-pointer hover:fill-yellow-400"
+        }`
       : "";
 
   const tokenCount =
@@ -75,16 +95,17 @@ export default function Token({
       reference === "player" &&
       playerState.priceToReplace[colorToReplace] === 0)
   )
-    return <></>;
+    return <div className="h-[40px] w-[40px]"></div>;
   return (
-    <div className="flex items-center text-sm">
-      <button
-        // className={`aspect-square w-[30px] rounded-full border-2 ${
-        //   !disabled ? colorClass : "bg-gray-400"
-        // }`}
-        disabled={disabled}
+    <div
+      className={`flex items-center text-sm ${
+        !showCount ? "h-[40px] w-[40px]" : "h-[40px] w-[60px]"
+      }`}
+    >
+      <div
+        className={`${tokenEffect && "cursor-pointer"}`}
         onClick={
-          /*async*/ (e: MouseEvent<HTMLButtonElement>) => {
+          /*async*/ (e: MouseEvent<HTMLDivElement>) => {
             // const updateData = {
             //   id: "32132121",
             //   playerId: "312313",
@@ -92,6 +113,7 @@ export default function Token({
             // if (test) test(updateData);
             // updateClientToken(props);
             // alert("322");
+            if (!tokenEffect) return;
             e.stopPropagation();
             setDisabled(true);
             setPlayerTokens({
@@ -122,7 +144,7 @@ export default function Token({
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
           </svg> */}
-      </button>
+      </div>
       {showCount && `×${tokenCount}`}
     </div>
   );

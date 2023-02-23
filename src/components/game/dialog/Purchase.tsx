@@ -31,84 +31,94 @@ export default function Purchase(props: DialogProps) {
   );
   return (
     <div className="flex w-full flex-col gap-8 sm:mx-16">
-      <Card cardId={playerState.selectedCard.id} cardEffect={null} {...props} />
-      <div className="flex w-full justify-center gap-4">
-        {(Object.keys(playerState.selectedCard.price) as CardColor[])
-          .filter(
-            (cardColor) =>
-              playerState.selectedCard &&
-              playerState.selectedCard.price[cardColor as CardColor] !== 0
-          )
-          .map((cardColor) => (
-            <>
-              <button
-                className={`h-20 w-20 rounded-md shadow-sm drop-shadow-md ${
-                  cardColor === playerState.selectedCardColor
-                    ? `ring ${colorClass}`
-                    : "border-2"
-                }`}
-                onClick={() => {
-                  setPlayerState((prev) => ({
-                    ...prev,
-                    selectedCardColor:
-                      cardColor === playerState.selectedCardColor
-                        ? null
-                        : cardColor,
-                  }));
-                }}
-              >
-                {playerState.selectedCard && (
-                  <>
-                    <div
-                      className={`absolute ${
-                        playerState.priceToReplace[cardColor] !== 0
-                          ? "top-6 left-4"
-                          : "top-5 left-5"
-                      }`}
-                    >
-                      <Token
-                        tokenColor={cardColor}
-                        tokenEffect="return"
-                        reference="player"
-                        {...props}
-                      />
-                    </div>
-                    <div
-                      className={`absolute -z-10 ${
-                        playerState.playerTokens[cardColor] !== 0
-                          ? "right-2 top-2"
-                          : "top-5 left-5"
-                      }`}
-                    >
-                      <Token
-                        tokenColor="gold"
-                        tokenEffect="return"
-                        reference="player"
-                        colorToReplace={cardColor}
-                        {...props}
-                      />
-                    </div>
-                    <div className="absolute right-0.5 bottom-0.5">
-                      <span className="text-md">
-                        {replacedPrice[cardColor]}
-                      </span>
-                      <span className="text-sm">
-                        /
-                        {
-                          opPrice(
-                            "decrement",
-                            playerState.selectedCard.price,
-                            game[`inventory${game.turnIdx}` as InventoryKey]
-                              .discount
-                          )[cardColor]
-                        }
-                      </span>
-                    </div>
-                  </>
-                )}
-              </button>
-            </>
-          ))}
+      <div className="mx-auto">
+        <Card
+          cardId={playerState.selectedCard.id}
+          cardEffect={null}
+          {...props}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="text-[16px] leading-none">Required tokens</div>
+        <hr className="h-[2px] w-full rounded-full bg-gray-700"></hr>
+        <div className="flex w-full justify-center gap-4">
+          {(Object.keys(playerState.selectedCard.price) as CardColor[])
+            .filter(
+              (cardColor) =>
+                playerState.selectedCard &&
+                playerState.selectedCard.price[cardColor as CardColor] !== 0
+            )
+            .map((cardColor) => (
+              <>
+                <button
+                  className={`h-20 w-20 rounded-md shadow-sm drop-shadow-md ${
+                    cardColor === playerState.selectedCardColor
+                      ? `ring ${colorClass}`
+                      : "border-2"
+                  }`}
+                  onClick={() => {
+                    setPlayerState((prev) => ({
+                      ...prev,
+                      selectedCardColor:
+                        cardColor === playerState.selectedCardColor
+                          ? null
+                          : cardColor,
+                    }));
+                  }}
+                >
+                  {playerState.selectedCard && (
+                    <>
+                      <div
+                        className={`absolute ${
+                          playerState.priceToReplace[cardColor] !== 0
+                            ? "top-6 left-4"
+                            : "top-5 left-5"
+                        }`}
+                      >
+                        <Token
+                          tokenColor={cardColor}
+                          tokenEffect="return"
+                          reference="player"
+                          {...props}
+                        />
+                      </div>
+                      <div
+                        className={`absolute -z-10 ${
+                          playerState.playerTokens[cardColor] !== 0
+                            ? "right-2 top-2"
+                            : "top-5 left-5"
+                        }`}
+                      >
+                        <Token
+                          tokenColor="gold"
+                          tokenEffect="return"
+                          reference="player"
+                          colorToReplace={cardColor}
+                          {...props}
+                        />
+                      </div>
+                      <div className="absolute right-0.5 bottom-0.5">
+                        <span className="text-md">
+                          {replacedPrice[cardColor]}
+                        </span>
+                        <span className="text-sm">
+                          /
+                          {
+                            opPrice(
+                              "decrement",
+                              playerState.selectedCard.price,
+                              game[`inventory${game.turnIdx}` as InventoryKey]
+                                .discount
+                            )[cardColor]
+                          }
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </button>
+              </>
+            ))}
+        </div>
       </div>
       <div>
         <Token

@@ -20,7 +20,7 @@ export default function Lobby() {
   // });
 
   const utils = api.useContext();
-  const lobby = api.lobbyx.findAndAuthorize.useQuery(
+  const lobby = api.lobby.findAndAuthorize.useQuery(
     {
       id,
       playerId: sessionData?.user.id,
@@ -29,18 +29,18 @@ export default function Lobby() {
       retry: false,
     }
   );
-  const player = api.lobbyx.findPlayer.useQuery(sessionData?.user.id);
-  const createGame = api.lobbyx.createGame.useMutation({
+  const player = api.lobby.findPlayer.useQuery(sessionData?.user.id);
+  const createGame = api.lobby.createGame.useMutation({
     async onSettled() {
-      utils.lobbyx.findPlayer.invalidate();
+      utils.lobby.findPlayer.invalidate();
     },
   });
-  const updatePlayers = api.lobbyx.updatePlayers.useMutation({
+  const updatePlayers = api.lobby.updatePlayers.useMutation({
     async onSettled() {
-      utils.lobbyx.findPlayer.invalidate();
+      utils.lobby.findPlayer.invalidate();
     },
   });
-  const clearThisLobby = api.lobbyx.clearThisLobby.useMutation();
+  const clearThisLobby = api.lobby.clearThisLobby.useMutation();
 
   useEffect(() => {
     if (player.data?.games) {
@@ -98,17 +98,3 @@ export default function Lobby() {
     </>
   );
 }
-
-const shuffle = (begin: number, end: number) => {
-  return shuffleArray(Array.from({ length: end - begin }, (_, i) => begin + i));
-};
-
-// DON'T TOUCH: Durstenfeld shuffle
-const shuffleArray = (array: number[]) => {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    let j = (Math.random() * (i + 1)) | 0;
-    [result[i], result[j]] = [result[j] as number, result[i] as number];
-  }
-  return result;
-};

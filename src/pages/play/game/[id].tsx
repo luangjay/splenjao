@@ -4,8 +4,8 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../../utils/api";
-import CardComponent from "../../../components/game/cards/Card";
-import CardContainer from "../../../components/game/deck/Deck";
+import Card from "../../../components/game/cards/Card";
+import Deck from "../../../components/game/deck/Deck";
 import Token from "../../../components/game/tokens/Token";
 import { useRouter } from "next/router";
 import Error from "next/error";
@@ -49,7 +49,7 @@ export default function Game() {
   const utils = api.useContext();
 
   // REACT QUERY HOOKS
-  const { data: player } = api.gamex.findPlayerById.useQuery(
+  const { data: player } = api.game.findPlayerById.useQuery(
     session.data?.user.id,
     {
       refetchInterval: 8000,
@@ -59,7 +59,7 @@ export default function Game() {
     data: game,
     error: gameError,
     refetch: gameRefetch,
-  } = api.gamex.findAndAuthorize.useQuery(
+  } = api.game.findAndAuthorize.useQuery(
     {
       id,
       playerId: session.data?.user.id,
@@ -69,14 +69,14 @@ export default function Game() {
       // refetchInterval: 1000,
     }
   );
-  const updatePlayerLastPlayed = api.gamex.updatePlayerLastPlayed.useMutation({
+  const updatePlayerLastPlayed = api.game.updatePlayerLastPlayed.useMutation({
     async onSettled() {
-      utils.gamex.findAndAuthorize.invalidate();
+      utils.game.findAndAuthorize.invalidate();
     },
   });
-  const updateNextTurn = api.gamex.updateNextTurn.useMutation({
+  const updateNextTurn = api.game.updateNextTurn.useMutation({
     async onSettled() {
-      utils.gamex.findAndAuthorize.invalidate();
+      utils.game.findAndAuthorize.invalidate();
     },
   });
 
@@ -198,8 +198,8 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen justify-between border-2 border-green-400 bg-white text-xl text-[#111827]">
-        <div className="flex w-1/5 flex-col justify-between border-2">
+      <main className="flex min-h-screen justify-between bg-white text-xl text-[#111827]">
+        <div className="flex w-1/5 flex-grow flex-col justify-between">
           <div className="flex flex-col">
             <div>{countdown}</div>
             <div>{game.turnIdx}</div>
@@ -211,34 +211,21 @@ export default function Game() {
             setPlayerState={setPlayerState}
           /> */}
         </div>
-        <div className="grid place-content-center border-2 border-red-500">
+        <div className="grid place-content-center">
           <div className="w-fit border-2">
-            <CardContainer
+            <Deck
               game={game}
               player={player}
-              cardEffect="purchase"
               playerState={playerState}
               setPlayerState={setPlayerState}
             />
           </div>
         </div>
-        <div className="flex w-1/5 flex-col border-2">
-          {!playerState.isNextTurn && playerTurn && (
-            <div>
-              <p>It's your turn</p>
-              <button
-                onClick={() =>
-                  setPlayerState((prev) => ({ ...prev, isNextTurn: true }))
-                }
-              >
-                Next turn
-              </button>
-            </div>
-          )}
-          <div>{playerState.message}</div>
+        <div className="flex w-1/5 flex-grow flex-col">
+          {/* <div>{playerState.message}</div>
           <div className="w-[50px]">{JSON.stringify(game.status)}</div>
           <div className="w-[50px]">{JSON.stringify(player.id)}</div>
-          <div className="w-[50px]">{JSON.stringify(playerState)}</div>
+          <div className="w-[50px]">{JSON.stringify(playerState)}</div> */}
           {/* DUMMY begin */}
           <button
             className="border-2"
@@ -262,7 +249,7 @@ export default function Game() {
           >
             Reserve
           </button>
-          <>Turn count: {a}</>
+          <div className="font-nova-flat">Turn count: {a}</div>
           {/* DUMMY end */}
         </div>
         {/* DIALOG */}
