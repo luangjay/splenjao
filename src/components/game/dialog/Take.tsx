@@ -131,7 +131,7 @@ export default function Take(props: TakeProps) {
       </div>
       <div className="flex w-full flex-col gap-1">
         <div className="">Your tokens</div>
-        <hr className="h-[2px] w-full bg-gray-700"></hr>
+        <hr className="h-[0.5px] w-full bg-gray-700"></hr>
         <div className="flex min-h-[40px] w-full justify-between">
           {tokenColors.map((tokenColor) => (
             <Token

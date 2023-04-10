@@ -12,13 +12,13 @@ export default function Tile({ tileId }: TileProps) {
     return <div className="mx-auto aspect-square rounded-lg"></div>;
   return (
     <div
-      className="relative mx-auto aspect-[0.95] w-full rounded-lg border border-gray-300 bg-gray-100 shadow-md drop-shadow-sm"
+      className="relative mx-auto aspect-square w-full rounded-lg border border-gray-300 bg-[url('/ricky.jpg')] bg-cover shadow-md drop-shadow-sm hover:bg-gray-200"
       // disabled={props.isTurnLoading}
     >
-      <div className="flex h-full flex-row justify-between p-[4%]">
-        <div className="flex h-full w-[30%] flex-col justify-between">
+      <div className="flex h-full flex-row">
+        <div className="z-10 flex h-full w-[33%] flex-col justify-between bg-white/[.5] p-[4px]">
           <ScoreLabel score={tile.score} />
-          <div className="">
+          <div className="flex flex-col gap-[1.5px]">
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(
               (color) => (
                 <PriceLabel color={color} price={tile.price[color]} />
@@ -40,7 +40,7 @@ function ScoreLabel({ score }: ScoreProps) {
     <div
       className={
         score
-          ? "number flex aspect-square w-full items-center justify-center rounded-lg font-mono text-xl font-black leading-tight"
+          ? "number flex aspect-square w-full items-center justify-center rounded-lg font-mono text-lg font-black leading-tight"
           : undefined
       }
     >
@@ -71,7 +71,7 @@ function PriceLabel({ color, price }: PriceProps) {
   if (!price) return <></>;
   return (
     <div
-      className={`number mx-auto flex aspect-square w-5/6 items-center justify-center rounded-md border-2 border-gray-100  font-mono text-lg font-black leading-none ${colorClass}`}
+      className={`number-sm mx-auto flex aspect-square w-[80%] items-center justify-center rounded-md font-mono text-[16px] font-black leading-none drop-shadow-md ${colorClass}`}
     >
       {price}
     </div>

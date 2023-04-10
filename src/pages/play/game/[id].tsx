@@ -66,6 +66,7 @@ export default function Game() {
     },
     {
       retry: false,
+      // notifyOnChangeProps: ["data"],
       // refetchInterval: 1000,
     }
   );
@@ -131,7 +132,7 @@ export default function Game() {
   // GAME PROTOCOL HOOKS
   useInterval(() => {
     if (validTab && player && game?.status === "created") {
-      const cd = 30 + (game.createdAt.getTime() - Date.now()) / 1000;
+      const cd = 15 + (game.createdAt.getTime() - Date.now()) / 1000;
       setCountdown(cd);
       if (playerHost && cd <= 0) {
         setPlayerState((prev) => ({ ...prev, isNextTurn: true }));
@@ -198,8 +199,9 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen justify-between bg-white text-xl text-[#111827]">
-        <div className="flex w-1/5 flex-grow flex-col justify-between">
+      {/* <main className="flex min-h-screen justify-between bg-[url('/background.jpg')] bg-cover text-xl text-[#111827]"> */}
+      <main className="flex min-h-screen justify-between overflow-scroll bg-gray-50 text-xl text-[#111827]">
+        <div className="flex min-w-[288px] flex-col justify-between border">
           <div className="flex flex-col">
             <div>{countdown}</div>
             <div>{game.turnIdx}</div>
@@ -211,8 +213,8 @@ export default function Game() {
             setPlayerState={setPlayerState}
           /> */}
         </div>
-        <div className="grid place-content-center">
-          <div className="w-fit border-2">
+        <div className="grid flex-grow place-content-center border">
+          <div className="w-fit">
             <Deck
               game={game}
               player={player}
@@ -221,7 +223,7 @@ export default function Game() {
             />
           </div>
         </div>
-        <div className="flex w-1/5 flex-grow flex-col">
+        <div className="flex min-w-[288px] flex-col border">
           {/* <div>{playerState.message}</div>
           <div className="w-[50px]">{JSON.stringify(game.status)}</div>
           <div className="w-[50px]">{JSON.stringify(player.id)}</div>

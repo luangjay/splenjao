@@ -47,9 +47,9 @@ export default function Card({
     return <div className="min-w-[100px] max-w-[200px] rounded-lg"></div>;
   return (
     <div
-      className={`aspect-[0.65] rounded-lg border border-gray-300 bg-gray-100 shadow-md drop-shadow-sm ${
-        playerTurn && cardEffect && "cursor-pointer hover:bg-gray-200"
-      } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[120px] max-w-[240px]"}`}
+      className={`aspect-[0.65] rounded-lg border bg-white drop-shadow ${
+        playerTurn && cardEffect && "hover:bg-gray-100"
+      } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
       // disabled={props.isTurnLoading}
       onClick={() => {
         if (
@@ -70,10 +70,14 @@ export default function Card({
         }
       }}
     >
-      <div className="flex h-full flex-row justify-between p-[4%]">
-        <div className="flex h-full w-[30%] flex-col justify-between">
+      <div className="flex h-full flex-row justify-between p-[6%]">
+        <div className="flex h-full w-[30%] flex-col justify-between px-[1%]">
           <ScoreLabel score={card.score} cardEffect={cardEffect} />
-          <div>
+          <div
+            className={`flex flex-col ${
+              cardEffect ? "gap-[2px]" : "gap-[3px]"
+            }`}
+          >
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(
               (color) => (
                 <PriceLabel
@@ -86,7 +90,7 @@ export default function Card({
           </div>
         </div>
         <div className="flex w-[30%] flex-col justify-between">
-          <ColorLabel color={card.color as CardColor} />
+          <ColorLabel color={card.color as CardColor} cardEffect={cardEffect} />
         </div>
       </div>
     </div>
@@ -130,7 +134,7 @@ function ScoreLabel({ score, cardEffect }: ScoreProps) {
       className={
         score
           ? `number flex aspect-square w-full items-center justify-center rounded-md font-mono font-black leading-tight ${
-              cardEffect ? "text-xl" : "text-2xl"
+              cardEffect ? "text-xl" : "text-3xl"
             }`
           : undefined
       }
@@ -142,26 +146,29 @@ function ScoreLabel({ score, cardEffect }: ScoreProps) {
 
 interface ColorProps {
   color: CardColor | undefined;
+  cardEffect: CardEffect | null;
 }
 
-function ColorLabel({ color }: ColorProps) {
+function ColorLabel({ color, cardEffect }: ColorProps) {
   const colorClass =
     color === "white"
-      ? "bg-gray-100"
+      ? "border-white bg-gradient-to-bl from-white to-gray-100"
       : color === "blue"
-      ? "bg-blue-600"
+      ? "border-blue-500 bg-gradient-to-bl from-blue-500 to-blue-400"
       : color === "green"
-      ? "bg-green-600"
+      ? "border-green-500 bg-gradient-to-bl from-green-500 to-green-400"
       : color === "red"
-      ? "bg-red-600"
+      ? "border-red-500 bg-gradient-to-bl from-red-500 to-red-400"
       : color === "black"
-      ? "bg-black"
+      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-700"
       : "";
 
   if (!colorClass) return <></>;
   return (
     <div
-      className={`${colorClass} flex aspect-square w-full items-center justify-center rounded-md drop-shadow-lg`}
+      className={`${colorClass} ${
+        cardEffect ? "rounded-md" : "rounded-[9px]"
+      } flex aspect-square w-full items-center justify-center drop-shadow-md`}
     ></div>
   );
 }
@@ -183,14 +190,14 @@ function PriceLabel({ color, price, cardEffect }: PriceProps) {
       : color === "red"
       ? "bg-red-500"
       : color === "black"
-      ? "bg-gray-800"
+      ? "bg-gray-700"
       : "";
 
   if (!price) return <></>;
   return (
     <div
-      className={`number flex aspect-square w-full items-center justify-center rounded-full border-2 border-gray-100 font-mono font-black leading-none ${colorClass} ${
-        cardEffect ? "text-lg" : "text-xl"
+      className={`number flex aspect-square w-full items-center justify-center rounded-full font-mono font-black leading-none drop-shadow-md ${colorClass} ${
+        cardEffect ? "text-lg" : "text-[27px]"
       }`}
     >
       {price}

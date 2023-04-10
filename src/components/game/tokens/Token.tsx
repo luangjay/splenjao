@@ -98,8 +98,8 @@ export default function Token({
     return <div className="h-[40px] w-[40px]"></div>;
   return (
     <div
-      className={`flex items-center text-sm ${
-        !showCount ? "h-[40px] w-[40px]" : "h-[40px] w-[60px]"
+      className={`flex h-[40px] items-center text-base ${
+        !showCount ? "w-[40px]" : "w-[64px]"
       }`}
     >
       <div
