@@ -67,6 +67,20 @@ export function opTokenCount(
   return result;
 }
 
+export function opTokenCountWColor(
+  op: "increment" | "decrement" | null,
+  tokens: Tokens,
+  tokenColor: TokenColor
+): Tokens {
+  if (op === null) return { ...tokens };
+  const result = {
+    ...tokens,
+    [tokenColor]:
+      op === "increment" ? tokens[tokenColor] + 1 : tokens[tokenColor] - 1,
+  };
+  return result;
+}
+
 export function opPrice(
   op: "increment" | "decrement" | null,
   price1: Price,

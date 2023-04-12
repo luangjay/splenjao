@@ -86,7 +86,9 @@ export default function Deck(props: DeckProps) {
         <Card cardId={101} {...props} /> */}
         {playerIdx !== -1 &&
           game[`inventory${playerIdx}` as InventoryKey].reserves.map(
-            (cardId) => <Card cardId={cardId} cardEffect="claim" {...props} />
+            (cardId) => (
+              <Card cardId={cardId} cardEffect="purchase" {...props} />
+            )
           )}
       </div>
     </div>

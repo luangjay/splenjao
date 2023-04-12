@@ -32,10 +32,10 @@
 
 .number {
   color: white;
-  -webkit-text-stroke: 0.12vh black;
+  -webkit-text-stroke: 0.12vh #111827;
 }
 
 .number-sm {
   color: white;
-  -webkit-text-stroke: 0.09vh black;
+  -webkit-text-stroke: 0.09vh #111827;
 }

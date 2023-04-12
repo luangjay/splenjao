@@ -52,10 +52,7 @@ export default function Card({
       } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
       // disabled={props.isTurnLoading}
       onClick={() => {
-        if (
-          playerTurn &&
-          (cardEffect === "purchase" || cardEffect === "claim")
-        ) {
+        if (playerTurn && cardEffect === "purchase") {
           const discountedPrice = opPrice(
             "decrement",
             card.price,

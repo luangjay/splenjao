@@ -8,6 +8,7 @@ import {
   opPriceWColor,
   drawCards,
   takeTile,
+  opTokenCountWColor,
 } from "../../../common/constants";
 
 const addSeconds = (date: Date, seconds: number) => {
@@ -233,10 +234,17 @@ export const gameRouter = createTRPCRouter({
                   input.playerState.selectedCard
                 ? {
                     tokens: opTokenCount(
-                      input.playerState.currentAction === "purchase"
+                      input.playerState.currentAction === "purchase" ||
+                        input.playerState.hasExtraTurn
                         ? "increment"
                         : "decrement",
-                      game.resource.tokens,
+                      input.playerState.currentAction === "reserve"
+                        ? opTokenCountWColor(
+                            "decrement",
+                            game.resource.tokens,
+                            "gold"
+                          )
+                        : game.resource.tokens,
                       input.playerState.playerTokens
                     ),
                     tiles:
@@ -297,11 +305,14 @@ export const gameRouter = createTRPCRouter({
                   }
                 : input.playerState.currentAction === "reserve"
                 ? {
-                    tokens: opTokenCount(
-                      "increment",
-                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      input.playerState.playerTokens
-                    ),
+                    tokens: !input.playerState.hasExtraTurn
+                      ? opTokenCountWColor(
+                          "increment",
+                          game[`inventory${game.turnIdx}` as InventoryKey]
+                            .tokens,
+                          "gold"
+                        )
+                      : input.playerState.inventoryTokens,
                     reserves: input.playerState.selectedCard
                       ? {
                           push: input.playerState.selectedCard.id,

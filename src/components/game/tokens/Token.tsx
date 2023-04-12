@@ -95,7 +95,9 @@ export default function Token({
       reference === "player" &&
       playerState.priceToReplace[colorToReplace] === 0)
   )
-    return <div className="h-[40px] w-[40px]"></div>;
+    return (
+      <div className={!showCount ? "-z-50 w-[40px]" : "-z-50 w-[64px]"}></div>
+    );
   return (
     <div
       className={`flex h-[40px] items-center text-base ${
@@ -134,16 +136,6 @@ export default function Token({
         }
       >
         <TokenIcon className={colorClass} />
-        {/* <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            height="40px"
-            width="40px"
-            className={`drop-shadow-lg ${colorClass}`}
-          >
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
-          </svg> */}
       </div>
       {showCount && `×${tokenCount}`}
     </div>
@@ -426,23 +418,39 @@ function setPlayerTokens({
     return;
   }
   // ACTION: RESERVE
-  if (tokenEffect === "special") {
-    if (tokenColor === "gold") {
-      setPlayerState((prev) => ({
-        ...prev,
-        success: false,
-        currentAction: "purchase",
-        resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
-        inventoryTokens:
-          game && game.status !== "created"
-            ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-            : { ...defaultTokens },
-        playerTokens: { ...defaultTokens },
-      }));
-      setMessage(setPlayerState, "Purchasing.");
+  if (playerState.currentAction === "reserve") {
+    if (playerState.hasExtraTurn) {
+      const sumTokenColors = Object.values(playerState.inventoryTokens).reduce(
+        (a, b) => a + b,
+        0
+      );
+      if (tokenEffect === "take") {
+        if (playerState.success) {
+          setMessage(setPlayerState, "Unable to return any more tokens.");
+          return;
+        }
+        if (sumTokenColors === 11) {
+          exchangeToken(
+            setPlayerState,
+            tokenColor,
+            "inventory",
+            "player",
+            true
+          );
+          setMessage(setPlayerState, "Return token success.");
+          return;
+        }
+        exchangeToken(setPlayerState, tokenColor, "inventory", "player", false);
+        setMessage(setPlayerState, "Return token success.");
+        return;
+      }
+      if (tokenEffect === "return") {
+        exchangeToken(setPlayerState, tokenColor, "player", "inventory", false);
+        setMessage(setPlayerState, "Take token success.");
+        return;
+      }
       return;
     }
-    return;
   }
 }
 
