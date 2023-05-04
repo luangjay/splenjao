@@ -1,8 +1,8 @@
-import Card from "../cards/Card";
-import Token from "../tokens/Token";
+import Card from "./Card";
+import Token from "./Token";
 import { DialogProps } from "./Dialog";
-import { CardColor, InventoryKey } from "../../../common/types";
-import { opPrice, opColorWPrice, tokenColors } from "../../../common/constants";
+import { CardColor, InventoryKey } from "../common/types";
+import { opPrice, opColorWPrice, tokenColors } from "../common/constants";
 
 export default function Claim(props: DialogProps) {
   const { game, player, playerState, setPlayerState } = props;

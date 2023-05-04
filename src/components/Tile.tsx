@@ -1,5 +1,5 @@
-import { CardColor } from "../../../common/types";
-import { api } from "../../../utils/api";
+import { CardColor } from "../common/types";
+import { api } from "../utils/api";
 
 interface TileProps {
   tileId: number;
@@ -40,7 +40,7 @@ function ScoreLabel({ score }: ScoreProps) {
     <div
       className={
         score
-          ? "number flex aspect-square w-full items-center justify-center rounded-lg font-mono text-lg font-black leading-tight"
+          ? "number flex aspect-square w-full items-center justify-center rounded-lg text-lg font-black leading-tight"
           : undefined
       }
     >
@@ -71,7 +71,7 @@ function PriceLabel({ color, price }: PriceProps) {
   if (!price) return <></>;
   return (
     <div
-      className={`number-sm mx-auto flex aspect-square w-[80%] items-center justify-center rounded-md font-mono text-[16px] font-black leading-none drop-shadow-md ${colorClass}`}
+      className={`number-sm mx-auto flex aspect-square w-[80%] items-center justify-center rounded-md text-[16px] font-black leading-none drop-shadow-md ${colorClass}`}
     >
       {price}
     </div>

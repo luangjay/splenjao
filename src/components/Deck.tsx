@@ -1,11 +1,11 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useState } from "react";
-import { tokenColors } from "../../../common/constants";
-import { InventoryKey, PlayerState } from "../../../common/types";
-import { CardEffect } from "../../../common/types";
-import Card from "../cards/Card";
-import Tile from "../tiles/Tile";
-import Token from "../tokens/Token";
+import { tokenColors } from "../common/constants";
+import { InventoryKey, PlayerState } from "../common/types";
+import { CardEffect } from "../common/types";
+import Card from "./Card";
+import Tile from "./Tile";
+import Token from "./Token";
 
 interface DeckProps {
   game: Game;

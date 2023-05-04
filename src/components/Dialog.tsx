@@ -5,14 +5,16 @@ import {
   defaultTokens,
   cardColors,
   tokenColors,
-} from "../../../common/constants";
-import { PlayerState } from "../../../common/types";
-import { CardColor, InventoryKey, Action } from "../../../common/types";
-import { api } from "../../../utils/api";
-import Card from "../cards/Card";
+  compPrice,
+  opPrice,
+} from "../common/constants";
+import { PlayerState } from "../common/types";
+import { CardColor, InventoryKey, Action } from "../common/types";
+import { api } from "../utils/api";
+import Card from "./Card";
 import Content from "./Content";
 import Claim from "./Claim";
-import TokenContainer from "../TokenContainer";
+import TokenContainer from "./TokenContainer";
 import Take from "./Take";
 
 export interface DialogProps {
@@ -52,8 +54,19 @@ export default function ActionDialog(props: DialogProps) {
       setPlayerState((prev) => ({
         ...prev,
         success:
-          action === "reserve" &&
-          game[`inventory${game.turnIdx}` as InventoryKey].reserves.length < 3,
+          action === "reserve"
+            ? game[`inventory${game.turnIdx}` as InventoryKey].reserves.length <
+              3
+            : playerState.selectedCard && action === "purchase"
+            ? compPrice(
+                playerState.playerTokens,
+                opPrice(
+                  "decrement",
+                  playerState.selectedCard.price,
+                  game[`inventory${game.turnIdx}` as InventoryKey].discount
+                )
+              )
+            : false,
         currentAction: action,
         resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
         inventoryTokens:
@@ -91,7 +104,7 @@ export default function ActionDialog(props: DialogProps) {
         onClick={close}
       ></div>
       <div className="flex min-h-screen items-center">
-        <div className="relative mx-auto flex h-[660px] w-[1082px] items-center justify-center rounded-md bg-gray-50 px-16 py-8 shadow-lg">
+        <div className="relative mx-auto flex h-[660px] w-[1082px] items-center justify-center rounded-md bg-gray-100 px-16 py-8 shadow-lg">
           <div className="items-centerzz flex h-full w-full justify-center gap-12">
             <div className="w-[160px]">
               <SideTab />

@@ -157,10 +157,19 @@ export function drawCards(resource: Resource, cardId: number) {
   };
 }
 
-export function takeTile(tiles: number[], tileId: number) {
-  const result = [...tiles];
-  const tileIdx = result.indexOf(tileId);
-  result.splice(tileIdx, 1, -1);
+// export function takeTile(tiles: number[], tileId: number) {
+//   const result = [...tiles];
+//   const tileIdx = result.indexOf(tileId);
+//   result.splice(tileIdx, 1, -1);
+//   return result;
+// }
+
+export function takeTiles(resTiles: number[], tileIds: number[]) {
+  let result = [...resTiles];
+  tileIds.forEach((tileId) => {
+    const tileIdx = result.indexOf(tileId);
+    result.splice(tileIdx, 1, -1);
+  });
   return result;
 }
 

@@ -4,16 +4,16 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "../../../utils/api";
-import Card from "../../../components/game/cards/Card";
-import Deck from "../../../components/game/deck/Deck";
-import Token from "../../../components/game/tokens/Token";
+import Card from "../../../components/Card";
+import Deck from "../../../components/Deck";
+import Token from "../../../components/Token";
 import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
 import { PlayerState } from "../../../common/types";
-import TokenContainer from "../../../components/game/TokenContainer";
-import ActionDialog from "../../../components/game/dialog/Dialog";
+import TokenContainer from "../../../components/TokenContainer";
+import ActionDialog from "../../../components/Dialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
 
 const defaultPrice = {
@@ -200,7 +200,7 @@ export default function Game() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {/* <main className="flex min-h-screen justify-between bg-[url('/background.jpg')] bg-cover text-xl text-[#111827]"> */}
-      <main className="flex min-h-screen justify-between overflow-scroll bg-gray-50 text-xl text-[#111827]">
+      <main className="flex min-h-screen justify-between overflow-scroll bg-gray-100 text-xl text-[#111827]">
         <div className="flex min-w-[288px] flex-col justify-between border">
           <div className="flex flex-col">
             <div>{countdown}</div>
@@ -213,7 +213,7 @@ export default function Game() {
             setPlayerState={setPlayerState}
           /> */}
         </div>
-        <div className="grid flex-grow place-content-center border">
+        <div className="grid flex-grow place-content-center overflow-scroll border">
           <div className="w-fit">
             <Deck
               game={game}

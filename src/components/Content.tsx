@@ -1,7 +1,7 @@
-import Card from "../cards/Card";
-import Token from "../tokens/Token";
+import Card from "./Card";
+import Token from "./Token";
 import { DialogProps } from "./Dialog";
-import { CardColor, InventoryKey } from "../../../common/types";
+import { CardColor, InventoryKey } from "../common/types";
 import {
   opPrice,
   opColorWPrice,
@@ -10,11 +10,21 @@ import {
   opTokenCount,
   defaultTokens,
   opTokenCountWColor,
-} from "../../../common/constants";
-import { cardColors } from "../../../common/constants";
+} from "../common/constants";
+import { cardColors } from "../common/constants";
 
 export default function Content(props: DialogProps) {
   const { game, player, playerState, setPlayerState } = props;
+
+  const cardReserved = playerState.selectedCard
+    ? game[`inventory${game.turnIdx}` as InventoryKey].reserves.includes(
+        playerState.selectedCard.id
+      )
+    : false;
+
+  const maxReserved =
+    game[`inventory${game.turnIdx}` as InventoryKey].reserves.length >= 3 ||
+    game[`inventory${game.turnIdx}` as InventoryKey].tokens.gold >= 3;
 
   const selectedColorClass =
     playerState.selectedCardColor === "white"
@@ -33,13 +43,13 @@ export default function Content(props: DialogProps) {
     color === "white"
       ? "border-white bg-gradient-to-bl from-white to-gray-50"
       : color === "blue"
-      ? "border-blue-500 bg-gradient-to-bl from-blue-500 to-blue-300"
+      ? "border-blue-500 bg-gradient-to-bl from-blue-500 to-blue-400"
       : color === "green"
-      ? "border-green-500 bg-gradient-to-bl from-green-500 to-green-300"
+      ? "border-green-500 bg-gradient-to-bl from-green-500 to-green-400"
       : color === "red"
-      ? "border-red-500 bg-gradient-to-bl from-red-500 to-red-300"
+      ? "border-red-500 bg-gradient-to-bl from-red-500 to-red-400"
       : color === "black"
-      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-600"
+      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-700"
       : "";
 
   // if (!playerState.selectedCard || action !== "purchase") return <></>;
@@ -177,7 +187,7 @@ export default function Content(props: DialogProps) {
         <div className="flex w-full justify-between">
           {requiredTokens.map((cardColor) => (
             <button
-              className={`aspect-square w-[20%] cursor-default rounded-md border bg-white drop-shadow hover:bg-gray-100 ${
+              className={`aspect-square w-[20%] cursor-default rounded-md border bg-gray-50 drop-shadow hover:bg-gray-100 ${
                 cardColor === playerState.selectedCardColor &&
                 selectedColorClass
               }`}
@@ -243,7 +253,7 @@ export default function Content(props: DialogProps) {
             .fill(0)
             .map(() => (
               <button
-                className={`aspect-square w-[20%] cursor-default rounded-md border bg-white drop-shadow hover:bg-gray-100`}
+                className={`aspect-square w-[20%] cursor-default rounded-md border bg-gray-50 drop-shadow hover:bg-gray-100`}
               >
                 {playerState.selectedCard && (
                   <>
@@ -330,7 +340,7 @@ export default function Content(props: DialogProps) {
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
           <button
-            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#3b6691] disabled:bg-[#213951]/[.5]"
+            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
             disabled={!playerState.success}
             onClick={() => {
               if (playerState.success) {
@@ -378,10 +388,10 @@ export default function Content(props: DialogProps) {
           <YourTokensShowcase />
           <div className="flex w-full justify-center">
             <button
-              className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#3b6691] disabled:bg-[#213951]/[.5]"
-              disabled={!playerState.success}
+              className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+              disabled={!playerState.success || cardReserved || maxReserved}
               onClick={() => {
-                if (playerState.success) {
+                if (playerState.success && !cardReserved && !maxReserved) {
                   const tokens = !playerState.hasExtraTurn
                     ? opTokenCount(
                         "increment",
@@ -411,7 +421,7 @@ export default function Content(props: DialogProps) {
                 }
               }}
             >
-              Purchase
+              Reserve
             </button>
           </div>
         </div>
@@ -423,10 +433,10 @@ export default function Content(props: DialogProps) {
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
           <button
-            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#3b6691] disabled:bg-[#213951]/[.5]"
-            disabled={!playerState.success}
+            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+            disabled={!playerState.success || cardReserved || maxReserved}
             onClick={() => {
-              if (playerState.success) {
+              if (playerState.success && !cardReserved && !maxReserved) {
                 const sumTokenColors = Object.values(
                   playerState.inventoryTokens
                 ).reduce((a, b) => a + b, 0);
@@ -467,7 +477,7 @@ export default function Content(props: DialogProps) {
       <YourTokensShowcase />
       <div className="flex w-full justify-center">
         <button
-          className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#3b6691] disabled:bg-[#213951]/[.5]"
+          className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
           disabled={!playerState.success}
           onClick={() => {
             if (playerState.success)

@@ -14,6 +14,12 @@ export default function TailwindBugFix() {
       <div className="hidden bg-gray-800"></div>
       <div className="hidden bg-yellow-400"></div>
       <div className="hidden bg-gray-100"></div>
+      <div className="hidden bg-blue-600"></div>
+      <div className="hidden bg-red-600"></div>
+      <div className="hidden bg-green-600"></div>
+      <div className="hidden bg-black"></div>
+      <div className="hidden bg-yellow-500"></div>
+      <div className="hidden bg-gray-100"></div>
       <div className="hidden bg-blue-300"></div>
       <div className="hidden bg-red-300"></div>
       <div className="hidden bg-green-300"></div>

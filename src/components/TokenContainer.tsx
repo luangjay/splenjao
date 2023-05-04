@@ -1,15 +1,15 @@
 import { Game, Player } from "@prisma/client";
 import { SetStateAction, useEffect, useState } from "react";
-import { PlayerState } from "../../common/types";
-import { tokenColors, cardColors } from "../../common/constants";
+import { PlayerState } from "../common/types";
+import { tokenColors, cardColors } from "../common/constants";
 import {
   TokenEffect,
   InventoryKey,
   Reference,
   TokenColor,
   CardColor,
-} from "../../common/types";
-import Token from "./tokens/Token";
+} from "../common/types";
+import Token from "./Token";
 
 interface TokenContainerProps {
   game: Game;

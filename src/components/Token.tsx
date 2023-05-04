@@ -7,15 +7,15 @@ import {
   Reference,
   TokenColor,
   CardColor,
-} from "../../../common/types";
-import { PlayerState } from "../../../common/types";
+} from "../common/types";
+import { PlayerState } from "../common/types";
 import {
   compPrice,
   defaultTokens,
   opPrice,
   opPriceWColor,
-} from "../../../common/constants";
-import { api } from "../../../utils/api";
+} from "../common/constants";
+import { api } from "../utils/api";
 
 interface TokenIconProps {
   className?: string | undefined;

@@ -5,10 +5,10 @@ import {
   compPrice,
   opPrice,
   opPriceWColor,
-} from "../../../common/constants";
-import { PlayerState } from "../../../common/types";
-import { CardColor, CardEffect, InventoryKey } from "../../../common/types";
-import { api } from "../../../utils/api";
+} from "../common/constants";
+import { PlayerState } from "../common/types";
+import { CardColor, CardEffect, InventoryKey } from "../common/types";
+import { api } from "../utils/api";
 
 interface CardProps {
   game: Game;
@@ -47,7 +47,7 @@ export default function Card({
     return <div className="min-w-[100px] max-w-[200px] rounded-lg"></div>;
   return (
     <div
-      className={`aspect-[0.65] rounded-lg border bg-white drop-shadow ${
+      className={`aspect-[0.65] rounded-lg border bg-gray-50 drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
       } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
       // disabled={props.isTurnLoading}
@@ -101,9 +101,9 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] items-center justify-center rounded-lg border border-gray-300 bg-[#111827] text-center font-mono text-sm text-gray-100 shadow-md drop-shadow-sm">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] items-center justify-center rounded-lg border border-gray-300 bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow-sm">
       <div>
-        <span className="text-md font-medium">SPLENJAO</span>
+        <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />
         <span className="number text-xl font-black">{cardCount}</span>
       </div>
@@ -130,7 +130,7 @@ function ScoreLabel({ score, cardEffect }: ScoreProps) {
     <div
       className={
         score
-          ? `number flex aspect-square w-full items-center justify-center rounded-md font-mono font-black leading-tight ${
+          ? `number flex aspect-square w-full items-center justify-center rounded-md font-black leading-tight ${
               cardEffect ? "text-xl" : "text-3xl"
             }`
           : undefined
@@ -149,15 +149,15 @@ interface ColorProps {
 function ColorLabel({ color, cardEffect }: ColorProps) {
   const colorClass =
     color === "white"
-      ? "border-white bg-gradient-to-bl from-white to-gray-100"
+      ? "border-white bg-gradient-to-bl from-white to-gray-50"
       : color === "blue"
-      ? "border-blue-500 bg-gradient-to-bl from-blue-500 to-blue-400"
+      ? "border-blue-500 bg-gradient-to-bl from-blue-600 to-blue-500"
       : color === "green"
-      ? "border-green-500 bg-gradient-to-bl from-green-500 to-green-400"
+      ? "border-green-500 bg-gradient-to-bl from-green-600 to-green-500"
       : color === "red"
-      ? "border-red-500 bg-gradient-to-bl from-red-500 to-red-400"
+      ? "border-red-500 bg-gradient-to-bl from-red-600 to-red-500"
       : color === "black"
-      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-700"
+      ? "border-gray-800 bg-gradient-to-bl from-gray-700 to-gray-700"
       : "";
 
   if (!colorClass) return <></>;
@@ -193,7 +193,7 @@ function PriceLabel({ color, price, cardEffect }: PriceProps) {
   if (!price) return <></>;
   return (
     <div
-      className={`number flex aspect-square w-full items-center justify-center rounded-full font-mono font-black leading-none drop-shadow-md ${colorClass} ${
+      className={`number flex aspect-square w-full items-center justify-center rounded-full font-black leading-none drop-shadow-md ${colorClass} ${
         cardEffect ? "text-lg" : "text-[27px]"
       }`}
     >
