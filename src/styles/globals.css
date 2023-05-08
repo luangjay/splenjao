@@ -16,19 +16,7 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-/* Firefox */
-* {
-  scrollbar-width: 0px;
-  scrollbar-color: var(--secondary) var(--primary);
+  @apply bg-gray-100;
 }
 
 /* Chrome, Edge, and Safari */

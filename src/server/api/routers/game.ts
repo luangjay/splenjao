@@ -139,6 +139,31 @@ export const gameRouter = createTRPCRouter({
       })
     ),
 
+  updateStatus: protectedProcedure
+    .input(z.object({ id: z.string(), status: z.string() }))
+    .mutation(async ({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: input.status,
+        },
+      })
+    ),
+
+  updateWinner: protectedProcedure
+    .input(z.string())
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input,
+        },
+        data: {},
+      })
+    ),
+
+  // BAD SMELL: GOD METHOD LOL
   updateNextTurn: protectedProcedure
     .input(
       z.object({
@@ -218,8 +243,8 @@ export const gameRouter = createTRPCRouter({
       //     id: input.playerState.cardId,
       //   },
       // });
-      if (game.status === "created")
-        return ctx.prisma.game.update({
+      if (game.status === "starting") {
+        await ctx.prisma.game.update({
           where: {
             id: input.id,
           },
@@ -228,6 +253,8 @@ export const gameRouter = createTRPCRouter({
             turnIdx: (game.turnIdx + 1) % game.playerCount,
           },
         });
+        return;
+      }
       if (
         !input.id ||
         !input.playerState.success ||
@@ -250,13 +277,12 @@ export const gameRouter = createTRPCRouter({
         console.log("found tile");
         console.log("found tile");
       }
-      return ctx.prisma.game.update({
+      const updatedGame = await ctx.prisma.game.update({
         where: {
           id: input.id,
         },
         data: {
           // status: game.status === "created" ? "started" : undefined,
-          turnIdx: (game.turnIdx + 1) % game.playerCount,
           resource: {
             update:
               input.playerState.currentAction === "take"
@@ -376,5 +402,113 @@ export const gameRouter = createTRPCRouter({
           },
         },
       });
+
+      const { maxIdx, maxScore } = calculateWinner(updatedGame);
+
+      for (let zz = 0; zz < 50; zz++) {
+        console.log(
+          updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey].score
+        );
+        console.log(
+          (updatedGame.status === "started"
+            ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
+                .score >= 15
+              ? updatedGame.turnIdx === updatedGame.playerCount - 1
+                ? "ended"
+                : "ending"
+              : undefined
+            : updatedGame.status === "ending" &&
+              updatedGame.turnIdx === updatedGame.playerCount - 1
+            ? "ended"
+            : undefined) || "zzzzz"
+        );
+      }
+
+      return ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          turnIdx: (updatedGame.turnIdx + 1) % updatedGame.playerCount,
+          status:
+            updatedGame.status === "started"
+              ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
+                  .score >= 15
+                ? updatedGame.turnIdx === updatedGame.playerCount - 1
+                  ? "ended"
+                  : "ending"
+                : undefined
+              : updatedGame.status === "ending" &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+              ? "ended"
+              : undefined,
+          winnerId:
+            updatedGame.status === "started"
+              ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
+                  .score >= 15 &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+                ? maxIdx === -1
+                  ? null
+                  : updatedGame.playerIds[maxIdx]
+                : undefined
+              : updatedGame.status === "ending" &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+              ? maxIdx === -1
+                ? null
+                : updatedGame.playerIds[maxIdx]
+              : undefined,
+          winnerScore:
+            updatedGame.status === "started"
+              ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
+                  .score >= 15 &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+                ? maxIdx === -1
+                  ? null
+                  : maxScore
+                : undefined
+              : updatedGame.status === "ending" &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+              ? maxIdx === -1
+                ? null
+                : maxScore
+              : undefined,
+        },
+      });
     }),
 });
+
+function calculateWinner(game: Game) {
+  let maxIdx = 0;
+  let maxScore = game.inventory0.score;
+
+  function compIdx(idx: number) {
+    const idxScore = game[`inventory${idx}` as InventoryKey].score;
+    return idxScore > maxScore
+      ? idx
+      : idxScore < maxScore
+      ? maxIdx
+      : maxIdx === -1
+      ? -1
+      : game[`inventory${idx}` as InventoryKey].cards.length <
+        game[`inventory${maxIdx}` as InventoryKey].cards.length
+      ? idx
+      : game[`inventory${idx}` as InventoryKey].cards.length >
+        game[`inventory${maxIdx}` as InventoryKey].cards.length
+      ? maxIdx
+      : -1;
+  }
+
+  Array(game.playerCount - 1)
+    .fill(0)
+    .forEach((_, idx) => {
+      idx++;
+      const idxScore = game[`inventory${idx}` as InventoryKey].score;
+      maxIdx = compIdx(idx);
+      maxScore = Math.max(idxScore, maxScore);
+    });
+
+  return {
+    maxIdx,
+    maxScore,
+  };
+}

@@ -112,6 +112,8 @@ model Game {
     inventory2      Inventory
     inventory3      Inventory
     players         Player[]        @relation(fields: [playerIds], references: [id])
+    winnerId        String?         @db.ObjectId
+    winnerScore     Int?
 }
 
 model Player {

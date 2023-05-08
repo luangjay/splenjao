@@ -9,10 +9,10 @@ export default function Tile({ tileId }: TileProps) {
   const { data: tile } = api.tile.findById.useQuery(tileId);
 
   if (!tile || tileId === -1)
-    return <div className="mx-auto aspect-square rounded-lg"></div>;
+    return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
   return (
     <div
-      className="relative mx-auto aspect-square w-full rounded-lg border border-gray-300 bg-[url('/ricky.jpg')] bg-cover shadow-md drop-shadow-sm hover:bg-gray-200"
+      className="relative mx-auto aspect-square w-full select-none rounded-lg border border-gray-300 bg-[url('/ricky.jpg')] bg-cover shadow-md drop-shadow-sm hover:bg-gray-200"
       // disabled={props.isTurnLoading}
     >
       <div className="flex h-full flex-row">

@@ -50,10 +50,11 @@ export default function Game() {
 
   // REACT QUERY HOOKS
   const { data: player } = api.game.findPlayerById.useQuery(
-    session.data?.user.id,
-    {
-      refetchInterval: 8000,
-    }
+    session.data?.user.id
+    // EXPENSIVE SHIT
+    // {
+    //   refetchInterval: 8000,
+    // }
   );
   const {
     data: game,
@@ -84,11 +85,6 @@ export default function Game() {
   // STATE HOOKS
   const [validTab, setValidTab] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  // const [userState, setUserState] = useState<UserState>({
-  //   validTab: false,
-  //   countdown: 0,
-  //   message: "",
-  // });
 
   const [playerState, setPlayerState] = useState<PlayerState>({
     // reset: false,
@@ -123,15 +119,15 @@ export default function Game() {
     }
   }, [player, game]);
 
-  useInterval(() => {
-    if (validTab && player && game) {
-      updatePlayerLastPlayed.mutate(player.id);
-    }
-  }, 5000);
+  // useInterval(() => {
+  //   if (validTab && player && game) {
+  //     updatePlayerLastPlayed.mutate(player.id);
+  //   }
+  // }, 5000);
 
   // GAME PROTOCOL HOOKS
   useInterval(() => {
-    if (validTab && player && game?.status === "created") {
+    if (validTab && player && game?.status === "starting") {
       const cd = 15 + (game.createdAt.getTime() - Date.now()) / 1000;
       setCountdown(cd);
       if (playerHost && cd <= 0) {
@@ -154,7 +150,7 @@ export default function Game() {
           currentAction: null,
           resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
           inventoryTokens:
-            game && game.status !== "created"
+            game && game.status !== "starting"
               ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
               : { ...defaultTokens },
           playerTokens: { ...defaultTokens },
@@ -171,19 +167,27 @@ export default function Game() {
   }, [/*validTab,*/ game?.turnIdx]);
 
   useEffect(() => {
-    if (validTab && player && game && playerState.isNextTurn) {
-      updateNextTurn.mutateAsync({
-        id: game.id,
-        playerId: player.id,
-        playerState,
-      });
-      setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
-    }
+    (async () => {
+      if (validTab && player && game && playerState.isNextTurn) {
+        await updateNextTurn.mutateAsync({
+          id: game.id,
+          playerId: player.id,
+          playerState,
+        });
+        setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
+      }
+    })();
   }, [playerState.isNextTurn]);
 
+  useEffect(() => {
+    if (game && game.status === "ended") {
+      alert(`winner id: ${game.winnerId}\nwinner score: ${game.winnerScore}`);
+    }
+  }, [game?.status]);
+
   // if (gameError) return <Error statusCode={404} />;
-  if (!player || !game) return <></>;
   if (gameError) return <Error statusCode={404} />;
+  if (!player || !game) return <></>;
   if (!validTab)
     return (
       <>
@@ -201,7 +205,7 @@ export default function Game() {
       </Head>
       {/* <main className="flex min-h-screen justify-between bg-[url('/background.jpg')] bg-cover text-xl text-[#111827]"> */}
       <main className="flex min-h-screen justify-between overflow-scroll bg-gray-100 text-xl text-[#111827]">
-        <div className="flex min-w-[288px] flex-col justify-between border">
+        <div className="flex w-1/5 flex-col justify-between border">
           <div className="flex flex-col">
             <div>{countdown}</div>
             <div>{game.turnIdx}</div>
@@ -214,7 +218,7 @@ export default function Game() {
           /> */}
         </div>
         <div className="grid flex-grow place-content-center overflow-scroll border">
-          <div className="w-fit">
+          <div className="">
             <Deck
               game={game}
               player={player}
@@ -223,7 +227,7 @@ export default function Game() {
             />
           </div>
         </div>
-        <div className="flex min-w-[288px] flex-col border">
+        <div className="flex w-1/5 flex-col border">
           {/* <div>{playerState.message}</div>
           <div className="w-[50px]">{JSON.stringify(game.status)}</div>
           <div className="w-[50px]">{JSON.stringify(player.id)}</div>

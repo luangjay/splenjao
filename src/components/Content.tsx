@@ -28,7 +28,7 @@ export default function Content(props: DialogProps) {
 
   const selectedColorClass =
     playerState.selectedCardColor === "white"
-      ? "border-[#ffffff] shadow-[0_0_0_0.2rem_rgba(192,192,192,.25)]"
+      ? "border-[#ccccccc] shadow-[0_0_0_0.2rem_rgba(255,255,255,.8)]"
       : playerState.selectedCardColor === "blue"
       ? "border-[#80bdff] shadow-[0_0_0_0.2rem_rgba(0,128,255,.25)]"
       : playerState.selectedCardColor === "green"
@@ -184,7 +184,7 @@ export default function Content(props: DialogProps) {
       <div className="flex flex-col gap-2">
         <div className="text-base font-semibold">Required tokens</div>
         {/* <hr className="h-[1px] w-full rounded-full bg-[#111827] drop-shadow-md"></hr> */}
-        <div className="flex w-full justify-between">
+        <div className="flex w-full select-none justify-between">
           {requiredTokens.map((cardColor) => (
             <button
               className={`aspect-square w-[20%] cursor-default rounded-md border bg-gray-50 drop-shadow hover:bg-gray-100 ${

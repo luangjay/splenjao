@@ -24,7 +24,7 @@ export default function Deck(props: DeckProps) {
     <div className="flex gap-12">
       <div className="flex items-center">
         <div
-          className={`flex h-max min-h-[40px] w-full flex-col border-2 ${
+          className={`flex h-max min-h-[40px] w-full select-none flex-col border-2 ${
             playerTurn && "cursor-pointer hover:bg-gray-100"
           }`}
           onClick={() =>

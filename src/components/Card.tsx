@@ -44,10 +44,12 @@ export default function Card({
       <BackCard cardCount={cardCount(game.resource.cardsLv3)} cardLv={3} />
     );
   if (!card || cardId === -1)
-    return <div className="min-w-[100px] max-w-[200px] rounded-lg"></div>;
+    return (
+      <div className="min-w-[100px] max-w-[200px] select-none rounded-lg"></div>
+    );
   return (
     <div
-      className={`aspect-[0.65] rounded-lg border bg-gray-50 drop-shadow ${
+      className={`aspect-[0.65] select-none rounded-lg border bg-gray-50 drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
       } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
       // disabled={props.isTurnLoading}
@@ -101,7 +103,7 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] items-center justify-center rounded-lg border border-gray-300 bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow-sm">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg border border-gray-300 bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow-sm">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />

@@ -31,4 +31,6 @@ export type PlayerState = {
   hasExtraTurn: boolean;
   isNextTurn: boolean;
   message: string;
+  winnerId?: string | null;
+  winnerScore?: number;
 };
