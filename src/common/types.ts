@@ -34,3 +34,8 @@ export type PlayerState = {
   winnerId?: string | null;
   winnerScore?: number;
 };
+
+export enum SocketEvents {
+  UpdateServer = "UPDATE_SERVER",
+  UpdateClient = "UPDATE_CLIENT",
+}

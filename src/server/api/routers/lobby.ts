@@ -116,8 +116,6 @@ export const lobbyRouter = createTRPCRouter({
           inventory1: newInventory(),
           inventory2: newInventory(),
           inventory3: newInventory(),
-          winnerId: undefined,
-          winnerScore: undefined,
         },
       })
     ),

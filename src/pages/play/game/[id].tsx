@@ -11,10 +11,11 @@ import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
-import { PlayerState } from "../../../common/types";
+import { PlayerState, SocketEvents } from "../../../common/types";
 import TokenContainer from "../../../components/TokenContainer";
 import ActionDialog from "../../../components/Dialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
+import { useSocket } from "../../../hooks/useSocket";
 
 const defaultPrice = {
   white: 0,
@@ -83,7 +84,8 @@ export default function Game() {
   });
 
   // STATE HOOKS
-  const [validTab, setValidTab] = useState(false);
+  // const [validTab, setValidTab] = useState(false);
+  const [validTab, setValidTab] = useState(true);
   const [countdown, setCountdown] = useState(0);
 
   const [playerState, setPlayerState] = useState<PlayerState>({
@@ -108,16 +110,16 @@ export default function Game() {
   const playerHost = player && game && player.id === game.hostId;
 
   // APP PROTOCOL HOOKS
-  useEffect(() => {
-    if (
-      player &&
-      game &&
-      (!player.lastPlayed || new Date() >= addSeconds(player.lastPlayed, 10))
-    ) {
-      setValidTab(true);
-      updatePlayerLastPlayed.mutate(player.id);
-    }
-  }, [player, game]);
+  // useEffect(() => {
+  //   if (
+  //     player &&
+  //     game &&
+  //     (!player.lastPlayed || new Date() >= addSeconds(player.lastPlayed, 10))
+  //   ) {
+  //     setValidTab(true);
+  //     updatePlayerLastPlayed.mutate(player.id);
+  //   }
+  // }, [player, game]);
 
   // useInterval(() => {
   //   if (validTab && player && game) {
@@ -135,6 +137,20 @@ export default function Game() {
       }
     }
   }, 500);
+
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (socket) {
+      socket.on(SocketEvents.UpdateClient, (message) => {
+        console.log("on: UpdateClient", message);
+        gameRefetch();
+      });
+      return () => {
+        socket.off(SocketEvents.UpdateClient);
+      };
+    }
+  }, [socket]);
 
   const [a, setA] = useState(0);
   // GAME LOGIC HOOKS
@@ -175,26 +191,28 @@ export default function Game() {
           playerState,
         });
         setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
+        socket?.emit(SocketEvents.UpdateServer);
       }
     })();
   }, [playerState.isNextTurn]);
 
-  useEffect(() => {
-    if (game && game.status === "ended") {
-      alert(`winner id: ${game.winnerId}\nwinner score: ${game.winnerScore}`);
-    }
-  }, [game?.status]);
+  // useEffect(() => {
+  //   if (game && game.status === "ended") {
+  //     alert(`winner id: ${game.winnerId}\nwinner score: ${game.winnerScore}`);
+  //   }
+  // }, [game?.status]);
 
   // if (gameError) return <Error statusCode={404} />;
   if (gameError) return <Error statusCode={404} />;
   if (!player || !game) return <></>;
-  if (!validTab)
+  if (!validTab) {
     return (
       <>
         <p>It looks like you are playing in another instance.</p>
         <p>If not, please wait a moment...</p>
       </>
     );
+  }
   // if (game.isError) return <Error statusCode={404} />;
   return (
     <>
@@ -255,7 +273,17 @@ export default function Game() {
           >
             Reserve
           </button>
-          <div className="font-nova-flat">Turn count: {a}</div>
+          <button
+            className="border-2"
+            onClick={() => {
+              if (socket) {
+                socket?.emit(SocketEvents.UpdateServer);
+              }
+            }}
+          >
+            hello
+          </button>
+          <div className="">Turn count: {a}</div>
           {/* DUMMY end */}
         </div>
         {/* DIALOG */}

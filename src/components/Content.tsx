@@ -26,6 +26,8 @@ export default function Content(props: DialogProps) {
     game[`inventory${game.turnIdx}` as InventoryKey].reserves.length >= 3 ||
     game[`inventory${game.turnIdx}` as InventoryKey].tokens.gold >= 3;
 
+  const noTokens = game.resource.tokens.gold <= 0;
+
   const selectedColorClass =
     playerState.selectedCardColor === "white"
       ? "border-[#ccccccc] shadow-[0_0_0_0.2rem_rgba(255,255,255,.8)]"
@@ -389,9 +391,16 @@ export default function Content(props: DialogProps) {
           <div className="flex w-full justify-center">
             <button
               className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
-              disabled={!playerState.success || cardReserved || maxReserved}
+              disabled={
+                !playerState.success || cardReserved || maxReserved || noTokens
+              }
               onClick={() => {
-                if (playerState.success && !cardReserved && !maxReserved) {
+                if (
+                  playerState.success &&
+                  !cardReserved &&
+                  !maxReserved &&
+                  !noTokens
+                ) {
                   const tokens = !playerState.hasExtraTurn
                     ? opTokenCount(
                         "increment",
@@ -434,9 +443,16 @@ export default function Content(props: DialogProps) {
         <div className="flex w-full justify-center">
           <button
             className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
-            disabled={!playerState.success || cardReserved || maxReserved}
+            disabled={
+              !playerState.success || cardReserved || maxReserved || noTokens
+            }
             onClick={() => {
-              if (playerState.success && !cardReserved && !maxReserved) {
+              if (
+                playerState.success &&
+                !cardReserved &&
+                !maxReserved &&
+                !noTokens
+              ) {
                 const sumTokenColors = Object.values(
                   playerState.inventoryTokens
                 ).reduce((a, b) => a + b, 0);

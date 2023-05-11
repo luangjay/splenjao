@@ -104,6 +104,7 @@ model Game {
     playerCount     Int
     playerIds       String[]        @db.ObjectId
     createdAt       DateTime
+    endedAt         DateTime?
     status          String
     turnIdx         Int
     resource        Resource
