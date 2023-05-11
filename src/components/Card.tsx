@@ -103,7 +103,7 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg border border-gray-300 bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow-sm">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />
@@ -151,15 +151,15 @@ interface ColorProps {
 function ColorLabel({ color, cardEffect }: ColorProps) {
   const colorClass =
     color === "white"
-      ? "border-white bg-gradient-to-bl from-white to-gray-50"
+      ? "border-white bg-gradient-to-bl from-white to-white/[.75]"
       : color === "blue"
-      ? "border-blue-500 bg-gradient-to-bl from-blue-600 to-blue-500"
+      ? "border-blue-500 bg-gradient-to-bl from-blue-600 to-blue-500/[.75]"
       : color === "green"
-      ? "border-green-500 bg-gradient-to-bl from-green-600 to-green-500"
+      ? "border-green-500 bg-gradient-to-bl from-green-600 to-green-500/[.75]"
       : color === "red"
-      ? "border-red-500 bg-gradient-to-bl from-red-600 to-red-500"
+      ? "border-red-500 bg-gradient-to-bl from-red-600 to-red-500/[.75]"
       : color === "black"
-      ? "border-gray-800 bg-gradient-to-bl from-gray-700 to-gray-700"
+      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-800/[.75]"
       : "";
 
   if (!colorClass) return <></>;
@@ -167,7 +167,7 @@ function ColorLabel({ color, cardEffect }: ColorProps) {
     <div
       className={`${colorClass} ${
         cardEffect ? "rounded-md" : "rounded-[9px]"
-      } flex aspect-square w-full items-center justify-center drop-shadow-md`}
+      } flex aspect-square w-full items-center justify-center drop-shadow`}
     ></div>
   );
 }
@@ -195,7 +195,7 @@ function PriceLabel({ color, price, cardEffect }: PriceProps) {
   if (!price) return <></>;
   return (
     <div
-      className={`number flex aspect-square w-full items-center justify-center rounded-full font-black leading-none drop-shadow-md ${colorClass} ${
+      className={`number flex aspect-square w-full items-center justify-center rounded-full font-black leading-none drop-shadow ${colorClass} ${
         cardEffect ? "text-lg" : "text-[27px]"
       }`}
     >

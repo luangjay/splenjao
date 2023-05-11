@@ -25,6 +25,11 @@ export default function TailwindBugFix() {
       <div className="hidden bg-green-300"></div>
       <div className="hidden bg-gray-600"></div>
       <div className="hidden bg-yellow-200"></div>
+      <div className="hidden shadow-white"></div>
+      <div className="hidden shadow-blue-500"></div>
+      <div className="hidden shadow-green-500"></div>
+      <div className="hidden shadow-red-500"></div>
+      <div className="hidden shadow-gray-800"></div>
       <svg className="fill-white hover:fill-gray-100"></svg>
       <svg className="fill-blue-500 hover:fill-blue-600"></svg>
       <svg className="fill-green-500 hover:fill-green-600"></svg>

@@ -20,11 +20,18 @@ export default function Deck(props: DeckProps) {
   const playerTurn =
     player && game && player.id === game.playerIds[game.turnIdx];
 
+  const tileClass =
+    game.playerCount === 2
+      ? "grid-cols-3 w-3/5"
+      : game.playerCount === 3
+      ? "grid-cols-4 w-4/5"
+      : "grid-cols-5";
+
   return (
     <div className="flex gap-12">
       <div className="flex items-center">
         <div
-          className={`flex h-max min-h-[40px] w-full select-none flex-col border-2 ${
+          className={`flex h-max min-h-[40px] w-full select-none flex-col rounded bg-gray-50 p-1 drop-shadow ${
             playerTurn && "cursor-pointer hover:bg-gray-100"
           }`}
           onClick={() =>
@@ -46,7 +53,7 @@ export default function Deck(props: DeckProps) {
         </div>
       </div>
       <div className="grid min-w-max grid-rows-4 gap-2 border">
-        <div className="grid grid-cols-5 gap-2">
+        <div className={`mx-auto grid gap-2 ${tileClass}`}>
           {game.resource.tiles.map(
             (tileId, idx) => idx < 5 && <Tile tileId={tileId} {...props} />
           )}

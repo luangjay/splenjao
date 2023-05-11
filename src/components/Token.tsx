@@ -100,7 +100,7 @@ export default function Token({
     );
   return (
     <div
-      className={`flex h-[40px] items-center text-base ${
+      className={`flex h-[40px] select-none items-center text-base ${
         !showCount ? "w-[40px]" : "w-[64px]"
       }`}
     >
