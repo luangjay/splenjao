@@ -24,21 +24,23 @@ const tokens = {
   black: 0,
   gold: 0,
 };
-const allTokens = {
-  white: 7,
-  blue: 7,
-  green: 7,
-  red: 7,
-  black: 7,
-  gold: 5,
+const allTokens = (playerCount: number) => {
+  switch (playerCount) {
+    case 2:
+      return { white: 4, blue: 4, green: 4, red: 4, black: 4, gold: 5 };
+    case 3:
+      return { white: 5, blue: 5, green: 5, red: 5, black: 5, gold: 5 };
+    default:
+      return { white: 7, blue: 7, green: 7, red: 7, black: 7, gold: 5 };
+  }
 };
 
-const newResource = () => ({
+const newResource = (playerCount: number) => ({
   cardsLv1: shuffle(0, 40),
   cardsLv2: shuffle(40, 70),
   cardsLv3: shuffle(70, 90),
-  tiles: shuffle(0, 10).slice(0, 5),
-  tokens: { ...allTokens },
+  tiles: shuffle(0, 10).slice(0, playerCount + 1),
+  tokens: { ...allTokens(playerCount) },
 });
 
 const newInventory = () => ({
@@ -111,7 +113,7 @@ export const lobbyRouter = createTRPCRouter({
           createdAt: new Date(),
           status: "starting",
           turnIdx: -1,
-          resource: newResource(),
+          resource: newResource(input.playerCount),
           inventory0: newInventory(),
           inventory1: newInventory(),
           inventory2: newInventory(),
