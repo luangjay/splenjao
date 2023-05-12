@@ -7,11 +7,11 @@ export default function LazyDevProvider({
 
   return (
     <>
-      <div className="sm:hidden">
+      <div className="md:hidden">
         <div>Your screen size is currently not supported.</div>
         <div>THE DEV IS LAZY!</div>
       </div>
-      <div className="max-sm:hidden">{children}</div>
+      <div className="max-md:hidden">{children}</div>
     </>
   );
 }

@@ -15,8 +15,9 @@ interface CardProps {
   player: Player;
   cardId: number;
   cardEffect: CardEffect | null;
-  playerState: PlayerState;
-  setPlayerState: (value: SetStateAction<PlayerState>) => void;
+  playerState?: PlayerState;
+  setPlayerState?: (value: SetStateAction<PlayerState>) => void;
+  big?: boolean;
 }
 
 export default function Card({
@@ -26,8 +27,11 @@ export default function Card({
   cardEffect,
   playerState,
   setPlayerState,
+  big = false,
 }: CardProps) {
-  const { data: card } = api.card.findById.useQuery(cardId);
+  const { data: card } = ![-1, 101, 102, 103].includes(cardId)
+    ? api.card.findById.useQuery(cardId)
+    : { data: null };
   const playerTurn =
     player && game && player.id === game.playerIds[game.turnIdx];
 
@@ -48,13 +52,18 @@ export default function Card({
       <div className="min-w-[100px] max-w-[200px] select-none rounded-lg"></div>
     );
   return (
-    <div
-      className={`aspect-[0.65] select-none rounded-lg border bg-gray-50 drop-shadow ${
+    <button
+      className={`aspect-[0.65] w-[100px] select-none rounded-lg border bg-gray-50 drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
-      } ${cardEffect ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
-      // disabled={props.isTurnLoading}
+      } ${!big ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
+      disabled={!cardEffect}
       onClick={() => {
-        if (playerTurn && cardEffect === "purchase") {
+        if (
+          playerTurn &&
+          cardEffect === "purchase" &&
+          playerState &&
+          setPlayerState
+        ) {
           const discountedPrice = opPrice(
             "decrement",
             card.price,
@@ -71,28 +80,20 @@ export default function Card({
     >
       <div className="flex h-full flex-row justify-between p-[6%]">
         <div className="flex h-full w-[30%] flex-col justify-between px-[1%]">
-          <ScoreLabel score={card.score} cardEffect={cardEffect} />
-          <div
-            className={`flex flex-col ${
-              cardEffect ? "gap-[2px]" : "gap-[3px]"
-            }`}
-          >
+          <ScoreLabel score={card.score} big={big} />
+          <div className={`flex flex-col ${!big ? "gap-[2px]" : "gap-[3px]"}`}>
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(
               (color) => (
-                <PriceLabel
-                  color={color}
-                  price={card.price[color]}
-                  cardEffect={cardEffect}
-                />
+                <PriceLabel color={color} price={card.price[color]} big={big} />
               )
             )}
           </div>
         </div>
-        <div className="flex w-[30%] flex-col justify-between">
-          <ColorLabel color={card.color as CardColor} cardEffect={cardEffect} />
+        <div className="flex w-[30%] flex-col items-end">
+          <ColorLabel color={card.color as CardColor} big={big} />
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -124,16 +125,16 @@ function BackCard({ cardLv, cardCount }: BackCardProps) {
 
 interface ScoreProps {
   score: number;
-  cardEffect: CardEffect | null;
+  big: boolean;
 }
 
-function ScoreLabel({ score, cardEffect }: ScoreProps) {
+function ScoreLabel({ score, big }: ScoreProps) {
   return (
     <div
       className={
         score
           ? `number flex aspect-square w-full items-center justify-center rounded-md font-black leading-tight ${
-              cardEffect ? "text-xl" : "text-3xl"
+              !big ? "text-xl" : "text-3xl"
             }`
           : undefined
       }
@@ -145,10 +146,10 @@ function ScoreLabel({ score, cardEffect }: ScoreProps) {
 
 interface ColorProps {
   color: CardColor | undefined;
-  cardEffect: CardEffect | null;
+  big: boolean;
 }
 
-function ColorLabel({ color, cardEffect }: ColorProps) {
+function ColorLabel({ color, big }: ColorProps) {
   const colorClass =
     color === "white"
       ? "border-white bg-gradient-to-bl from-white to-white/[.75]"
@@ -166,8 +167,8 @@ function ColorLabel({ color, cardEffect }: ColorProps) {
   return (
     <div
       className={`${colorClass} ${
-        cardEffect ? "rounded-md" : "rounded-[9px]"
-      } flex aspect-square w-full items-center justify-center drop-shadow`}
+        !big ? "rounded-md" : "rounded-[9px]"
+      } aspect-square w-[90%] drop-shadow`}
     ></div>
   );
 }
@@ -175,10 +176,10 @@ function ColorLabel({ color, cardEffect }: ColorProps) {
 interface PriceProps {
   color: CardColor | undefined;
   price: number | undefined;
-  cardEffect: CardEffect | null;
+  big: boolean;
 }
 
-function PriceLabel({ color, price, cardEffect }: PriceProps) {
+function PriceLabel({ color, price, big }: PriceProps) {
   const colorClass =
     color === "white"
       ? "bg-white"
@@ -196,7 +197,7 @@ function PriceLabel({ color, price, cardEffect }: PriceProps) {
   return (
     <div
       className={`number flex aspect-square w-full items-center justify-center rounded-full font-black leading-none drop-shadow ${colorClass} ${
-        cardEffect ? "text-lg" : "text-[27px]"
+        !big ? "text-lg" : "text-[27px]"
       }`}
     >
       {price}

@@ -34,7 +34,7 @@ export default function Content(props: DialogProps) {
       : playerState.selectedCardColor === "blue"
       ? "border-[#80bdff] shadow-[0_0_0_0.2rem_rgba(0,128,255,.25)]"
       : playerState.selectedCardColor === "green"
-      ? "border-[#40ffbd] shadow-[0_0_0_0.2rem_rgba(128,255,0,.25)]"
+      ? "border-[#60eebd] shadow-[0_0_0_0.2rem_rgba(128,255,0,.25)]"
       : playerState.selectedCardColor === "red"
       ? "border-[#ff80bd] shadow-[0_0_0_0.2rem_rgba(255,128,0,.25)]"
       : playerState.selectedCardColor === "black"
@@ -93,6 +93,7 @@ export default function Content(props: DialogProps) {
           <Card
             cardId={playerState.selectedCard.id}
             cardEffect={null}
+            big={true}
             {...props}
           />
           {/* CARD STATS */}
@@ -100,12 +101,12 @@ export default function Content(props: DialogProps) {
             {/* CARD LEVEL */}
             <div className="flex h-1/6 w-full items-center gap-2 px-2">
               <div className="w-[25%]">Level</div>
-              <div className="flex h-1/3 flex-grow items-center justify-between gap-[3px]">
+              <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
                 {Array(3)
                   .fill(0)
                   .map((_, i) => (
                     <div
-                      className={`h-full w-1/3 rounded-lg drop-shadow-sm ${
+                      className={`h-full w-1/3 rounded-lg drop-shadow ${
                         playerState.selectedCard &&
                         playerState.selectedCard.level > i
                           ? colorClass(
@@ -116,19 +117,19 @@ export default function Content(props: DialogProps) {
                     ></div>
                   ))}
               </div>
-              <div className="w-3 text-center">
+              <div className="w-5 text-end">
                 {playerState.selectedCard.level}
               </div>
             </div>
             {/* CARD SCORE */}
             <div className="flex h-1/6 w-full items-center gap-2 px-2">
               <div className="w-[25%]">Score</div>
-              <div className="flex h-1/3 flex-grow items-center justify-between gap-[3px]">
+              <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
                 {Array(5)
                   .fill(0)
                   .map((_, i) => (
                     <div
-                      className={`h-full w-1/5 rounded-md drop-shadow-sm ${
+                      className={`h-full w-1/5 rounded-md drop-shadow ${
                         playerState.selectedCard &&
                         playerState.selectedCard.score > i
                           ? colorClass(
@@ -139,7 +140,7 @@ export default function Content(props: DialogProps) {
                     ></div>
                   ))}
               </div>
-              <div className="w-3 text-center">
+              <div className="w-5 text-end">
                 {playerState.selectedCard.score}
               </div>
             </div>
@@ -154,12 +155,12 @@ export default function Content(props: DialogProps) {
                         .slice(1)
                         .toLowerCase()}`}
                     </div>
-                    <div className="flex h-1/3 flex-grow items-center justify-between gap-[3px]">
+                    <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
                       {Array(7)
                         .fill(0)
                         .map((_, i) => (
                           <div
-                            className={`h-full w-1/5 rounded-md drop-shadow-sm ${
+                            className={`h-full w-1/5 rounded-md drop-shadow ${
                               playerState.selectedCard &&
                               playerState.selectedCard?.price[color] > i
                                 ? colorClass(color)
@@ -168,7 +169,7 @@ export default function Content(props: DialogProps) {
                           ></div>
                         ))}
                     </div>
-                    <div className="w-3 text-center">
+                    <div className="w-5 text-end">
                       {playerState.selectedCard?.price[color]}
                     </div>
                   </div>
@@ -189,7 +190,7 @@ export default function Content(props: DialogProps) {
         <div className="flex w-full select-none justify-between">
           {requiredTokens.map((cardColor) => (
             <button
-              className={`relative aspect-square w-[20%] cursor-default rounded-md border bg-gray-50 ${
+              className={`relative aspect-square w-[20%] rounded-md border bg-gray-50 ${
                 cardColor === playerState.selectedCardColor
                   ? selectedColorClass
                   : "drop-shadow"
@@ -344,7 +345,7 @@ export default function Content(props: DialogProps) {
 
   if (playerState.currentAction === "take")
     return (
-      <div className="relative flex w-full flex-col gap-6 text-base text-[#111827]">
+      <div className="relative flex w-full flex-col gap-6 text-base">
         <NoCardShowcase />
         <AvailableTokensShowcase />
         <SelectedTokensShowcase />
@@ -392,7 +393,7 @@ export default function Content(props: DialogProps) {
   if (playerState.currentAction === "reserve") {
     if (playerState.hasExtraTurn)
       return (
-        <div className="relative flex w-full flex-col gap-6 text-base text-[#111827]">
+        <div className="relative flex w-full flex-col gap-6 text-base">
           <NoCardShowcase />
           <AvailableTokensShowcase />
           <SelectedTokensShowcase />
@@ -445,7 +446,7 @@ export default function Content(props: DialogProps) {
         </div>
       );
     return (
-      <div className="relative flex w-full flex-col gap-6 text-base text-[#111827]">
+      <div className="relative flex w-full flex-col gap-6 text-base">
         <CardShowcase />
         <AvailableTokensShowcase />
         <YourTokensShowcase />
@@ -496,7 +497,7 @@ export default function Content(props: DialogProps) {
   }
   // Purchase or claim
   return (
-    <div className="relative flex w-full flex-col gap-6 text-base text-[#111827]">
+    <div className="relative flex w-full flex-col gap-6 text-base">
       <CardShowcase />
       <RequiredTokensShowcase />
       <YourTokensShowcase />

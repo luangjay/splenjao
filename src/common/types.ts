@@ -1,4 +1,4 @@
-import { Card, Price, Tokens } from "@prisma/client";
+import { Card, Game, Player, Price, Tokens } from "@prisma/client";
 
 export type CardColor = "white" | "blue" | "green" | "red" | "black";
 
@@ -38,4 +38,9 @@ export type PlayerState = {
 export enum SocketEvents {
   UpdateServer = "UPDATE_SERVER",
   UpdateClient = "UPDATE_CLIENT",
+}
+
+export interface PlayerProps {
+  game: Game;
+  me: Player;
 }

@@ -2,11 +2,15 @@
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      transitionProperty: {
+        width: "width",
+      },
+    },
     fontFamily: {
       number: ['"Source Sans Pro"', "monospace"],
       mono: ['"Source Code Pro"', "monospace"],
-      sans: ['"Arimo"', "sans-serif"],
+      sans: ['"Inter"', "sans-serif"],
     },
   },
   plugins: [],

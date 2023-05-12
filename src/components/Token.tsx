@@ -96,10 +96,14 @@ export default function Token({
       playerState.priceToReplace[colorToReplace] === 0)
   )
     return (
-      <div className={!showCount ? "-z-50 w-[40px]" : "-z-50 w-[64px]"}></div>
+      <div
+        className={
+          !showCount ? "-z-50 h-[40px] w-[40px]" : "-z-50 h-[40px] w-[64px]"
+        }
+      ></div>
     );
   return (
-    <div
+    <button
       className={`flex h-[40px] select-none items-center text-base ${
         !showCount ? "w-[40px]" : "w-[64px]"
       }`}
@@ -138,7 +142,7 @@ export default function Token({
         <TokenIcon className={colorClass} />
       </div>
       {showCount && `×${tokenCount}`}
-    </div>
+    </button>
   );
 }
 

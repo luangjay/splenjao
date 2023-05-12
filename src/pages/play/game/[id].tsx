@@ -16,6 +16,8 @@ import TokenContainer from "../../../components/TokenContainer";
 import ActionDialog from "../../../components/Dialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
 import { useSocket } from "../../../hooks/useSocket";
+import Others from "../../../components/Others";
+import Me from "../../../components/Me";
 
 const defaultPrice = {
   white: 0,
@@ -202,6 +204,9 @@ export default function Game() {
   //   }
   // }, [game?.status]);
 
+  const [openOthers, setOpenOthers] = useState(false);
+  const [openMe, setOpenMe] = useState(false);
+
   // if (gameError) return <Error statusCode={404} />;
   if (gameError) return <Error statusCode={404} />;
   if (!player || !game) return <></>;
@@ -222,69 +227,60 @@ export default function Game() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {/* <main className="flex min-h-screen justify-between bg-[url('/background.jpg')] bg-cover text-xl text-[#111827]"> */}
-      <main className="flex min-h-screen justify-between overflow-scroll bg-gray-100 text-xl text-[#111827]">
-        <div className="flex w-1/5 flex-col justify-between border">
-          <div className="flex flex-col">
-            <div>{countdown}</div>
-            <div>{game.turnIdx}</div>
+      <main className="relative flex h-screen select-none bg-gray-100 text-xl text-slate-600">
+        <div
+          className="fixed z-10 flex h-full items-center overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-width delay-[500]"
+          style={{ width: openOthers ? "312px" : 0 }}
+        >
+          <div className="flex h-full flex-1 flex-col justify-between">
+            <Others game={game} me={player} />
           </div>
-          {/* <TokenContainer
+          <button
+            className="mx-0.5 flex h-[72px] items-center rounded-lg hover:bg-white/[.4]"
+            onClick={() => setOpenOthers((prev) => !prev)}
+          >
+            <LeftIcon />
+          </button>
+        </div>
+        <div className="fixed z-10 flex h-full items-center drop-shadow">
+          <button
+            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-width delay-[500] hover:bg-gray-200/[.2]"
+            style={{ width: !openOthers ? "36px" : 0 }}
+            onClick={() => setOpenOthers((prev) => !prev)}
+          >
+            <RightIcon />
+          </button>
+        </div>
+        <div className="mx-auto flex h-fit min-h-full items-center justify-center">
+          <Deck
             game={game}
             player={player}
             playerState={playerState}
             setPlayerState={setPlayerState}
-          /> */}
+          />
         </div>
-        <div className="grid flex-grow place-content-center overflow-scroll border">
-          <div className="">
-            <Deck
-              game={game}
-              player={player}
-              playerState={playerState}
-              setPlayerState={setPlayerState}
-            />
+        <div
+          className="fixed right-0 z-10 flex h-full items-center overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-width delay-100"
+          style={{ width: openMe ? "312px" : 0 }}
+        >
+          <button
+            className="mx-0.5 flex h-[72px] items-center rounded-lg hover:bg-white/[.4]"
+            onClick={() => setOpenMe((prev) => !prev)}
+          >
+            <RightIcon />
+          </button>
+          <div className="flex h-full flex-1 flex-col justify-between">
+            <Me game={game} me={player} />
           </div>
         </div>
-        <div className="flex w-1/5 flex-col border">
-          {/* <div>{playerState.message}</div>
-          <div className="w-[50px]">{JSON.stringify(game.status)}</div>
-          <div className="w-[50px]">{JSON.stringify(player.id)}</div>
-          <div className="w-[50px]">{JSON.stringify(playerState)}</div> */}
-          {/* DUMMY begin */}
+        <div className="fixed right-0 z-10 flex h-full items-center drop-shadow">
           <button
-            className="border-2"
-            onClick={() => {
-              if (playerTurn)
-                setPlayerState((prev) => ({ ...prev, currentAction: "take" }));
-            }}
+            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-width delay-100 hover:bg-gray-200/[.2]"
+            style={{ width: !openMe ? "36px" : 0 }}
+            onClick={() => setOpenMe((prev) => !prev)}
           >
-            Take
+            <LeftIcon />
           </button>
-          <button
-            className="border-2"
-            onClick={() => {
-              if (playerTurn)
-                setPlayerState((prev) => ({
-                  ...prev,
-                  currentAction: "reserve",
-                  cardId: 7,
-                }));
-            }}
-          >
-            Reserve
-          </button>
-          <button
-            className="border-2"
-            onClick={() => {
-              if (socket) {
-                socket?.emit(SocketEvents.UpdateServer);
-              }
-            }}
-          >
-            hello
-          </button>
-          <div className="">Turn count: {a}</div>
-          {/* DUMMY end */}
         </div>
         {/* DIALOG */}
         <ActionDialog
@@ -348,64 +344,24 @@ function useTimeout(callback: Function, delay: number) {
   return timeoutRef;
 }
 
-// const AuthShowcase: React.FC = () => {
-//   const { data: sessionData } = useSession();
+function LeftIcon() {
+  return (
+    <svg fill="currentColor" viewBox="0 0 16 16" height="36px" width="36px">
+      <path
+        fillRule="evenodd"
+        d="M11.354 1.646a.5.5 0 010 .708L5.707 8l5.647 5.646a.5.5 0 01-.708.708l-6-6a.5.5 0 010-.708l6-6a.5.5 0 01.708 0z"
+      />
+    </svg>
+  );
+}
 
-//   return (
-//     <div className="flex flex-col items-center justify-center gap-4">
-//       <p className="text-center text-2xl">
-//         {sessionData && <span>{sessionData.user?.name}</span>}
-//       </p>
-//     </div>
-//   );
-// };
-
-// // multi tab detection
-// function register_tab_GUID() {
-//   // detect local storage available
-//   if (typeof Storage !== "undefined") {
-//     // get (set if not) tab GUID and store in tab session
-//     if (sessionStorage["tabGUID"] == null)
-//       sessionStorage["tabGUID"] = tab_GUID();
-//     var guid = sessionStorage["tabGUID"];
-
-//     // add eventlistener to local storage
-//     window.addEventListener("storage", storage_Handler, false);
-
-//     // set tab GUID in local storage
-//     localStorage["tabGUID"] = guid;
-//   }
-// }
-
-// function storage_Handler(e: StorageEvent) {
-//   // if tabGUID does not match then more than one tab and GUID
-//   if (e.key == "tabGUID") {
-//     if (e.oldValue != e.newValue) tab_Warning();
-//   }
-// }
-
-// function tab_GUID() {
-//   function s4() {
-//     return Math.floor((1 + Math.random()) * 0x10000)
-//       .toString(16)
-//       .substring(1);
-//   }
-//   return (
-//     s4() +
-//     s4() +
-//     "-" +
-//     s4() +
-//     "-" +
-//     s4() +
-//     "-" +
-//     s4() +
-//     "-" +
-//     s4() +
-//     s4() +
-//     s4()
-//   );
-// }
-
-// function tab_Warning() {
-//   alert("Another tab is open!");
-// }
+function RightIcon() {
+  return (
+    <svg fill="currentColor" viewBox="0 0 16 16" height="36px" width="36px">
+      <path
+        fillRule="evenodd"
+        d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"
+      />
+    </svg>
+  );
+}

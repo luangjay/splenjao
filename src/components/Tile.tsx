@@ -12,11 +12,11 @@ export default function Tile({ tileId }: TileProps) {
     return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
   return (
     <div
-      className="relative mx-auto aspect-square w-full select-none rounded-lg border border-gray-300 bg-[url('/ricky.jpg')] bg-cover shadow-md drop-shadow-sm hover:bg-gray-200"
+      className="relative mx-auto aspect-square w-[100px] select-none rounded-lg border border-gray-300 bg-[url('/ricky.jpg')] bg-cover shadow-md drop-shadow-sm hover:bg-gray-200"
       // disabled={props.isTurnLoading}
     >
       <div className="flex h-full flex-row">
-        <div className="z-10 flex h-full w-[33%] flex-col justify-between bg-white/[.5] p-[4px]">
+        <div className="z-10 flex h-full w-[33%] flex-col justify-between bg-white/[.5] p-[4px] backdrop-blur-sm">
           <ScoreLabel score={tile.score} />
           <div className="flex flex-col gap-[1.5px]">
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(

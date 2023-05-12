@@ -98,7 +98,7 @@ export default function ActionDialog(props: DialogProps) {
 
   if (playerState.currentAction === null) return <></>;
   return (
-    <div className="fixed inset-0 z-10 overflow-y-auto text-slate-800 opacity-100 backdrop-blur-md">
+    <div className="fixed inset-0 z-10 overflow-y-auto text-slate-600 opacity-100 backdrop-blur-md">
       <div
         className="fixed inset-0 h-full w-full bg-black opacity-20"
         onClick={close}
@@ -116,9 +116,9 @@ export default function ActionDialog(props: DialogProps) {
             <div className="h-full w-[1px] border border-gray-300"></div>
             <div className="w-[160px]">
               <div className="w-full">
-                <code className="text-xs">
+                {/* <code className="text-xs">
                   {JSON.stringify(playerState, null, 2)}
-                </code>
+                </code> */}
               </div>
             </div>
           </div>

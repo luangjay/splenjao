@@ -25,13 +25,13 @@ export default function Deck(props: DeckProps) {
       ? "grid-cols-3 w-3/5"
       : game.playerCount === 3
       ? "grid-cols-4 w-4/5"
-      : "grid-cols-5";
+      : "grid-cols-5 w-full";
 
   return (
-    <div className="flex gap-12">
+    <div className="flex gap-6 p-2 lg:gap-12 lg:p-4">
       <div className="flex items-center">
-        <div
-          className={`flex h-max min-h-[40px] w-full select-none flex-col rounded bg-gray-50 p-1 drop-shadow ${
+        <button
+          className={`flex h-max min-h-[40px] select-none flex-col rounded bg-gray-50 p-1 drop-shadow ${
             playerTurn && "cursor-pointer hover:bg-gray-100"
           }`}
           onClick={() =>
@@ -50,15 +50,15 @@ export default function Deck(props: DeckProps) {
               {...props}
             />
           ))}
-        </div>
+        </button>
       </div>
-      <div className="grid min-w-max grid-rows-4 gap-2 border">
-        <div className={`mx-auto grid gap-2 ${tileClass}`}>
+      <div className="grid grid-rows-4 gap-1.5 lg:gap-2">
+        <div className={`mx-auto grid gap-1.5 lg:gap-2 ${tileClass}`}>
           {game.resource.tiles.map(
             (tileId, idx) => idx < 5 && <Tile tileId={tileId} {...props} />
           )}
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid h-fit grid-cols-5 gap-1.5 lg:gap-2">
           <Card cardId={103} cardEffect={null} {...props} />
           {game.resource.cardsLv3.map(
             (cardId, idx) =>
@@ -67,7 +67,7 @@ export default function Deck(props: DeckProps) {
               )
           )}
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid h-fit grid-cols-5 gap-1.5 lg:gap-2">
           <Card cardId={102} cardEffect={null} {...props} />
           {game.resource.cardsLv2.map(
             (cardId, idx) =>
@@ -76,7 +76,7 @@ export default function Deck(props: DeckProps) {
               )
           )}
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid h-fit grid-cols-5 gap-1.5 lg:gap-2">
           <Card cardId={101} cardEffect={null} {...props} />
           {game.resource.cardsLv1.map(
             (cardId, idx) =>
@@ -86,11 +86,8 @@ export default function Deck(props: DeckProps) {
           )}
         </div>
       </div>
-      <div className="grid min-w-max grid-rows-4 gap-2 border">
+      <div className="grid h-fit grid-rows-4 gap-1.5 lg:gap-2">
         <Card cardId={-1} cardEffect={null} {...props} />
-        {/* <Card cardId={103} {...props} />
-        <Card cardId={102} {...props} />
-        <Card cardId={101} {...props} /> */}
         {playerIdx !== -1 &&
           game[`inventory${playerIdx}` as InventoryKey].reserves.map(
             (cardId) => (
