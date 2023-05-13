@@ -90,11 +90,28 @@ export default function Deck(props: DeckProps) {
       <div className="grid h-fit grid-rows-4 gap-1.5 lg:gap-2">
         <div></div>
         {playerIdx !== -1 &&
-          game[`inventory${playerIdx}` as InventoryKey].reserves.map(
-            (cardId) => (
-              <Card cardId={cardId} cardEffect="purchase" {...props} />
-            )
-          )}
+          Array(3)
+            .fill(0)
+            .map((_, idx) => {
+              const reservedCardId =
+                game[`inventory${playerIdx}` as InventoryKey].reserves[idx];
+              if (reservedCardId !== undefined) {
+                return (
+                  <Card
+                    cardId={reservedCardId}
+                    cardEffect="purchase"
+                    {...props}
+                  />
+                );
+              }
+              return <Card cardId={104} cardEffect={null} {...props} />;
+            })}
+        {playerIdx === -1 &&
+          Array(3)
+            .fill(0)
+            .map((_, idx) => (
+              <Card cardId={104} cardEffect={null} {...props} />
+            ))}
       </div>
     </div>
   );

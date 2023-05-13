@@ -18,6 +18,7 @@ import { InventoryKey, TokenColor } from "../../../common/types";
 import { useSocket } from "../../../hooks/useSocket";
 import Others from "../../../components/Others";
 import Me from "../../../components/Me";
+import TestD from "../../../components/TestD";
 
 const defaultPrice = {
   white: 0,
@@ -230,14 +231,14 @@ export default function Game() {
         {/* OTHERS */}
         <div
           className="fixed z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
-          style={{ width: openOthers ? "342px" : 0 }}
+          style={{ width: !openOthers ? 0 : "306px" }}
         >
           <Others game={game} me={player} />
         </div>
         <div className="fixed z-10 flex h-full items-center">
           <button
             className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
-            style={{ left: !openOthers ? "0" : "342px" }}
+            style={{ left: !openOthers ? "0" : "306px" }}
             onClick={() => setOpenOthers((prev) => !prev)}
           >
             {!openOthers ? <RightIcon /> : <LeftIcon />}
@@ -256,14 +257,14 @@ export default function Game() {
         <div className="fixed right-0 z-10 flex h-full items-center">
           <button
             className="absolute flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
-            style={{ right: !openMe ? "342px" : "0" }}
+            style={{ right: !openMe ? 0 : "306px" }}
             onClick={() => setOpenMe((prev) => !prev)}
           >
-            {!openMe ? <RightIcon /> : <LeftIcon />}
+            {!openMe ? <LeftIcon /> : <RightIcon />}
           </button>
           <div
             className="fixed right-0 z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
-            style={{ width: openMe ? "0" : "342px" }}
+            style={{ width: !openMe ? 0 : "306px" }}
           >
             <Me game={game} me={player} />
           </div>
@@ -298,6 +299,7 @@ export default function Game() {
           playerState={playerState}
           setPlayerState={setPlayerState}
         />
+        <TestD />
       </main>
     </>
   );

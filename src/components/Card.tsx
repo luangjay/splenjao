@@ -102,7 +102,6 @@ function PlaceholderCard() {
     <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-slate-300 text-center text-sm drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">RESERVED</span>
-        <br />
       </div>
     </div>
   );
@@ -115,7 +114,7 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-[#111827] text-center text-sm text-gray-100 drop-shadow">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-slate-800 text-center text-sm text-gray-100 drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />

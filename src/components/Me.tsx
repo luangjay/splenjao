@@ -11,6 +11,7 @@ import Image from "next/image";
 import Card from "./Card";
 import { useState } from "react";
 import Tile from "./Tile";
+import Title from "./Title";
 
 export default function Me(props: PlayerProps) {
   const { game, me: player } = props;
@@ -129,13 +130,23 @@ export default function Me(props: PlayerProps) {
 
   return (
     <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
-      <div className="flex-1"></div>
       <div className="flex flex-col gap-4">
-        <div className="font-bold">Tiles</div>
+        <Title>OPTIONS</Title>
+        <div className="flex h-[60px] items-center justify-center rounded-lg">
+          <button
+            className="rounded-lg px-4 py-3 font-semibold hover:bg-white/[.4]"
+            onClick={() => confirm()}
+          >
+            Leave game
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col gap-4">
+        <Title>TILES</Title>
         <MyTiles />
       </div>
       <div className="flex flex-col gap-2">
-        <div className="font-bold">Cards</div>
+        <Title>CARDS</Title>
         <MyCards />
       </div>
       <MyProfile />

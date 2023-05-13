@@ -33,7 +33,7 @@ export default function Others(props: PlayerProps) {
           return <div className="w-full"></div>;
         }
         return (
-          <div className="h-fit w-full text-base">
+          <div className="h-fit w-full overflow-auto text-base">
             <div className="flex flex-col rounded-lg bg-gray-100 drop-shadow">
               <div className="flex h-[90px] w-full items-center gap-4 p-4 text-start">
                 <div className="aspect-square h-[90%]">

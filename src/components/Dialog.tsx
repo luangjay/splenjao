@@ -96,53 +96,60 @@ export default function ActionDialog(props: DialogProps) {
     );
   }
 
-  if (playerState.currentAction === null) return <></>;
   return (
-    <div className="fixed inset-0 z-10 overflow-y-auto text-slate-600 opacity-100 backdrop-blur-md">
-      <div
-        className="fixed inset-0 h-full w-full bg-black opacity-20"
-        onClick={close}
-      ></div>
-      <div className="flex min-h-screen items-center">
-        <div className="relative mx-auto flex h-[660px] w-[1082px] items-center justify-center rounded-md bg-gray-100 px-16 py-8 shadow-lg">
-          <div className="items-centerzz flex h-full w-full justify-center gap-12">
-            <div className="w-[160px]">
-              <SideTab />
-            </div>
-            <div className="h-full w-[1px] border border-gray-300"></div>
-            <div className="w-[500px]">
-              <Content {...props} />
-            </div>
-            <div className="h-full w-[1px] border border-gray-300"></div>
-            <div className="w-[160px]">
-              <div className="w-full">
-                {/* <code className="text-xs">
+    <div
+      className="fixed inset-0 z-10 overflow-y-auto bg-black/[.4] backdrop-blur-sm"
+      style={{
+        visibility: playerState.currentAction === null ? "hidden" : "visible",
+      }}
+    >
+      {playerState.currentAction === null ? (
+        <></>
+      ) : (
+        <>
+          <div className="fixed inset-0 h-full w-full" onClick={close}></div>
+          <div className="flex min-h-screen items-center">
+            <div className="relative mx-auto flex h-[660px] w-[1082px] items-center justify-center rounded-md bg-gray-100 px-16 py-8 shadow-lg">
+              <div className="items-centerzz flex h-full w-full justify-center gap-12">
+                <div className="w-[160px]">
+                  <SideTab />
+                </div>
+                <div className="h-full w-[1px] border border-gray-300"></div>
+                <div className="w-[500px]">
+                  <Content {...props} />
+                </div>
+                <div className="h-full w-[1px] border border-gray-300"></div>
+                <div className="w-[160px]">
+                  <div className="w-full">
+                    {/* <code className="text-xs">
                   {JSON.stringify(playerState, null, 2)}
                 </code> */}
+                  </div>
+                </div>
               </div>
+              <button
+                type="button"
+                className="absolute top-2 right-2 mx-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900"
+                onClick={close}
+              >
+                <svg
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
             </div>
           </div>
-          <button
-            type="button"
-            className="absolute top-2 right-2 mx-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900"
-            onClick={close}
-          >
-            <svg
-              aria-hidden="true"
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
