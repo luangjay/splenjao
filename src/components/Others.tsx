@@ -24,10 +24,7 @@ export default function Others(props: PlayerProps) {
       {others.map((player) => {
         const idx = player.idx;
         const inventory = game[`inventory${idx}` as InventoryKey];
-        const tokenCount = Object.values(inventory.tokens).reduce(
-          (a, b) => a + b,
-          0
-        );
+        const reserveCount = inventory.reserves.length;
         const cardCount = inventory.cards.length;
         const tileCount = inventory.tiles.length;
         const score = inventory.score;
@@ -59,13 +56,13 @@ export default function Others(props: PlayerProps) {
                     </div>
                   </div>
                   <div className="flex h-[24px] justify-between">
-                    <div className="-mx-0.5 flex h-[24px] items-center gap-1">
-                      <TokenIcon />
-                      {tokenCount}
-                    </div>
                     <div className="flex h-[24px] items-center gap-1.5">
                       <CardIcon />
                       {cardCount}
+                    </div>
+                    <div className="-mx-0.5 flex h-[24px] items-center gap-1">
+                      <ReserveIcon />
+                      {reserveCount}
                     </div>
                     <div className="flex h-[24px] items-center gap-1.5">
                       <TileIcon />
@@ -94,6 +91,20 @@ export default function Others(props: PlayerProps) {
         );
       })}
     </div>
+  );
+}
+
+function ReserveIcon() {
+  return (
+    <svg
+      fill="currentColor"
+      viewBox="0 0 16 16"
+      height="20px"
+      width="20px"
+      className="rotate-6"
+    >
+      <path d="M2 1a1 1 0 00-1 1v4.586a1 1 0 00.293.707l7 7a1 1 0 001.414 0l4.586-4.586a1 1 0 000-1.414l-7-7A1 1 0 006.586 1H2zm4 3.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+    </svg>
   );
 }
 

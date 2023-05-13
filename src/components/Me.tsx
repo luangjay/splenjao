@@ -16,7 +16,6 @@ export default function Me(props: PlayerProps) {
   const { game, me: player } = props;
   const idx = game.playerIds.indexOf(player.id);
   const inventory = game[`inventory${idx}` as InventoryKey];
-  const tokenCount = Object.values(inventory.tokens).reduce((a, b) => a + b, 0);
   const cardCount = inventory.cards.length;
   const reserveCount = inventory.reserves.length;
   const tileCount = inventory.tiles.length;
@@ -129,7 +128,7 @@ export default function Me(props: PlayerProps) {
   );
 
   return (
-    <div className="flex h-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
+    <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
       <div className="flex-1"></div>
       <div className="flex flex-col gap-4">
         <div className="font-bold">Tiles</div>

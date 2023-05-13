@@ -18,6 +18,7 @@ interface CardProps {
   playerState?: PlayerState;
   setPlayerState?: (value: SetStateAction<PlayerState>) => void;
   big?: boolean;
+  phIdx?: number;
 }
 
 export default function Card({
@@ -28,8 +29,9 @@ export default function Card({
   playerState,
   setPlayerState,
   big = false,
+  phIdx = -1,
 }: CardProps) {
-  const { data: card } = ![-1, 101, 102, 103].includes(cardId)
+  const { data: card } = ![-1, 101, 102, 103, 104].includes(cardId)
     ? api.card.findById.useQuery(cardId)
     : { data: null };
   const playerTurn =
@@ -47,10 +49,8 @@ export default function Card({
     return (
       <BackCard cardCount={cardCount(game.resource.cardsLv3)} cardLv={3} />
     );
-  if (!card || cardId === -1)
-    return (
-      <div className="min-h-[154px] min-w-[100px] select-none rounded-lg"></div>
-    );
+  if (cardId === 104) return <PlaceholderCard />;
+  if (!card || cardId === -1) return <></>;
   return (
     <button
       className={`select-none rounded-lg border bg-gray-50 drop-shadow ${
@@ -94,6 +94,17 @@ export default function Card({
         </div>
       </div>
     </button>
+  );
+}
+
+function PlaceholderCard() {
+  return (
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-slate-300 text-center text-sm drop-shadow">
+      <div>
+        <span className="text-md font-mono font-medium">RESERVED</span>
+        <br />
+      </div>
+    </div>
   );
 }
 

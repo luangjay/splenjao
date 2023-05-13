@@ -88,7 +88,7 @@ export default function Deck(props: DeckProps) {
         </div>
       </div>
       <div className="grid h-fit grid-rows-4 gap-1.5 lg:gap-2">
-        <Card cardId={-1} cardEffect={null} {...props} />
+        <div></div>
         {playerIdx !== -1 &&
           game[`inventory${playerIdx}` as InventoryKey].reserves.map(
             (cardId) => (

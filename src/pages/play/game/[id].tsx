@@ -229,26 +229,18 @@ export default function Game() {
       <main className="relative flex h-screen select-none bg-gray-100 text-xl text-slate-600">
         {/* OTHERS */}
         <div
-          className="fixed z-10 flex h-full items-center overflow-hidden drop-shadow transition-all"
+          className="fixed z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
           style={{ width: openOthers ? "342px" : 0 }}
         >
-          <div className="flex h-full flex-1 flex-col justify-between overflow-auto bg-gray-200/[.5]">
-            <Others game={game} me={player} />
-          </div>
-          <button
-            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] hover:bg-gray-200/[.2]"
-            onClick={() => setOpenOthers((prev) => !prev)}
-          >
-            <LeftIcon />
-          </button>
+          <Others game={game} me={player} />
         </div>
-        <div className="fixed z-10 flex h-full items-center drop-shadow">
+        <div className="fixed z-10 flex h-full items-center">
           <button
-            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-all delay-[500] hover:bg-gray-200/[.2]"
-            style={{ width: !openOthers ? "36px" : 0 }}
+            className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
+            style={{ left: !openOthers ? "0" : "342px" }}
             onClick={() => setOpenOthers((prev) => !prev)}
           >
-            <RightIcon />
+            {!openOthers ? <RightIcon /> : <LeftIcon />}
           </button>
         </div>
         {/* DECK */}
@@ -261,7 +253,22 @@ export default function Game() {
           />
         </div>
         {/* ME */}
-        <div
+        <div className="fixed right-0 z-10 flex h-full items-center">
+          <button
+            className="absolute flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
+            style={{ right: !openMe ? "342px" : "0" }}
+            onClick={() => setOpenMe((prev) => !prev)}
+          >
+            {!openMe ? <RightIcon /> : <LeftIcon />}
+          </button>
+          <div
+            className="fixed right-0 z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
+            style={{ width: openMe ? "0" : "342px" }}
+          >
+            <Me game={game} me={player} />
+          </div>
+        </div>
+        {/* <div
           className="fixed right-0 z-10 flex h-full items-center overflow-hidden drop-shadow transition-all"
           style={{ width: openMe ? "342px" : 0 }}
         >
@@ -283,7 +290,7 @@ export default function Game() {
           >
             <LeftIcon />
           </button>
-        </div>
+        </div> */}
         {/* DIALOG */}
         <ActionDialog
           game={game}
