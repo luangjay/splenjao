@@ -104,7 +104,7 @@ export default function Token({
     );
   return (
     <button
-      className={`flex h-[40px] select-none items-center text-base ${
+      className={`flex h-[40px] select-none items-center ${
         !showCount ? "w-[40px]" : "w-[64px]"
       }`}
     >

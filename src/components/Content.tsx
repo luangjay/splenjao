@@ -79,7 +79,7 @@ export default function Content(props: DialogProps) {
   const NoCardShowcase = () => (
     <div className="flex flex-col gap-2">
       <div className="h-[215px]">
-        <div className="text-base font-semibold">Card</div>
+        <div className="font-semibold">Card</div>
         <div>Test</div>
       </div>
     </div>
@@ -88,12 +88,12 @@ export default function Content(props: DialogProps) {
   const CardShowcase = () =>
     playerState.selectedCard && (
       <div className="flex flex-col gap-2">
-        <div className="text-base font-semibold">Card</div>
+        {/* <div className="font-semibold">Card</div> */}
         <div className="flex w-full gap-6">
           <Card
             cardId={playerState.selectedCard.id}
             cardEffect={null}
-            big={true}
+            big
             {...props}
           />
           {/* CARD STATS */}
@@ -185,7 +185,7 @@ export default function Content(props: DialogProps) {
     discountedPrice &&
     replacedPrice && (
       <div className="flex flex-col gap-2">
-        <div className="text-base font-semibold">Required tokens</div>
+        {/* <div className="font-semibold">Required tokens</div> */}
         {/* <hr className="h-[1px] w-full rounded-full bg-[#111827] drop-shadow-md"></hr> */}
         <div className="flex w-full select-none justify-between">
           {requiredTokens.map((cardColor) => (
@@ -321,7 +321,7 @@ export default function Content(props: DialogProps) {
 
   const YourTokensShowcase = () => (
     <div className="flex flex-col gap-2">
-      <div className="text-base font-semibold">Your tokens</div>
+      {/* <div className="text-sm font-semibold">Your tokens</div> */}
       <div className="flex h-[40px] w-full">
         {tokenColors.map((tokenColor) => (
           <div className="flex w-1/6 justify-center">
@@ -497,7 +497,7 @@ export default function Content(props: DialogProps) {
   }
   // Purchase or claim
   return (
-    <div className="relative flex w-full flex-col gap-6 text-base">
+    <div className="relative flex w-full flex-col gap-6 border border-red-500 text-sm">
       <CardShowcase />
       <RequiredTokensShowcase />
       <YourTokensShowcase />

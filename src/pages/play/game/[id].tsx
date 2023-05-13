@@ -13,12 +13,11 @@ import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
 import { PlayerState, SocketEvents } from "../../../common/types";
 import TokenContainer from "../../../components/TokenContainer";
-import ActionDialog from "../../../components/Dialog";
 import { InventoryKey, TokenColor } from "../../../common/types";
 import { useSocket } from "../../../hooks/useSocket";
 import Others from "../../../components/Others";
 import Me from "../../../components/Me";
-import TestD from "../../../components/TestD";
+import ActionDialog from "../../../components/Dialog";
 
 const defaultPrice = {
   white: 0,
@@ -293,13 +292,18 @@ export default function Game() {
           </button>
         </div> */}
         {/* DIALOG */}
+        {/* <ActionDialog
+          game={game}
+          player={player}
+          playerState={playerState}
+          setPlayerState={setPlayerState}
+        /> */}
         <ActionDialog
           game={game}
           player={player}
           playerState={playerState}
           setPlayerState={setPlayerState}
         />
-        <TestD />
       </main>
     </>
   );

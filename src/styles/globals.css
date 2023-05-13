@@ -50,3 +50,21 @@ body {
   -webkit-text-stroke: 0.05rem #111827;
   @apply font-number;
 }
+
+/* NEW */
+.its-ur-turn {
+  @apply relative flex items-center justify-center overflow-hidden;
+}
+
+.its-ur-turn::before {
+  @apply absolute h-[300px] w-[300px] animate-[border_4s_linear_infinite] bg-[conic-gradient(transparent,transparent,transparent,#00ccff)] content-[''];
+  animation-delay: -2s;
+}
+
+.its-ur-turn::after {
+  @apply absolute h-[300px] w-[300px] animate-[border_4s_linear_infinite] bg-[conic-gradient(transparent,transparent,transparent,#d400d4)] content-[''];
+}
+
+.its-ur-turn span {
+  @apply absolute inset-[5px] z-10 h-full w-full rounded-lg bg-inherit;
+}

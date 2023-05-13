@@ -1,21 +1,11 @@
+import { useState, Fragment, SetStateAction } from "react";
+import { Dialog, Tab, Transition } from "@headlessui/react";
 import { Game, Player } from "@prisma/client";
-import { SetStateAction } from "react";
-import {
-  defaultPrice,
-  defaultTokens,
-  cardColors,
-  tokenColors,
-  compPrice,
-  opPrice,
-} from "../common/constants";
-import { PlayerState } from "../common/types";
-import { CardColor, InventoryKey, Action } from "../common/types";
-import { api } from "../utils/api";
-import Card from "./Card";
+import { InventoryKey, PlayerState } from "../common/types";
+import Title from "./Title";
+import { defaultPrice, defaultTokens } from "../common/constants";
 import Content from "./Content";
-import Claim from "./Claim";
-import TokenContainer from "./TokenContainer";
-import Take from "./Take";
+import { CardIcon, ReserveIcon } from "./Me";
 
 export interface DialogProps {
   game: Game;
@@ -26,8 +16,9 @@ export interface DialogProps {
 
 export default function ActionDialog(props: DialogProps) {
   const { game, player, playerState, setPlayerState } = props;
+  const isOpen = playerState.currentAction !== null;
 
-  const close = () => {
+  function closeDialog() {
     if (player && game) {
       setPlayerState({
         // reset: false,
@@ -47,109 +38,72 @@ export default function ActionDialog(props: DialogProps) {
         message: "",
       });
     }
-  };
-
-  const changeAction = (action: Action) => {
-    if (action !== playerState.currentAction && player && game) {
-      setPlayerState((prev) => ({
-        ...prev,
-        success:
-          action === "reserve"
-            ? game[`inventory${game.turnIdx}` as InventoryKey].reserves.length <
-              3
-            : playerState.selectedCard && action === "purchase"
-            ? compPrice(
-                playerState.playerTokens,
-                opPrice(
-                  "decrement",
-                  playerState.selectedCard.price,
-                  game[`inventory${game.turnIdx}` as InventoryKey].discount
-                )
-              )
-            : false,
-        currentAction: action,
-        resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
-        inventoryTokens:
-          game && game.status !== "created"
-            ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
-            : { ...defaultTokens },
-        playerTokens: { ...defaultTokens },
-        priceToReplace: { ...defaultPrice },
-        // selectedCard: null,
-        selectedCardColor: null,
-        hasExtraTurn: false,
-        isNextTurn: false,
-        message: "",
-      }));
-    }
-  };
-
-  function SideTab() {
-    return (
-      <>
-        <div onClick={() => changeAction("take")}>Take</div>
-        <div onClick={() => changeAction("purchase")}>Purchase</div>
-        <div onClick={() => changeAction("reserve")}>Reserve</div>
-        <div className="h-[30px]"></div>
-        <div>{playerState.message}</div>
-      </>
-    );
   }
+  const titleTxt =
+    playerState.currentAction === "purchase"
+      ? "PURCHASE CARD"
+      : playerState.currentAction === "reserve"
+      ? "RESERVE CARD"
+      : "COLLECT TOKENS";
 
   return (
-    <div
-      className="fixed inset-0 z-10 overflow-y-auto bg-black/[.4] backdrop-blur-sm"
-      style={{
-        visibility: playerState.currentAction === null ? "hidden" : "visible",
-      }}
-    >
-      {playerState.currentAction === null ? (
-        <></>
-      ) : (
-        <>
-          <div className="fixed inset-0 h-full w-full" onClick={close}></div>
-          <div className="flex min-h-screen items-center">
-            <div className="relative mx-auto flex h-[660px] w-[1082px] items-center justify-center rounded-md bg-gray-100 px-16 py-8 shadow-lg">
-              <div className="items-centerzz flex h-full w-full justify-center gap-12">
-                <div className="w-[160px]">
-                  <SideTab />
-                </div>
-                <div className="h-full w-[1px] border border-gray-300"></div>
-                <div className="w-[500px]">
-                  <Content {...props} />
-                </div>
-                <div className="h-full w-[1px] border border-gray-300"></div>
-                <div className="w-[160px]">
-                  <div className="w-full">
-                    {/* <code className="text-xs">
-                  {JSON.stringify(playerState, null, 2)}
-                </code> */}
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog
+        as="div"
+        className="relative z-20 select-none max-md:hidden"
+        onClose={closeDialog}
+      >
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center text-center">
+            <Transition.Child
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              {playerState.currentAction && (
+                <Dialog.Panel className="w-[640px] transform overflow-hidden rounded-2xl bg-gray-100 text-left align-middle shadow-xl transition-all">
+                  <div className="flex w-full gap-6">
+                    <div className="flex flex-1 flex-col gap-4 py-6 pl-6">
+                      <div className="flex aspect-square w-full items-center justify-center rounded bg-gray-50 text-slate-600 drop-shadow">
+                        <CardIcon width="80%" height="80%" />
+                      </div>
+                      <div className="flex aspect-square w-full items-center justify-center rounded bg-gray-50 text-slate-600 drop-shadow">
+                        <ReserveIcon width="80%" height="80%" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-6 py-6">
+                      <Dialog.Title>
+                        <Title>{titleTxt}</Title>
+                      </Dialog.Title>
+                      <div className="w-[400px]">
+                        <Content {...props} />
+                      </div>
+                    </div>
+                    <div className="flex-1 py-6 pr-6">
+                      {/* <div className="aspect-square w-full bg-red-500"></div> */}
+                    </div>
                   </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="absolute top-2 right-2 mx-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900"
-                onClick={close}
-              >
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-              </button>
-            </div>
+                </Dialog.Panel>
+              )}
+            </Transition.Child>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+      </Dialog>
+    </Transition>
   );
 }

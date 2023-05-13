@@ -28,10 +28,10 @@ export default function Deck(props: DeckProps) {
       : "grid-cols-5 w-full";
 
   return (
-    <div className="flex gap-6 overflow-auto p-2 lg:gap-12 lg:p-4">
+    <div className="flex gap-6 overflow-auto p-2 lg:gap-12 lg:p-6">
       <div className="flex items-center">
         <button
-          className={`flex h-max min-h-[40px] select-none flex-col rounded bg-gray-50 p-1 drop-shadow ${
+          className={`flex h-max min-h-[40px] select-none flex-col rounded bg-gray-50 p-1 text-base drop-shadow ${
             playerTurn && "cursor-pointer hover:bg-gray-100"
           }`}
           disabled={!playerTurn}

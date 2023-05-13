@@ -18,7 +18,6 @@ interface CardProps {
   playerState?: PlayerState;
   setPlayerState?: (value: SetStateAction<PlayerState>) => void;
   big?: boolean;
-  phIdx?: number;
 }
 
 export default function Card({
@@ -29,7 +28,6 @@ export default function Card({
   playerState,
   setPlayerState,
   big = false,
-  phIdx = -1,
 }: CardProps) {
   const { data: card } = ![-1, 101, 102, 103, 104].includes(cardId)
     ? api.card.findById.useQuery(cardId)
@@ -55,7 +53,7 @@ export default function Card({
     <button
       className={`select-none rounded-lg border bg-gray-50 drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
-      } ${!big ? "h-[154px] min-w-[100px]" : "h-[231px] min-w-[150px]"}`}
+      } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       disabled={!playerTurn || !cardEffect}
       onClick={() => {
         if (
@@ -144,7 +142,7 @@ function ScoreLabel({ score, big }: ScoreProps) {
       className={
         score
           ? `number flex aspect-square w-full items-center justify-center rounded-md font-black leading-tight ${
-              !big ? "text-xl" : "text-3xl"
+              !big ? "text-[20px]" : "text-[26px]"
             }`
           : undefined
       }
@@ -177,7 +175,7 @@ function ColorLabel({ color, big }: ColorProps) {
   return (
     <div
       className={`${colorClass} ${
-        !big ? "rounded-md" : "rounded-[9px]"
+        !big ? "rounded-md" : "rounded-[8px]"
       } aspect-square w-[90%] drop-shadow`}
     ></div>
   );
@@ -207,7 +205,7 @@ function PriceLabel({ color, price, big }: PriceProps) {
   return (
     <div
       className={`number flex aspect-square w-full items-center justify-center rounded-full font-black leading-none drop-shadow ${colorClass} ${
-        !big ? "text-lg" : "text-[27px]"
+        !big ? "text-[20px]" : "text-[26px]"
       }`}
     >
       {price}

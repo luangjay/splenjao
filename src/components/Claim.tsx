@@ -1,6 +1,6 @@
 import Card from "./Card";
 import Token from "./Token";
-import { DialogProps } from "./Dialog";
+import { DialogProps } from "./LegacyDialog";
 import { CardColor, InventoryKey } from "../common/types";
 import { opPrice, opColorWPrice, tokenColors } from "../common/constants";
 
