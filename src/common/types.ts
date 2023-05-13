@@ -10,7 +10,7 @@ export type Reference = "resource" | "player" | "inventory";
 
 export type TokenEffect = "take" | "return" | "special";
 
-export type CardEffect = "purchase";
+export type CardEffect = "purchase" | "special";
 
 export type InventoryKey =
   | "inventory0"

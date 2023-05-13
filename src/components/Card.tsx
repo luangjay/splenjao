@@ -49,14 +49,14 @@ export default function Card({
     );
   if (!card || cardId === -1)
     return (
-      <div className="min-w-[100px] max-w-[200px] select-none rounded-lg"></div>
+      <div className="min-h-[154px] min-w-[100px] select-none rounded-lg"></div>
     );
   return (
     <button
-      className={`aspect-[0.65] w-[100px] select-none rounded-lg border bg-gray-50 drop-shadow ${
+      className={`select-none rounded-lg border bg-gray-50 drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
-      } ${!big ? "w-[100px] max-w-[200px]" : "w-[150px] max-w-[300px]"}`}
-      disabled={!cardEffect}
+      } ${!big ? "h-[154px] min-w-[100px]" : "h-[231px] min-w-[150px]"}`}
+      disabled={!playerTurn || !cardEffect}
       onClick={() => {
         if (
           playerTurn &&
@@ -104,7 +104,7 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-[#111827] text-center text-sm text-gray-100 shadow-md drop-shadow">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-[#111827] text-center text-sm text-gray-100 drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />

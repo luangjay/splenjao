@@ -20,7 +20,7 @@ export default function Others(props: PlayerProps) {
     .filter((player) => player.id !== me.id);
 
   return (
-    <div className="flex w-full flex-col justify-between gap-4 overflow-auto p-4">
+    <div className="flex w-full flex-col justify-between gap-6 overflow-auto p-6">
       {others.map((player) => {
         const idx = player.idx;
         const inventory = game[`inventory${idx}` as InventoryKey];
@@ -36,7 +36,7 @@ export default function Others(props: PlayerProps) {
           return <div className="w-full"></div>;
         }
         return (
-          <div className="h-fit w-full text-sm">
+          <div className="h-fit w-full text-base">
             <div className="flex flex-col rounded-lg bg-gray-100 drop-shadow">
               <div className="flex h-[90px] w-full items-center gap-4 p-4 text-start">
                 <div className="aspect-square h-[90%]">

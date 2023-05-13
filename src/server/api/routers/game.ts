@@ -262,21 +262,6 @@ export const gameRouter = createTRPCRouter({
       ) {
         return;
       }
-      if (tiles.length > 0) {
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-        console.log("found tile");
-      }
       const updatedGame = await ctx.prisma.game.update({
         where: {
           id: input.id,
@@ -404,25 +389,6 @@ export const gameRouter = createTRPCRouter({
       });
 
       const { maxIdx, maxScore } = calculateWinner(updatedGame);
-
-      for (let zz = 0; zz < 50; zz++) {
-        console.log(
-          updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey].score
-        );
-        console.log(
-          (updatedGame.status === "started"
-            ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
-                .score >= 15
-              ? updatedGame.turnIdx === updatedGame.playerCount - 1
-                ? "ended"
-                : "ending"
-              : undefined
-            : updatedGame.status === "ending" &&
-              updatedGame.turnIdx === updatedGame.playerCount - 1
-            ? "ended"
-            : undefined) || "zzzzz"
-        );
-      }
 
       return ctx.prisma.game.update({
         where: {

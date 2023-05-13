@@ -28,12 +28,13 @@ export default function Deck(props: DeckProps) {
       : "grid-cols-5 w-full";
 
   return (
-    <div className="flex gap-6 p-2 lg:gap-12 lg:p-4">
+    <div className="flex gap-6 overflow-auto p-2 lg:gap-12 lg:p-4">
       <div className="flex items-center">
         <button
           className={`flex h-max min-h-[40px] select-none flex-col rounded bg-gray-50 p-1 drop-shadow ${
             playerTurn && "cursor-pointer hover:bg-gray-100"
           }`}
+          disabled={!playerTurn}
           onClick={() =>
             setPlayerState((prev) => ({
               ...prev,
@@ -55,7 +56,7 @@ export default function Deck(props: DeckProps) {
       <div className="grid grid-rows-4 gap-1.5 lg:gap-2">
         <div className={`mx-auto grid gap-1.5 lg:gap-2 ${tileClass}`}>
           {game.resource.tiles.map(
-            (tileId, idx) => idx < 5 && <Tile tileId={tileId} {...props} />
+            (tileId, idx) => idx < 5 && <Tile tileId={tileId} />
           )}
         </div>
         <div className="grid h-fit grid-cols-5 gap-1.5 lg:gap-2">

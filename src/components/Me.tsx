@@ -1,9 +1,16 @@
-import { Game } from "@prisma/client";
-import { InventoryKey, PlayerProps, TokenColor } from "../common/types";
+import { Card as CardSchema, Game } from "@prisma/client";
+import {
+  CardColor,
+  InventoryKey,
+  PlayerProps,
+  TokenColor,
+} from "../common/types";
 import { api } from "../utils/api";
 import { tokenColors } from "../common/constants";
 import Image from "next/image";
 import Card from "./Card";
+import { useState } from "react";
+import Tile from "./Tile";
 
 export default function Me(props: PlayerProps) {
   const { game, me: player } = props;
@@ -11,8 +18,11 @@ export default function Me(props: PlayerProps) {
   const inventory = game[`inventory${idx}` as InventoryKey];
   const tokenCount = Object.values(inventory.tokens).reduce((a, b) => a + b, 0);
   const cardCount = inventory.cards.length;
+  const reserveCount = inventory.reserves.length;
   const tileCount = inventory.tiles.length;
   const score = inventory.score;
+
+  const [showScore, setShowScore] = useState(false);
 
   const MyProfile = () => (
     <div className="flex flex-col rounded-lg bg-gray-100 drop-shadow">
@@ -39,7 +49,7 @@ export default function Me(props: PlayerProps) {
             width={256}
             height={256}
             className="aspect-square h-full rounded-full object-cover drop-shadow"
-          ></Image>
+          />
         </div>
         <div className="flex h-full flex-1 flex-col justify-between">
           <div className="flex h-[24px] items-center justify-between">
@@ -52,13 +62,13 @@ export default function Me(props: PlayerProps) {
             </div>
           </div>
           <div className="flex h-[24px] justify-between">
-            <div className="-mx-0.5 flex h-[24px] items-center gap-1">
-              <TokenIcon />
-              {tokenCount}
-            </div>
             <div className="flex h-[24px] items-center gap-1.5">
               <CardIcon />
               {cardCount}
+            </div>
+            <div className="-mx-0.5 flex h-[24px] items-center gap-1">
+              <ReserveIcon />
+              {reserveCount}
             </div>
             <div className="flex h-[24px] items-center gap-1.5">
               <TileIcon />
@@ -70,19 +80,66 @@ export default function Me(props: PlayerProps) {
     </div>
   );
 
-  return (
-    <div className="flex w-full flex-col justify-between gap-4 overflow-auto p-4">
-      <div className="h-fit w-full text-sm">
-        <div>
-          <Card
-            cardId={inventory.cards[0] ?? -1}
-            cardEffect={null}
-            game={game}
-            player={player}
-          />
+  const MyCards = () => (
+    <div className="flex h-[190px]">
+      {inventory.cards.length === 0 ? (
+        <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg pt-8 text-base">
+          No cards owned
         </div>
-        <MyProfile />
+      ) : (
+        <div className="flex h-full w-full overflow-auto pt-8 text-sm">
+          {inventory.cards.map((cardId) => {
+            const [float, setFloat] = useState(false);
+            return (
+              <div
+                className="flex w-[40px] rounded-lg transition-all duration-[100ms]"
+                style={{ marginTop: float ? "-32px" : "0px" }}
+                onClick={() => setFloat((prev) => !prev)}
+              >
+                <Card
+                  cardId={cardId ?? -1}
+                  cardEffect={"special"}
+                  game={game}
+                  player={player}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  const MyTiles = () => (
+    <div className="flex h-[100px]">
+      {inventory.tiles.length === 0 ? (
+        <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg text-base">
+          No tiles owned
+        </div>
+      ) : (
+        <div className="flex h-full w-full gap-2 overflow-auto text-sm">
+          {inventory.tiles.map((tileId) => (
+            <div className="flex rounded-lg transition-all duration-[100ms]">
+              <Tile tileId={tileId} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="flex h-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
+      <div className="flex-1"></div>
+      <div className="flex flex-col gap-4">
+        <div className="font-bold">Tiles</div>
+        <MyTiles />
       </div>
+      <div className="flex flex-col gap-2">
+        <div className="font-bold">Cards</div>
+        <MyCards />
+      </div>
+      <MyProfile />
     </div>
   );
 }
@@ -100,7 +157,7 @@ const colorClass = (tokenColor: TokenColor) =>
     ? `fill-gray-800`
     : tokenColor === "gold"
     ? `fill-yellow-300`
-    : "";
+    : ``;
 
 function ScoreIcon() {
   return (
@@ -132,6 +189,20 @@ function TokenIcon(props: TokenIconProps) {
     >
       <path fill="none" d="M0 0h24v24H0z" />
       <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-14.243L7.757 12 12 16.243 16.243 12 12 7.757z" />
+    </svg>
+  );
+}
+
+function ReserveIcon() {
+  return (
+    <svg
+      fill="currentColor"
+      viewBox="0 0 16 16"
+      height="20px"
+      width="20px"
+      className="rotate-6"
+    >
+      <path d="M2 1a1 1 0 00-1 1v4.586a1 1 0 00.293.707l7 7a1 1 0 001.414 0l4.586-4.586a1 1 0 000-1.414l-7-7A1 1 0 006.586 1H2zm4 3.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
     </svg>
   );
 }

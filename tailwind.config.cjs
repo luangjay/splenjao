@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       transitionProperty: {
         width: "width",
+        margin: "margin",
       },
     },
     fontFamily: {

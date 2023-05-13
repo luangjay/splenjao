@@ -226,17 +226,17 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <main className="flex min-h-screen justify-between bg-[url('/background.jpg')] bg-cover text-xl text-[#111827]"> */}
       <main className="relative flex h-screen select-none bg-gray-100 text-xl text-slate-600">
+        {/* OTHERS */}
         <div
-          className="fixed z-10 flex h-full items-center overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-width delay-[500]"
-          style={{ width: openOthers ? "312px" : 0 }}
+          className="fixed z-10 flex h-full items-center overflow-hidden drop-shadow transition-all"
+          style={{ width: openOthers ? "342px" : 0 }}
         >
-          <div className="flex h-full flex-1 flex-col justify-between">
+          <div className="flex h-full flex-1 flex-col justify-between overflow-auto bg-gray-200/[.5]">
             <Others game={game} me={player} />
           </div>
           <button
-            className="mx-0.5 flex h-[72px] items-center rounded-lg hover:bg-white/[.4]"
+            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] hover:bg-gray-200/[.2]"
             onClick={() => setOpenOthers((prev) => !prev)}
           >
             <LeftIcon />
@@ -244,13 +244,14 @@ export default function Game() {
         </div>
         <div className="fixed z-10 flex h-full items-center drop-shadow">
           <button
-            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-width delay-[500] hover:bg-gray-200/[.2]"
+            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-all delay-[500] hover:bg-gray-200/[.2]"
             style={{ width: !openOthers ? "36px" : 0 }}
             onClick={() => setOpenOthers((prev) => !prev)}
           >
             <RightIcon />
           </button>
         </div>
+        {/* DECK */}
         <div className="mx-auto flex h-fit min-h-full items-center justify-center">
           <Deck
             game={game}
@@ -259,23 +260,24 @@ export default function Game() {
             setPlayerState={setPlayerState}
           />
         </div>
+        {/* ME */}
         <div
-          className="fixed right-0 z-10 flex h-full items-center overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-width delay-100"
-          style={{ width: openMe ? "312px" : 0 }}
+          className="fixed right-0 z-10 flex h-full items-center overflow-hidden drop-shadow transition-all"
+          style={{ width: openMe ? "342px" : 0 }}
         >
           <button
-            className="mx-0.5 flex h-[72px] items-center rounded-lg hover:bg-white/[.4]"
+            className="flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] hover:bg-gray-200/[.2]"
             onClick={() => setOpenMe((prev) => !prev)}
           >
             <RightIcon />
           </button>
-          <div className="flex h-full flex-1 flex-col justify-between">
+          <div className="flex h-full flex-1 flex-col justify-between overflow-auto bg-gray-200/[.5]">
             <Me game={game} me={player} />
           </div>
         </div>
         <div className="fixed right-0 z-10 flex h-full items-center drop-shadow">
           <button
-            className="flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] transition-width delay-100 hover:bg-gray-200/[.2]"
+            className="flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] transition-all hover:bg-gray-200/[.3]"
             style={{ width: !openMe ? "36px" : 0 }}
             onClick={() => setOpenMe((prev) => !prev)}
           >
