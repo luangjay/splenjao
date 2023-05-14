@@ -100,7 +100,11 @@ export default function Token({
       playerState.priceToReplace[colorToReplace] === 0)
   )
     return (
-      <div className={!showCount ? "-z-50 h-[36px]" : "-z-50 h-[36px]"}></div>
+      <div
+        className={
+          !showCount ? "-z-50 h-[40px] w-[64px]" : "-z-50 h-[40px] w-[64px]"
+        }
+      ></div>
     );
   return (
     <div
@@ -109,8 +113,9 @@ export default function Token({
       } ${flexCol && "flex-col"}`}
     >
       <button
-        className={`${tokenEffect && "cursor-pointer"}`}
-        onClick={(e: MouseEvent<HTMLButtonElement>) => {
+        className={`${tokenEffect}`}
+        disabled={!tokenEffect}
+        onClick={(e) => {
           if (!tokenEffect) return;
           e.stopPropagation();
           setDisabled(true);

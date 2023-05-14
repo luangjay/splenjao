@@ -44,12 +44,13 @@ export default function ActionDialog(props: DialogProps) {
       });
     }
   }
-  const titleTxt =
-    playerState.currentAction === "purchase"
-      ? "PURCHASE"
-      : playerState.currentAction === "reserve"
-      ? "RESERVE"
-      : "COLLECT";
+  const titleTxt = playerState.hasExtraTurn
+    ? "RETURN"
+    : playerState.currentAction === "purchase"
+    ? "PURCHASE"
+    : playerState.currentAction === "reserve"
+    ? "RESERVE"
+    : "COLLECT";
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -82,7 +83,7 @@ export default function ActionDialog(props: DialogProps) {
             >
               {playerState.currentAction && (
                 <Dialog.Panel className="flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
-                  <div className="flex flex-col items-end py-[72px]">
+                  <div className="flex flex-col items-end py-8">
                     <ActionTab {...props} />
                   </div>
                   <div className="flex flex-col gap-2 rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
@@ -93,7 +94,7 @@ export default function ActionDialog(props: DialogProps) {
                       <Content {...props} />
                     </div>
                   </div>
-                  <div className="w-[100px]"></div>
+                  <div className="flex w-[80px] flex-col items-end py-8"></div>
                 </Dialog.Panel>
               )}
             </Transition.Child>
@@ -206,7 +207,6 @@ function ActionTab(props: DialogProps) {
                 <tab.Child width="70%" height="70%" />
               </button>
             )}
-            {/* <div className="h-2 w-4 bg-slate-400"></div> */}
           </div>
         </div>
       ))}

@@ -29,9 +29,11 @@ export default function Card({
   setPlayerState,
   big = false,
 }: CardProps) {
-  const { data: card } = ![-1, 101, 102, 103, 104].includes(cardId)
+  const { data: card, isLoading: cardLoading } = ![
+    -1, 101, 102, 103, 104,
+  ].includes(cardId)
     ? api.card.findById.useQuery(cardId)
-    : { data: null };
+    : { data: null, isLoading: null };
   const playerTurn =
     player && game && player.id === game.playerIds[game.turnIdx];
 
@@ -48,6 +50,14 @@ export default function Card({
       <BackCard cardCount={cardCount(game.resource.cardsLv3)} cardLv={3} />
     );
   if (cardId === 104) return <PlaceholderCard />;
+  if (cardLoading)
+    return (
+      <div
+        className={`select-none rounded-lg border bg-gray-50 drop-shadow ${
+          playerTurn && cardEffect && "hover:bg-gray-100"
+        } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
+      ></div>
+    );
   if (!card || cardId === -1) return <></>;
   return (
     <button

@@ -6,8 +6,13 @@ interface TileProps {
 }
 
 export default function Tile({ tileId }: TileProps) {
-  const { data: tile } = api.tile.findById.useQuery(tileId);
+  const { data: tile, isLoading: tileLoading } =
+    api.tile.findById.useQuery(tileId);
 
+  if (tileLoading)
+    return (
+      <div className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-gray-100 bg-cover drop-shadow"></div>
+    );
   if (!tile || tileId === -1)
     return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
   return (

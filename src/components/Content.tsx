@@ -32,7 +32,7 @@ export default function Content(props: DialogProps) {
 
   const selectedColorClass =
     playerState.selectedCardColor === "white"
-      ? "border-slate-300 border shadow-[0_0_0_0.2rem_rgba(255,255,255,.6)]"
+      ? "border-slate-300 border shadow-[0_0_0_0.2rem_rgba(255,255,255,.9)]"
       : playerState.selectedCardColor === "blue"
       ? "border-[#80bdff] shadow-[0_0_0_0.2rem_rgba(0,128,255,.25)]"
       : playerState.selectedCardColor === "green"
@@ -192,10 +192,10 @@ export default function Content(props: DialogProps) {
         <div className="flex w-full select-none justify-center gap-6">
           {requiredTokens.map((cardColor) => (
             <button
-              className={`relative aspect-square w-[20%] rounded-md border bg-[linear-gradient(45deg,rgba(255,255,255,0.8),rgba(255,255,255,0.6))] drop-shadow ${
+              className={`relative aspect-square w-[20%] cursor-default rounded-md border bg-[linear-gradient(45deg,#f5f5f5,#ffffff)] drop-shadow ${
                 cardColor === playerState.selectedCardColor &&
                 selectedColorClass
-              } ${discountedPrice[cardColor] !== 0 && "hover:scale-105"}`}
+              } ${discountedPrice[cardColor] !== 0 && ""}`}
               disabled={discountedPrice[cardColor] === 0}
               onClick={() => {
                 if (discountedPrice[cardColor] !== 0) {
@@ -211,22 +211,23 @@ export default function Content(props: DialogProps) {
                   <div
                     className={`absolute ${
                       playerState.priceToReplace[cardColor] !== 0
-                        ? "top-6 left-4"
-                        : "top-5 left-5"
+                        ? "top-4 left-3"
+                        : "top-4 left-4"
                     }`}
                   >
                     <Token
                       tokenColor={cardColor}
                       tokenEffect="return"
                       reference="player"
+                      flexCol
                       {...props}
                     />
                   </div>
                   <div
-                    className={`absolute z-10 ${
+                    className={`absolute ${
                       playerState.playerTokens[cardColor] !== 0
                         ? "right-2 top-2"
-                        : "top-5 left-5"
+                        : "top-4 left-4"
                     }`}
                   >
                     <Token
@@ -234,6 +235,7 @@ export default function Content(props: DialogProps) {
                       tokenEffect="return"
                       reference="player"
                       colorToReplace={cardColor}
+                      flexCol
                       {...props}
                     />
                   </div>
@@ -286,7 +288,9 @@ export default function Content(props: DialogProps) {
 
   const AvailableTokensShowcase = () => (
     <div className="mx-4 flex flex-1 flex-col gap-2">
-      {playerState.currentAction !== "take" && <Title>AVAILABLE TOKENS</Title>}
+      {playerState.currentAction !== "take" && !playerState.hasExtraTurn && (
+        <Title>AVAILABLE TOKENS</Title>
+      )}
       <div className="flex w-full flex-1 items-center justify-center">
         {tokenColors.map((tokenColor) => (
           <div className="flex w-1/6 justify-center">
@@ -409,7 +413,7 @@ export default function Content(props: DialogProps) {
               }
             }}
           >
-            Collect
+            {playerState.hasExtraTurn ? "Return" : "Collect"}
           </Button>
         </div>
       </div>
@@ -418,7 +422,6 @@ export default function Content(props: DialogProps) {
     if (playerState.hasExtraTurn)
       return (
         <div className="relative flex h-full w-full flex-col gap-6 text-sm">
-          <NoCardShowcase />
           <AvailableTokensShowcase />
           <SelectedTokensShowcase />
           <YourTokensShowcase />
@@ -463,7 +466,7 @@ export default function Content(props: DialogProps) {
                 }
               }}
             >
-              Reserve
+              Return
             </Button>
           </div>
         </div>
