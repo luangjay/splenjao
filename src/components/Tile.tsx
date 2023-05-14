@@ -11,14 +11,14 @@ export default function Tile({ tileId }: TileProps) {
 
   if (tileLoading)
     return (
-      <div className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-gray-100 bg-cover drop-shadow"></div>
+      <div className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-gray-100 bg-cover drop-shadow-lg"></div>
     );
   if (!tile || tileId === -1)
     return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
   return (
     <div
-      className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-[url('/ricky.jpg')] bg-cover drop-shadow"
-      // disabled={props.isTurnLoading}
+      className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-cover drop-shadow"
+      style={{ backgroundImage: `url(${tile.pic})` }}
     >
       <div className="flex h-full flex-row rounded-lg drop-shadow-none">
         <div className="z-10 flex h-full w-[33%] flex-col justify-between rounded-[8px_0_0_8px] bg-white/[.5] p-[4px] backdrop-blur-sm">

@@ -41,6 +41,7 @@ model Tile {
     id      Int         @id @map("_id")
     score   Int
     price   Price
+    pic     String?
 }
 
 type Price {
