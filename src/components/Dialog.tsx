@@ -1,11 +1,16 @@
 import { useState, Fragment, SetStateAction } from "react";
 import { Dialog, Tab, Transition } from "@headlessui/react";
 import { Game, Player } from "@prisma/client";
-import { InventoryKey, PlayerState } from "../common/types";
+import { Action, InventoryKey, PlayerState } from "../common/types";
 import Title from "./Title";
-import { defaultPrice, defaultTokens } from "../common/constants";
+import {
+  compPrice,
+  defaultPrice,
+  defaultTokens,
+  opPrice,
+} from "../common/constants";
 import Content from "./Content";
-import { CardIcon, ReserveIcon } from "./Me";
+import { CardIcon, ReserveIcon, TokenIcon } from "./Me";
 
 export interface DialogProps {
   game: Game;
@@ -41,10 +46,10 @@ export default function ActionDialog(props: DialogProps) {
   }
   const titleTxt =
     playerState.currentAction === "purchase"
-      ? "PURCHASE CARD"
+      ? "PURCHASE"
       : playerState.currentAction === "reserve"
-      ? "RESERVE CARD"
-      : "COLLECT TOKENS";
+      ? "RESERVE"
+      : "COLLECT";
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -76,28 +81,19 @@ export default function ActionDialog(props: DialogProps) {
               leaveTo="opacity-0 scale-95"
             >
               {playerState.currentAction && (
-                <Dialog.Panel className="w-[640px] transform overflow-hidden rounded-2xl bg-gray-100 text-left align-middle shadow-xl transition-all">
-                  <div className="flex w-full gap-6">
-                    <div className="flex flex-1 flex-col gap-4 py-6 pl-6">
-                      <div className="flex aspect-square w-full items-center justify-center rounded bg-gray-50 text-slate-600 drop-shadow">
-                        <CardIcon width="80%" height="80%" />
-                      </div>
-                      <div className="flex aspect-square w-full items-center justify-center rounded bg-gray-50 text-slate-600 drop-shadow">
-                        <ReserveIcon width="80%" height="80%" />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-6 py-6">
-                      <Dialog.Title>
-                        <Title>{titleTxt}</Title>
-                      </Dialog.Title>
-                      <div className="w-[400px]">
-                        <Content {...props} />
-                      </div>
-                    </div>
-                    <div className="flex-1 py-6 pr-6">
-                      {/* <div className="aspect-square w-full bg-red-500"></div> */}
+                <Dialog.Panel className="flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
+                  <div className="flex flex-col items-end py-[72px]">
+                    <ActionTab {...props} />
+                  </div>
+                  <div className="flex flex-col gap-2 rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
+                    <Dialog.Title>
+                      <Title size={1}>{titleTxt}</Title>
+                    </Dialog.Title>
+                    <div className="h-[530px] w-[400px]">
+                      <Content {...props} />
                     </div>
                   </div>
+                  <div className="w-[100px]"></div>
                 </Dialog.Panel>
               )}
             </Transition.Child>
@@ -105,5 +101,115 @@ export default function ActionDialog(props: DialogProps) {
         </div>
       </Dialog>
     </Transition>
+  );
+}
+
+function ActionTab(props: DialogProps) {
+  const { game, player, playerState, setPlayerState } = props;
+
+  const cardReserved = playerState.selectedCard
+    ? game[`inventory${game.turnIdx}` as InventoryKey].reserves.includes(
+        playerState.selectedCard.id
+      )
+    : false;
+
+  const maxReserved =
+    game[`inventory${game.turnIdx}` as InventoryKey].reserves.length >= 3 ||
+    game[`inventory${game.turnIdx}` as InventoryKey].tokens.gold >= 3;
+
+  const noTokens = game.resource.tokens.gold <= 0;
+
+  const changeAction = (action: Action) => {
+    if (action !== playerState.currentAction && player && game) {
+      setPlayerState((prev) => ({
+        ...prev,
+        success:
+          action === "reserve"
+            ? game[`inventory${game.turnIdx}` as InventoryKey].reserves.length <
+              3
+            : playerState.selectedCard && action === "purchase"
+            ? compPrice(
+                playerState.playerTokens,
+                opPrice(
+                  "decrement",
+                  playerState.selectedCard.price,
+                  game[`inventory${game.turnIdx}` as InventoryKey].discount
+                )
+              )
+            : false,
+        currentAction: action,
+        resourceTokens: game ? game.resource.tokens : { ...defaultTokens },
+        inventoryTokens:
+          game && game.status !== "created"
+            ? game[`inventory${game.turnIdx}` as InventoryKey].tokens
+            : { ...defaultTokens },
+        playerTokens: { ...defaultTokens },
+        priceToReplace: { ...defaultPrice },
+        // selectedCard: null,
+        selectedCardColor: null,
+        hasExtraTurn: false,
+        isNextTurn: false,
+        message: "",
+      }));
+    }
+  };
+
+  const tabs =
+    playerState.currentAction === "take"
+      ? [{ Child: TokenIcon, selected: true, onClick: () => {} }]
+      : cardReserved
+      ? [
+          {
+            Child: CardIcon,
+            selected: playerState.currentAction === "purchase",
+            onClick: () => changeAction("purchase"),
+          },
+        ]
+      : [
+          {
+            Child: CardIcon,
+            selected: playerState.currentAction === "purchase",
+            onClick: () => changeAction("purchase"),
+          },
+          {
+            Child: ReserveIcon,
+            selected: playerState.currentAction === "reserve",
+            onClick: () => changeAction("reserve"),
+          },
+        ];
+
+  if (playerState.currentAction === null) return <></>;
+  return (
+    <>
+      {tabs.map((tab, idx) => (
+        <div
+          className={`flex flex-col items-center justify-center ${
+            tab.selected ? "w-[80px]" : "w-[60px]"
+          }`}
+        >
+          {/* {idx !== 0 && <div className="h-4 w-2 bg-slate-400"></div>} */}
+          <div className="flex items-center">
+            {tab.selected ? (
+              <button
+                className="flex aspect-square w-[80px] items-center justify-center rounded-[16px_0_0_16px] bg-slate-700 text-gray-200 drop-shadow"
+                disabled={tab.selected}
+                onClick={tab.onClick}
+              >
+                <tab.Child width="70%" height="70%" />
+              </button>
+            ) : (
+              <button
+                className="flex aspect-square w-[60px] items-center justify-center rounded-[16px_0_0_16px] bg-slate-500 pt-1 pl-1 text-gray-200 drop-shadow hover:bg-slate-400"
+                disabled={tab.selected}
+                onClick={tab.onClick}
+              >
+                <tab.Child width="70%" height="70%" />
+              </button>
+            )}
+            {/* <div className="h-2 w-4 bg-slate-400"></div> */}
+          </div>
+        </div>
+      ))}
+    </>
   );
 }

@@ -21,59 +21,74 @@ export default function Me(props: PlayerProps) {
   const reserveCount = inventory.reserves.length;
   const tileCount = inventory.tiles.length;
   const score = inventory.score;
+  const isTurn = idx === game.turnIdx;
 
   const [showScore, setShowScore] = useState(false);
 
-  const MyProfile = () => (
-    <div className="flex h-full w-full flex-col rounded-lg bg-gray-100 drop-shadow">
-      {/* <span /> */}
-      <div className="h-fit p-4">
-        <div className="flex justify-between gap-1 text-sm">
-          {tokenColors.map((tokenColor) => (
-            <div className="flex w-1/6 items-center gap-[1px]">
-              {inventory.tokens[tokenColor] > 0 && (
-                <>
-                  <TokenIcon className={colorClass(tokenColor)} />
-                  {inventory.tokens[tokenColor]}
-                </>
-              )}
+  const MyProfile = (
+    <div
+      className={`relative rounded-2xl bg-gray-100 ${
+        !isTurn && "border border-slate-600"
+      }`}
+    >
+      {isTurn && (
+        <div className="bg-animation absolute inset-0 rounded-2xl"></div>
+      )}
+      <div
+        className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none  ${
+          isTurn && "border border-slate-600"
+        }`}
+      >
+        <div className="flex flex-col">
+          <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
+            <div className="aspect-square h-[84%]">
+              <Image
+                alt=""
+                src={player.image || ""}
+                width={256}
+                height={256}
+                className="aspect-square h-full rounded-full object-cover drop-shadow"
+              ></Image>
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="mx-4 border"></div>
-      <div className="flex h-[90px] w-full items-center gap-4 p-4 text-start">
-        <div className="aspect-square h-[90%]">
-          <Image
-            alt=""
-            src={player.image || ""}
-            width={256}
-            height={256}
-            className="aspect-square h-full rounded-full object-cover drop-shadow"
-          />
-        </div>
-        <div className="flex h-full flex-1 flex-col justify-between">
-          <div className="flex h-[24px] items-center justify-between">
-            <div className="w-[99px] truncate text-base font-medium">
-              {player.name}
-            </div>
-            <div className="flex h-[24px] items-center gap-1.5">
-              <ScoreIcon />
-              {score}
+            <div className="flex h-full flex-1 flex-col justify-between">
+              <div className="flex h-[24px] items-center justify-between">
+                <div className="w-[99px] truncate text-base font-medium">
+                  {player.name}
+                </div>
+                <div className="flex h-[24px] items-center gap-1.5">
+                  <ScoreIcon />
+                  {score}
+                </div>
+              </div>
+              <div className="flex h-[24px] justify-between">
+                <div className="flex h-[24px] items-center gap-1.5">
+                  <CardIcon />
+                  {cardCount}
+                </div>
+                <div className="-mx-0.5 flex h-[24px] items-center gap-1">
+                  <ReserveIcon />
+                  {reserveCount}
+                </div>
+                <div className="flex h-[24px] items-center gap-1.5">
+                  <TileIcon />
+                  {tileCount}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex h-[24px] justify-between">
-            <div className="flex h-[24px] items-center gap-1.5">
-              <CardIcon />
-              {cardCount}
-            </div>
-            <div className="-mx-0.5 flex h-[24px] items-center gap-1">
-              <ReserveIcon />
-              {reserveCount}
-            </div>
-            <div className="flex h-[24px] items-center gap-1.5">
-              <TileIcon />
-              {tileCount}
+          <div className="mx-4 border"></div>
+          <div className="h-fit p-3 px-4">
+            <div className="flex justify-between gap-1 text-sm">
+              {tokenColors.map((tokenColor) => (
+                <div className="flex w-1/6 items-center gap-[1px]">
+                  {inventory.tokens[tokenColor] > 0 && (
+                    <>
+                      <TokenIcon className={colorClass(tokenColor)} />
+                      {inventory.tokens[tokenColor]}
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -81,7 +96,7 @@ export default function Me(props: PlayerProps) {
     </div>
   );
 
-  const MyCards = () => (
+  const MyCards = (
     <div className="flex h-[190px]">
       {inventory.cards.length === 0 ? (
         <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg pt-8 text-base">
@@ -111,7 +126,7 @@ export default function Me(props: PlayerProps) {
     </div>
   );
 
-  const MyTiles = () => (
+  const MyTiles = (
     <div className="flex h-[100px]">
       {inventory.tiles.length === 0 ? (
         <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg text-base">
@@ -131,7 +146,7 @@ export default function Me(props: PlayerProps) {
 
   return (
     <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-4">
         <Title>OPTIONS</Title>
         <div className="flex h-[60px] items-center justify-center rounded-lg">
           <button
@@ -144,13 +159,13 @@ export default function Me(props: PlayerProps) {
       </div>
       <div className="flex flex-col gap-4">
         <Title>TILES</Title>
-        <MyTiles />
+        {MyTiles}
       </div>
       <div className="flex flex-col gap-2">
         <Title>CARDS</Title>
-        <MyCards />
+        {MyCards}
       </div>
-      <MyProfile />
+      {MyProfile}
     </div>
   );
 }

@@ -1,11 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"); */
 
 @tailwind base;
 @tailwind components;
@@ -51,20 +47,34 @@ body {
   @apply font-number;
 }
 
-/* NEW */
-.its-ur-turn {
-  @apply relative flex items-center justify-center overflow-hidden;
+/* SAD: cpu usage is too damn high */
+.bg-animation {
+  content: "";
+  --angle: 0deg;
+  transform: translateZ(0);
 }
 
-.its-ur-turn::before {
-  @apply absolute h-[300px] w-[300px] animate-[border_4s_linear_infinite] bg-[conic-gradient(transparent,transparent,transparent,#00ccff)] content-[''];
-  animation-delay: -2s;
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
 }
 
-.its-ur-turn::after {
-  @apply absolute h-[300px] w-[300px] animate-[border_4s_linear_infinite] bg-[conic-gradient(transparent,transparent,transparent,#d400d4)] content-[''];
+@keyframes rotate-animation {
+  to {
+    --angle: 360deg;
+  }
 }
 
-.its-ur-turn span {
-  @apply absolute inset-[5px] z-10 h-full w-full rounded-lg bg-inherit;
+@supports (background: paint(houdini)) {
+  .bg-animation {
+    animation: rotate-animation 4s linear infinite;
+    background: linear-gradient(
+      var(--angle),
+      #ec4899,
+      #407cff,
+      #ec4899,
+      #6366f1
+    );
+  }
 }

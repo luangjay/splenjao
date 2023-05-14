@@ -7,14 +7,9 @@ module.exports = {
         width: "width",
         margin: "margin",
       },
-      keyframes: {
-        border: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
+      translate: {
+        "z-0": {
+          z: "0%",
         },
       },
     },

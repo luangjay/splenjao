@@ -1,7 +1,7 @@
 import Card from "./Card";
 import Token from "./Token";
 import { DialogProps } from "./Dialog";
-import { CardColor, InventoryKey } from "../common/types";
+import { CardColor, InventoryKey, TokenColor } from "../common/types";
 import {
   opPrice,
   opColorWPrice,
@@ -12,6 +12,8 @@ import {
   opTokenCountWColor,
 } from "../common/constants";
 import { cardColors } from "../common/constants";
+import { ButtonHTMLAttributes } from "react";
+import Title from "./Title";
 
 export default function Content(props: DialogProps) {
   const { game, player, playerState, setPlayerState } = props;
@@ -30,7 +32,7 @@ export default function Content(props: DialogProps) {
 
   const selectedColorClass =
     playerState.selectedCardColor === "white"
-      ? "border-slate-300 border border-gray-200 shadow-[0_0_0_0.2rem_rgba(255,255,255,1)]"
+      ? "border-slate-300 border shadow-[0_0_0_0.2rem_rgba(255,255,255,.6)]"
       : playerState.selectedCardColor === "blue"
       ? "border-[#80bdff] shadow-[0_0_0_0.2rem_rgba(0,128,255,.25)]"
       : playerState.selectedCardColor === "green"
@@ -89,7 +91,7 @@ export default function Content(props: DialogProps) {
     playerState.selectedCard && (
       <div className="flex flex-col gap-2">
         {/* <div className="font-semibold">Card</div> */}
-        <div className="flex w-full gap-6">
+        <div className="flex w-full justify-center gap-6">
           <Card
             cardId={playerState.selectedCard.id}
             cardEffect={null}
@@ -97,9 +99,9 @@ export default function Content(props: DialogProps) {
             {...props}
           />
           {/* CARD STATS */}
-          <div className="flex flex-grow flex-col">
-            {/* CARD LEVEL */}
-            <div className="flex h-1/6 w-full items-center gap-2 px-2">
+          {/* <div className="flex flex-grow flex-col"> */}
+          {/* CARD LEVEL */}
+          {/* <div className="flex h-1/6 w-full items-center gap-2 px-2">
               <div className="w-[25%]">Level</div>
               <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
                 {Array(3)
@@ -120,9 +122,9 @@ export default function Content(props: DialogProps) {
               <div className="w-5 text-end">
                 {playerState.selectedCard.level}
               </div>
-            </div>
-            {/* CARD SCORE */}
-            <div className="flex h-1/6 w-full items-center gap-2 px-2">
+            </div> */}
+          {/* CARD SCORE */}
+          {/* <div className="flex h-1/6 w-full items-center gap-2 px-2">
               <div className="w-[25%]">Score</div>
               <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
                 {Array(5)
@@ -143,9 +145,9 @@ export default function Content(props: DialogProps) {
               <div className="w-5 text-end">
                 {playerState.selectedCard.score}
               </div>
-            </div>
-            {/* CARD PRICE */}
-            {cardColors.map(
+            </div> */}
+          {/* CARD PRICE */}
+          {/* {cardColors.map(
               (color) =>
                 playerState.selectedCard &&
                 playerState.selectedCard.price[color] > 0 && (
@@ -175,7 +177,7 @@ export default function Content(props: DialogProps) {
                   </div>
                 )
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -184,17 +186,16 @@ export default function Content(props: DialogProps) {
     requiredTokens &&
     discountedPrice &&
     replacedPrice && (
-      <div className="flex flex-col gap-2">
-        {/* <div className="font-semibold">Required tokens</div> */}
+      <div className="mx-4 flex flex-1 flex-col gap-2">
+        <Title>REQUIRED TOKENS</Title>
         {/* <hr className="h-[1px] w-full rounded-full bg-[#111827] drop-shadow-md"></hr> */}
-        <div className="flex w-full select-none justify-between">
+        <div className="flex w-full select-none justify-center gap-6">
           {requiredTokens.map((cardColor) => (
             <button
-              className={`relative aspect-square w-[20%] rounded-md border bg-gray-50 ${
-                cardColor === playerState.selectedCardColor
-                  ? selectedColorClass
-                  : "drop-shadow"
-              } ${discountedPrice[cardColor] !== 0 && "hover:bg-gray-100"}`}
+              className={`relative aspect-square w-[20%] rounded-md border bg-[linear-gradient(45deg,rgba(255,255,255,0.8),rgba(255,255,255,0.6))] drop-shadow ${
+                cardColor === playerState.selectedCardColor &&
+                selectedColorClass
+              } ${discountedPrice[cardColor] !== 0 && "hover:scale-105"}`}
               disabled={discountedPrice[cardColor] === 0}
               onClick={() => {
                 if (discountedPrice[cardColor] !== 0) {
@@ -237,7 +238,9 @@ export default function Content(props: DialogProps) {
                     />
                   </div>
                   <div className="absolute right-0.5 bottom-0.5">
-                    <span className="text-lg">{replacedPrice[cardColor]}</span>
+                    <span className="text-lg font-medium">
+                      {replacedPrice[cardColor]}
+                    </span>
                     <span className="text-sm">
                       /
                       {
@@ -259,7 +262,7 @@ export default function Content(props: DialogProps) {
               )}
             </button>
           ))}
-          {Array(4 - requiredTokens.length)
+          {/* {Array(4 - requiredTokens.length)
             .fill(0)
             .map(() => (
               <button
@@ -276,15 +279,15 @@ export default function Content(props: DialogProps) {
                   </div>
                 </>
               </button>
-            ))}
+            ))} */}
         </div>
       </div>
     );
 
   const AvailableTokensShowcase = () => (
-    <div className="flex flex-col gap-2">
-      <div className="text-base font-semibold">Available tokens</div>
-      <div className="flex h-[40px] w-full">
+    <div className="mx-4 flex flex-1 flex-col gap-2">
+      {playerState.currentAction !== "take" && <Title>AVAILABLE TOKENS</Title>}
+      <div className="flex w-full flex-1 items-center justify-center">
         {tokenColors.map((tokenColor) => (
           <div className="flex w-1/6 justify-center">
             <Token
@@ -292,6 +295,7 @@ export default function Content(props: DialogProps) {
               tokenEffect={!playerState.hasExtraTurn ? "take" : null}
               reference="resource"
               showCount
+              flexCol
               {...props}
             />
           </div>
@@ -301,9 +305,9 @@ export default function Content(props: DialogProps) {
   );
 
   const SelectedTokensShowcase = () => (
-    <div className="flex flex-col gap-2">
-      <div className="text-base font-semibold">Selected tokens</div>
-      <div className="flex h-[40px] w-full">
+    <div className="mx-4 flex flex-1 flex-col gap-2">
+      <Title>SELECTED TOKENS</Title>
+      <div className="flex h-full w-full flex-1 items-center">
         {tokenColors.map((tokenColor) => (
           <div className="flex w-1/6 justify-center">
             <Token
@@ -311,6 +315,7 @@ export default function Content(props: DialogProps) {
               tokenEffect="return"
               reference="player"
               showCount
+              flexCol
               {...props}
             />
           </div>
@@ -320,11 +325,11 @@ export default function Content(props: DialogProps) {
   );
 
   const YourTokensShowcase = () => (
-    <div className="flex flex-col gap-2">
-      {/* <div className="text-sm font-semibold">Your tokens</div> */}
-      <div className="flex h-[40px] w-full">
-        {tokenColors.map((tokenColor) => (
-          <div className="flex w-1/6 justify-center">
+    <div className="mx-4 flex flex-1 flex-col gap-2">
+      <Title>YOUR TOKENS</Title>
+      {playerState.currentAction === "purchase" ? (
+        <div className="flex w-full flex-1 items-center justify-center gap-6">
+          {tokenColors.map((tokenColor) => (
             <Token
               tokenColor={tokenColor}
               tokenEffect={
@@ -335,24 +340,43 @@ export default function Content(props: DialogProps) {
               }
               reference="inventory"
               showCount={true}
+              flexCol
               {...props}
             />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex h-full w-full items-center">
+          {tokenColors.map((tokenColor) => (
+            <div className="flex w-1/6 justify-center">
+              <Token
+                tokenColor={tokenColor}
+                tokenEffect={
+                  !playerState.hasExtraTurn &&
+                  playerState.currentAction !== "purchase"
+                    ? null
+                    : "take"
+                }
+                reference="inventory"
+                showCount={true}
+                flexCol
+                {...props}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
   if (playerState.currentAction === "take")
     return (
-      <div className="relative flex w-full flex-col gap-6 text-base">
-        <NoCardShowcase />
+      <div className="relative flex h-full w-full flex-col justify-between gap-6 text-sm">
         <AvailableTokensShowcase />
         <SelectedTokensShowcase />
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
-          <button
-            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+          <Button
             disabled={!playerState.success}
             onClick={() => {
               if (playerState.success) {
@@ -385,22 +409,21 @@ export default function Content(props: DialogProps) {
               }
             }}
           >
-            Take
-          </button>
+            Collect
+          </Button>
         </div>
       </div>
     );
   if (playerState.currentAction === "reserve") {
     if (playerState.hasExtraTurn)
       return (
-        <div className="relative flex w-full flex-col gap-6 text-base">
+        <div className="relative flex h-full w-full flex-col gap-6 text-sm">
           <NoCardShowcase />
           <AvailableTokensShowcase />
           <SelectedTokensShowcase />
           <YourTokensShowcase />
           <div className="flex w-full justify-center">
-            <button
-              className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+            <Button
               disabled={
                 !playerState.success || cardReserved || maxReserved || noTokens
               }
@@ -441,18 +464,17 @@ export default function Content(props: DialogProps) {
               }}
             >
               Reserve
-            </button>
+            </Button>
           </div>
         </div>
       );
     return (
-      <div className="relative flex w-full flex-col gap-6 text-base">
+      <div className="relative flex h-full w-full flex-col gap-6 text-sm">
         <CardShowcase />
         <AvailableTokensShowcase />
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
-          <button
-            className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+          <Button
             disabled={
               !playerState.success || cardReserved || maxReserved || noTokens
             }
@@ -490,20 +512,19 @@ export default function Content(props: DialogProps) {
             }}
           >
             Reserve
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
   // Purchase or claim
   return (
-    <div className="relative flex w-full flex-col gap-6 border border-red-500 text-sm">
+    <div className="relative flex h-full w-full flex-col gap-6 text-sm">
       <CardShowcase />
       <RequiredTokensShowcase />
       <YourTokensShowcase />
       <div className="flex w-full justify-center">
-        <button
-          className="w-1/3 rounded-md bg-[#213951] p-2 font-semibold text-white hover:bg-[#05213c] disabled:bg-[#213951]/[.5]"
+        <Button
           disabled={!playerState.success}
           onClick={() => {
             if (playerState.success)
@@ -514,7 +535,7 @@ export default function Content(props: DialogProps) {
           }}
         >
           Purchase
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -531,5 +552,18 @@ function CompleteIcon() {
     >
       <path d="M10.067.87a2.89 2.89 0 00-4.134 0l-.622.638-.89-.011a2.89 2.89 0 00-2.924 2.924l.01.89-.636.622a2.89 2.89 0 000 4.134l.637.622-.011.89a2.89 2.89 0 002.924 2.924l.89-.01.622.636a2.89 2.89 0 004.134 0l.622-.637.89.011a2.89 2.89 0 002.924-2.924l-.01-.89.636-.622a2.89 2.89 0 000-4.134l-.637-.622.011-.89a2.89 2.89 0 00-2.924-2.924l-.89.01-.622-.636zm.287 5.984l-3 3a.5.5 0 01-.708 0l-1.5-1.5a.5.5 0 11.708-.708L7 8.793l2.646-2.647a.5.5 0 01.708.708z" />
     </svg>
+  );
+}
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+
+function Button({ children, ...props }: ButtonProps) {
+  return (
+    <button
+      className="w-[30%] rounded-md bg-slate-600 p-2 text-base font-semibold text-white hover:bg-slate-700 disabled:bg-slate-400"
+      {...props}
+    >
+      {children}
+    </button>
   );
 }

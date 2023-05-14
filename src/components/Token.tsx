@@ -19,15 +19,16 @@ import { api } from "../utils/api";
 
 interface TokenIconProps {
   className?: string | undefined;
+  flexCol?: boolean;
 }
 
-function TokenIcon({ className }: TokenIconProps) {
+function TokenIcon({ className, flexCol = false }: TokenIconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
-      height="40px"
-      width="40px"
+      height={!flexCol ? "40px" : "36px"}
+      width={!flexCol ? "40px" : "36px"}
       className={`drop-shadow-lg ${className || "fill-slate-50"}`}
     >
       <path fill="none" d="M0 0h24v24H0z" />
@@ -46,6 +47,7 @@ interface TokenProps {
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
   colorToReplace?: CardColor;
   showCount?: boolean;
+  flexCol?: boolean;
 }
 
 export default function Token({
@@ -58,6 +60,7 @@ export default function Token({
   setPlayerState,
   colorToReplace,
   showCount,
+  flexCol = false,
 }: TokenProps) {
   const [disabled, setDisabled] = useState(false);
 
@@ -88,6 +91,7 @@ export default function Token({
         : 0
       : playerState.playerTokens[tokenColor];
 
+  if (tokenCount === 0 && flexCol) return <></>;
   if (
     tokenCount === 0 ||
     (colorToReplace &&
@@ -96,53 +100,37 @@ export default function Token({
       playerState.priceToReplace[colorToReplace] === 0)
   )
     return (
-      <div
-        className={
-          !showCount ? "-z-50 h-[40px] w-[40px]" : "-z-50 h-[40px] w-[64px]"
-        }
-      ></div>
+      <div className={!showCount ? "-z-50 h-[36px]" : "-z-50 h-[36px]"}></div>
     );
   return (
-    <button
-      className={`flex h-[40px] select-none items-center ${
-        !showCount ? "w-[40px]" : "w-[64px]"
-      }`}
+    <div
+      className={`flex select-none items-center ${
+        showCount && !flexCol && "w-[64px]"
+      } ${flexCol && "flex-col"}`}
     >
-      <div
+      <button
         className={`${tokenEffect && "cursor-pointer"}`}
-        onClick={
-          /*async*/ (e: MouseEvent<HTMLDivElement>) => {
-            // const updateData = {
-            //   id: "32132121",
-            //   playerId: "312313",
-            // };
-            // if (test) test(updateData);
-            // updateClientToken(props);
-            // alert("322");
-            if (!tokenEffect) return;
-            e.stopPropagation();
-            setDisabled(true);
-            setPlayerTokens({
-              game,
-              player,
-              tokenColor,
-              tokenEffect,
-              reference,
-              playerState,
-              setPlayerState,
-              colorToReplace,
-            });
-            // await new Promise((resolve) => {
-            //   setTimeout(resolve, 700);
-            // });
-            setDisabled(false);
-          }
-        }
+        onClick={(e: MouseEvent<HTMLButtonElement>) => {
+          if (!tokenEffect) return;
+          e.stopPropagation();
+          setDisabled(true);
+          setPlayerTokens({
+            game,
+            player,
+            tokenColor,
+            tokenEffect,
+            reference,
+            playerState,
+            setPlayerState,
+            colorToReplace,
+          });
+          setDisabled(false);
+        }}
       >
-        <TokenIcon className={colorClass} />
-      </div>
-      {showCount && `×${tokenCount}`}
-    </button>
+        <TokenIcon className={colorClass} flexCol={flexCol} />
+      </button>
+      {showCount && `${!flexCol ? "×" : ""}${tokenCount}`}
+    </div>
   );
 }
 
