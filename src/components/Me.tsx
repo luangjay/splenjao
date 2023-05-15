@@ -1,10 +1,5 @@
-import { Card as CardSchema, Game } from "@prisma/client";
-import {
-  CardColor,
-  InventoryKey,
-  PlayerProps,
-  TokenColor,
-} from "../common/types";
+import { Card as CardSchema, Game, Inventory, Player } from "@prisma/client";
+import { CardColor, InventoryKey, TokenColor } from "../common/types";
 import { api } from "../utils/api";
 import { tokenColors } from "../common/constants";
 import Image from "next/image";
@@ -13,15 +8,13 @@ import { useState } from "react";
 import Tile from "./Tile";
 import Title from "./Title";
 
-export default function Me(props: PlayerProps) {
-  const { game, me: player } = props;
+export interface PlayerProps {
+  game: Game;
+  player: Player;
+}
 
-  const utils = api.useContext();
-  const leaveGame = api.game.updateLeave.useMutation({
-    async onSettled() {
-      utils.game.findAndAuthorize.invalidate();
-    },
-  });
+export default function Me(props: PlayerProps) {
+  const { game, player } = props;
 
   const idx = game.playerIds.indexOf(player.id);
   const inventory = game[`inventory${idx}` as InventoryKey];
@@ -31,147 +24,170 @@ export default function Me(props: PlayerProps) {
   const score = inventory.score;
   const isTurn = idx === game.turnIdx;
 
-  const MyProfile = (
-    <div
-      className={`relative rounded-2xl bg-gray-100 ${!isTurn && "drop-shadow"}`}
-    >
-      {isTurn && (
-        <div className="bg-animation absolute inset-0 rounded-2xl"></div>
-      )}
-      <div
-        className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none  ${
-          isTurn && "border border-slate-600"
-        }`}
-      >
-        <div className="flex flex-col">
-          <div className="h-fit p-3 px-4">
-            <div className="flex justify-between gap-1 text-sm">
-              {tokenColors.map((tokenColor) => (
-                <div className="flex w-1/6 items-center gap-[1px]">
-                  {inventory.tokens[tokenColor] > 0 && (
-                    <>
-                      <TokenIcon className={colorClass(tokenColor)} />
-                      {inventory.tokens[tokenColor]}
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="mx-4 border"></div>
-          <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
-            <div className="aspect-square h-[84%]">
-              <Image
-                alt=""
-                src={player.image || ""}
-                width={256}
-                height={256}
-                className="aspect-square h-full rounded-full object-cover drop-shadow"
-              ></Image>
-            </div>
-            <div className="flex h-full flex-1 flex-col justify-between">
-              <div className="flex h-[24px] items-center justify-between">
-                <div className="w-[99px] truncate text-base font-medium">
-                  {player.name}
-                </div>
-                <div className="relative flex h-[24px] items-center gap-1.5">
-                  {score >= 15 && (
-                    <span className="absolute -top-0.5 -right-2 z-20 flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500"></span>
-                    </span>
-                  )}
-                  <ScoreIcon />
-                  {score}
-                </div>
-              </div>
-              <div className="flex h-[24px] justify-between">
-                <div className="flex h-[24px] items-center gap-1.5">
-                  <CardIcon />
-                  {cardCount}
-                </div>
-                <div className="-mx-0.5 flex h-[24px] items-center gap-1">
-                  <ReserveIcon />
-                  {reserveCount}
-                </div>
-                <div className="flex h-[24px] items-center gap-1.5">
-                  <TileIcon />
-                  {tileCount}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const MyCard = ({ cardId }: { cardId: number }) => {
-    const [float, setFloat] = useState(false);
-    return (
-      <div
-        className="z-20 flex rounded-lg transition-all duration-[100ms]"
-        style={{ marginTop: float ? "-64px" : "0px" }}
-        onClick={() => setFloat((prev) => !prev)}
-      >
-        <Card
-          cardId={cardId ?? -1}
-          cardEffect={"special"}
-          game={game}
-          player={player}
-        />
-      </div>
-    );
+  const addProps = {
+    idx,
+    inventory,
+    cardCount,
+    reserveCount,
+    tileCount,
+    score,
+    isTurn,
   };
-
-  const MyCards = (
-    <div className="flex flex-1">
-      {inventory.cards.length === 0 ? (
-        <div className="flex h-[100px] w-full items-center justify-center overflow-auto rounded-lg pt-16 pb-6 text-base">
-          No cards owned
-        </div>
-      ) : (
-        <div className="relative flex h-full max-h-[320px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
-          {[...inventory.cards].map((cardId) => (
-            <MyCard cardId={cardId} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const MyTiles = (
-    <div className="flex h-[100px]">
-      {inventory.tiles.length === 0 ? (
-        <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg text-base">
-          No tiles owned
-        </div>
-      ) : (
-        <div className="flex h-full w-full gap-2 overflow-auto text-sm">
-          {inventory.tiles.map((tileId) => (
-            <div className="flex rounded-lg transition-all duration-[100ms]">
-              <Tile tileId={tileId} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="flex h-full w-full flex-col gap-6 overflow-auto p-6 text-base">
       <div className="flex flex-col gap-4">
         <Title>TILES</Title>
-        {MyTiles}
+        <MyTiles {...props} {...addProps} />
       </div>
       <div className="flex flex-1 flex-col gap-2">
         <Title>CARDS</Title>
-        {MyCards}
+        <MyCards {...props} {...addProps} />
       </div>
-      {MyProfile}
+      <MyProfile {...props} {...addProps} />
     </div>
   );
 }
+
+interface MeProps extends PlayerProps {
+  idx: number;
+  inventory: Inventory;
+  cardCount: number;
+  reserveCount: number;
+  tileCount: number;
+  score: number;
+  isTurn: boolean;
+  cardId?: number;
+}
+
+const MyProfile = (props: MeProps) => (
+  <div
+    className={`relative rounded-2xl bg-gray-100 ${
+      !props.isTurn && "drop-shadow"
+    }`}
+  >
+    {props.isTurn && (
+      <div className="bg-animation absolute inset-0 rounded-2xl"></div>
+    )}
+    <div
+      className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
+        props.isTurn && "border border-slate-600"
+      }`}
+    >
+      <div className="flex flex-col">
+        <div className="h-fit p-3 px-4">
+          <div className="flex justify-between gap-1 text-sm">
+            {tokenColors.map((tokenColor) => (
+              <div className="flex w-1/6 items-center gap-[1px]">
+                {props.inventory.tokens[tokenColor] > 0 && (
+                  <>
+                    <TokenIcon className={colorClass(tokenColor)} />
+                    {props.inventory.tokens[tokenColor]}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mx-4 border"></div>
+        <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
+          <div className="aspect-square h-[84%]">
+            <Image
+              alt=""
+              src={props.player.image || ""}
+              width={256}
+              height={256}
+              className="aspect-square h-full rounded-full object-cover drop-shadow"
+            />
+          </div>
+          <div className="flex h-full flex-1 flex-col justify-between">
+            <div className="flex h-[24px] items-center justify-between">
+              <div className="w-[99px] truncate text-base font-medium">
+                {props.player.name}
+              </div>
+              <div className="relative flex h-[24px] items-center gap-1.5">
+                {props.score >= 15 && (
+                  <span className="absolute -top-0.5 -right-2 z-20 flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500"></span>
+                  </span>
+                )}
+                <ScoreIcon />
+                {props.score}
+              </div>
+            </div>
+            <div className="flex h-[24px] justify-between">
+              <div className="flex h-[24px] items-center gap-1.5">
+                <CardIcon />
+                {props.cardCount}
+              </div>
+              <div className="-mx-0.5 flex h-[24px] items-center gap-1">
+                <ReserveIcon />
+                {props.reserveCount}
+              </div>
+              <div className="flex h-[24px] items-center gap-1.5">
+                <TileIcon />
+                {props.tileCount}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const MyCards = (props: MeProps) => (
+  <div className="flex flex-1">
+    {props.inventory.cards.length === 0 ? (
+      <div className="flex h-[100px] w-full items-center justify-center overflow-auto rounded-lg pt-16 pb-6 text-base">
+        No cards owned
+      </div>
+    ) : (
+      <div className="relative flex h-full max-h-[256px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
+        {props.inventory.cards.map((cardId) => (
+          <MyCard {...props} cardId={cardId} />
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const MyCard = (props: MeProps) => {
+  const [float, setFloat] = useState(false);
+  return (
+    <div
+      className="z-20 flex rounded-lg transition-all duration-[100ms]"
+      style={{ marginTop: float ? "-64px" : "0px" }}
+      onClick={() => setFloat((prev) => !prev)}
+    >
+      <Card
+        cardId={props.cardId ?? -1}
+        cardEffect={"special"}
+        game={props.game}
+        player={props.player}
+      />
+    </div>
+  );
+};
+
+const MyTiles = (props: MeProps) => (
+  <div className="flex h-[100px]">
+    {props.inventory.tiles.length === 0 ? (
+      <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg text-base">
+        No tiles owned
+      </div>
+    ) : (
+      <div className="flex h-full w-full gap-2 overflow-auto text-sm">
+        {props.inventory.tiles.map((tileId) => (
+          <div className="flex rounded-lg transition-all duration-[100ms]">
+            <Tile tileId={tileId} />
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
 export const colorClass = (tokenColor: TokenColor) =>
   tokenColor === "white"

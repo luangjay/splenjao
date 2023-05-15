@@ -568,7 +568,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
 function Button({ children, ...props }: ButtonProps) {
   return (
     <button
-      className="w-[30%] rounded-md bg-slate-600 p-2 text-base font-semibold text-white hover:bg-slate-700 disabled:bg-slate-400"
+      className="w-[30%] rounded-md bg-slate-600 p-2 text-base font-semibold text-slate-100 drop-shadow hover:bg-slate-700 disabled:bg-gray-400"
       {...props}
     >
       {children}

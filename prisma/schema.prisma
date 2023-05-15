@@ -104,8 +104,6 @@ model Game {
     hostId          String          @db.ObjectId @unique
     playerCount     Int
     playerIds       String[]        @db.ObjectId
-    createdAt       DateTime
-    endedAt         DateTime?
     status          String
     turnIdx         Int
     resource        Resource
@@ -116,6 +114,9 @@ model Game {
     players         Player[]        @relation(fields: [playerIds], references: [id])
     winnerId        String?         @db.ObjectId
     winnerScore     Int?
+    stopperId       String?         @db.ObjectId
+    createdAt       DateTime
+    endedAt         DateTime?
 }
 
 model Player {

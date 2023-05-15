@@ -31,16 +31,10 @@ export type PlayerState = {
   hasExtraTurn: boolean;
   isNextTurn: boolean;
   message: string;
-  winnerId?: string | null;
-  winnerScore?: number;
+  leave: boolean;
 };
 
 export enum SocketEvents {
   UpdateServer = "UPDATE_SERVER",
   UpdateClient = "UPDATE_CLIENT",
-}
-
-export interface PlayerProps {
-  game: Game;
-  me: Player;
 }

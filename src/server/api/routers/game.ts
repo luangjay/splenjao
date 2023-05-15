@@ -163,16 +163,20 @@ export const gameRouter = createTRPCRouter({
       })
     ),
 
-  updateLeave: protectedProcedure.input(z.string()).mutation(({ ctx, input }) =>
-    ctx.prisma.game.update({
-      where: {
-        id: input,
-      },
-      data: {
-        status: "canceled",
-      },
-    })
-  ),
+  updateLeave: protectedProcedure
+    .input(z.object({ id: z.string(), playerId: z.string() }))
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: "stopped",
+          stopperId: input.playerId,
+          endedAt: new Date(),
+        },
+      })
+    ),
 
   // BAD SMELL: GOD METHOD LOL
   updateNextTurn: protectedProcedure
@@ -448,6 +452,18 @@ export const gameRouter = createTRPCRouter({
               ? maxIdx === -1
                 ? null
                 : maxScore
+              : undefined,
+          endedAt:
+            updatedGame.status === "started"
+              ? updatedGame[`inventory${updatedGame.turnIdx}` as InventoryKey]
+                  .score >= 15
+                ? updatedGame.turnIdx === updatedGame.playerCount - 1
+                  ? new Date()
+                  : undefined
+                : undefined
+              : updatedGame.status === "ending" &&
+                updatedGame.turnIdx === updatedGame.playerCount - 1
+              ? new Date()
               : undefined,
         },
       });

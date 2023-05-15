@@ -32,7 +32,7 @@ export default function Deck(props: DeckProps) {
       <div className="flex items-center">
         <button
           className={`flex h-max min-h-[40px] select-none flex-col rounded-lg bg-gray-50 p-1 text-base drop-shadow ${
-            playerTurn && "hover:bg-gray-100"
+            playerTurn && ""
           }`}
           disabled={!playerTurn}
           onClick={() =>

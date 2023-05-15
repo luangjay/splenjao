@@ -12,7 +12,6 @@ import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
 import { PlayerState, SocketEvents } from "../../../common/types";
-import TokenContainer from "../../../components/TokenContainer";
 import { InventoryKey, TokenColor } from "../../../common/types";
 import { useSocket } from "../../../hooks/useSocket";
 import Others from "../../../components/Others";
@@ -103,6 +102,7 @@ export default function Game() {
     hasExtraTurn: false,
     isNextTurn: false,
     message: "",
+    leave: false,
   });
 
   // HELPER CONSTANTS
@@ -158,8 +158,6 @@ export default function Game() {
   // GAME LOGIC HOOKS
   useEffect(() => {
     (async () => {
-      // alert(JSON.stringify(game?.resource.tokens));
-      // alert(game.isRefetchError);
       if (player && game) {
         await gameRefetch();
         setPlayerState({
@@ -178,6 +176,7 @@ export default function Game() {
           hasExtraTurn: false,
           isNextTurn: false,
           message: "",
+          leave: false,
         });
       }
     })();
@@ -185,17 +184,19 @@ export default function Game() {
   }, [/*validTab,*/ game?.turnIdx]);
 
   useEffect(() => {
-    (async () => {
-      if (validTab && player && game && playerState.isNextTurn) {
-        await updateNextTurn.mutateAsync({
-          id: game.id,
-          playerId: player.id,
-          playerState,
-        });
-        setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
-        socket?.emit(SocketEvents.UpdateServer);
-      }
-    })();
+    if (socket) {
+      (async () => {
+        if (validTab && player && game && playerState.isNextTurn) {
+          await updateNextTurn.mutateAsync({
+            id: game.id,
+            playerId: player.id,
+            playerState,
+          });
+          setPlayerState((prev) => ({ ...prev, isNextTurn: false }));
+          socket.emit(SocketEvents.UpdateServer);
+        }
+      })();
+    }
   }, [playerState.isNextTurn]);
 
   // useEffect(() => {
@@ -207,7 +208,6 @@ export default function Game() {
   const [openOthers, setOpenOthers] = useState(false);
   const [openMe, setOpenMe] = useState(false);
 
-  // if (gameError) return <Error statusCode={404} />;
   if (gameError) return <Error statusCode={404} />;
   if (!player || !game) return <></>;
   if (!validTab) {
@@ -226,15 +226,15 @@ export default function Game() {
         <meta name="description" content="Splenjao" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="relative flex h-screen select-none bg-gray-100 text-xl text-slate-600">
+      <main className="relative flex h-screen select-none overflow-auto bg-gray-100 text-xl text-slate-600">
         {/* OTHERS */}
         <div
-          className="fixed z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
+          className="fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
           style={{ width: !openOthers ? 0 : "306px" }}
         >
-          <Others game={game} me={player} />
+          <Others game={game} player={player} />
         </div>
-        <div className="fixed z-10 flex h-full items-center">
+        <div className="fixed z-20 flex h-full items-center">
           <button
             className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
             style={{ left: !openOthers ? "0" : "306px" }}
@@ -253,7 +253,7 @@ export default function Game() {
           />
         </div>
         {/* ME */}
-        <div className="fixed right-0 z-10 flex h-full items-center">
+        <div className="fixed right-0 z-20 flex h-full items-center">
           <button
             className="absolute flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
             style={{ right: !openMe ? 0 : "306px" }}
@@ -262,42 +262,12 @@ export default function Game() {
             {!openMe ? <LeftIcon /> : <RightIcon />}
           </button>
           <div
-            className="fixed right-0 z-10 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
+            className="fixed right-0 z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
             style={{ width: !openMe ? 0 : "306px" }}
           >
-            <Me game={game} me={player} />
+            <Me game={game} player={player} />
           </div>
         </div>
-        {/* <div
-          className="fixed right-0 z-10 flex h-full items-center overflow-hidden drop-shadow transition-all"
-          style={{ width: openMe ? "342px" : 0 }}
-        >
-          <button
-            className="flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] hover:bg-gray-200/[.2]"
-            onClick={() => setOpenMe((prev) => !prev)}
-          >
-            <RightIcon />
-          </button>
-          <div className="flex h-full flex-1 flex-col justify-between overflow-auto bg-gray-200/[.5]">
-            <Me game={game} me={player} />
-          </div>
-        </div>
-        <div className="fixed right-0 z-10 flex h-full items-center drop-shadow">
-          <button
-            className="flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] transition-all hover:bg-gray-200/[.3]"
-            style={{ width: !openMe ? "36px" : 0 }}
-            onClick={() => setOpenMe((prev) => !prev)}
-          >
-            <LeftIcon />
-          </button>
-        </div> */}
-        {/* DIALOG */}
-        {/* <ActionDialog
-          game={game}
-          player={player}
-          playerState={playerState}
-          setPlayerState={setPlayerState}
-        /> */}
         <ActionDialog
           game={game}
           player={player}

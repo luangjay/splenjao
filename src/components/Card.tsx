@@ -54,9 +54,7 @@ export default function Card({
     return (
       <div
         className={`select-none rounded-lg bg-gray-50 drop-shadow ${
-          playerTurn &&
-          cardEffect &&
-          "hover:absolute hover:bottom-1 hover:bg-gray-100"
+          playerTurn && cardEffect && ""
         } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       ></div>
     );
@@ -65,7 +63,7 @@ export default function Card({
   return (
     <button
       className={`select-none rounded-lg bg-gray-50 bg-[url('/sakura.png')] bg-cover bg-center bg-no-repeat bg-origin-padding drop-shadow ${
-        playerTurn && cardEffect && "hover:bg-gray-100"
+        playerTurn && cardEffect && ""
       } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       disabled={!playerTurn || !cardEffect}
       onClick={() => {
@@ -110,7 +108,7 @@ export default function Card({
 
 function PlaceholderCard() {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-slate-300 text-center text-sm drop-shadow">
+    <div className="flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-300 to-slate-300/80 text-center text-sm drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
       </div>
@@ -125,7 +123,7 @@ interface BackCardProps {
 
 function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
-    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-slate-800 text-center text-sm text-gray-100 drop-shadow">
+    <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 text-center text-sm text-gray-100 drop-shadow">
       <div>
         <span className="text-md font-mono font-medium">SPLENJAO</span>
         <br />

@@ -21,7 +21,8 @@ export interface DialogProps {
 
 export default function ActionDialog(props: DialogProps) {
   const { game, player, playerState, setPlayerState } = props;
-  const isOpen = playerState.currentAction !== null;
+  const playerTurn = player.id === game.playerIds[game.turnIdx];
+  const isOpen = playerTurn && playerState.currentAction !== null;
 
   function closeDialog() {
     if (player && game) {
@@ -41,6 +42,7 @@ export default function ActionDialog(props: DialogProps) {
         hasExtraTurn: false,
         isNextTurn: false,
         message: "",
+        leave: false,
       });
     }
   }
@@ -56,7 +58,7 @@ export default function ActionDialog(props: DialogProps) {
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-20 select-none max-md:hidden"
+        className="relative z-20 select-none text-slate-600 max-md:hidden"
         onClose={() => {}}
       >
         <Transition.Child
@@ -74,10 +76,10 @@ export default function ActionDialog(props: DialogProps) {
         <div className="fixed inset-0 overflow-y-auto" onClick={closeDialog}>
           <div className="flex min-h-full items-center justify-center text-center">
             <Transition.Child
-              enter="ease-out duration-300"
+              enter="ease-out duration-200"
               enterFrom="opacity-0 scale-95"
               enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
+              leave="ease-in duration-150"
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
@@ -86,11 +88,11 @@ export default function ActionDialog(props: DialogProps) {
               </div>
               {playerState.currentAction && (
                 <Dialog.Panel className="relative flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
-                  <div className="flex flex-col gap-2 rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
+                  <div className="flex flex-col rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
                     <Dialog.Title>
                       <Title size={1}>{titleTxt}</Title>
                     </Dialog.Title>
-                    <div className="h-[530px] w-[400px]">
+                    <div className="mt-2 h-[530px] w-[400px]">
                       <Content {...props} />
                     </div>
                   </div>
