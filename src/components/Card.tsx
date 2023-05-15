@@ -110,7 +110,7 @@ function PlaceholderCard() {
   return (
     <div className="flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-300 to-slate-300/80 text-center text-sm drop-shadow">
       <div>
-        <span className="text-md font-mono font-medium">SPLENJAO</span>
+        <span className="text-md font-mono font-semibold">SPLENJAO</span>
       </div>
     </div>
   );
@@ -125,7 +125,7 @@ function BackCard({ cardLv, cardCount }: BackCardProps) {
   return (
     <div className="relative flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 text-center text-sm text-gray-100 drop-shadow">
       <div>
-        <span className="text-md font-mono font-medium">SPLENJAO</span>
+        <span className="text-md font-mono font-semibold">SPLENJAO</span>
         <br />
         <span className="number text-xl font-black">{cardCount}</span>
       </div>

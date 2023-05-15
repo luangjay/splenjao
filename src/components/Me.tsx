@@ -37,12 +37,12 @@ export default function Me(props: PlayerProps) {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-6 overflow-auto p-6 text-base">
+    <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
       <div className="flex flex-col gap-4">
         <Title>TILES</Title>
         <MyTiles {...props} {...addProps} />
       </div>
-      <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <Title>CARDS</Title>
         <MyCards {...props} {...addProps} />
       </div>
@@ -73,11 +73,11 @@ const MyProfile = (props: MeProps) => {
         (props.localSettings?.enableAnimation ? (
           <div className="bg-animation absolute inset-0 rounded-2xl"></div>
         ) : (
-          <div className="absolute inset-0 rounded-2xl bg-slate-600"></div>
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-400/[.8]"></div>
         ))}
       <div
         className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-          props.isTurn && "border border-slate-600"
+          props.isTurn ? "border border-slate-600" : "border border-transparent"
         }`}
       >
         <div className="flex flex-col">
@@ -146,13 +146,13 @@ const MyProfile = (props: MeProps) => {
 };
 
 const MyCards = (props: MeProps) => (
-  <div className="flex flex-1">
+  <div className="flex">
     {props.inventory.cards.length === 0 ? (
       <div className="flex h-[100px] w-full items-center justify-center overflow-auto rounded-lg pt-16 pb-6 text-base">
         No cards owned
       </div>
     ) : (
-      <div className="relative flex h-full max-h-[256px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
+      <div className="relative flex h-[200px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
         {props.inventory.cards.map((cardId) => (
           <MyCard {...props} cardId={cardId} />
         ))}

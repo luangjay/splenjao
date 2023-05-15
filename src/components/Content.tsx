@@ -35,6 +35,237 @@ export default function Content(props: DialogProps) {
 
   const noTokens = game.resource.tokens.gold <= 0;
 
+  const { gold: goldToken, ...price } = playerState.playerTokens;
+
+  if (playerState.currentAction === "take")
+    return (
+      <div className="relative flex h-full w-full flex-col justify-between gap-6 text-sm">
+        <AvailableTokensShowcase {...props} />
+        <SelectedTokensShowcase {...props} />
+        <YourTokensShowcase {...props} />
+        <div className="flex w-full justify-center">
+          <Button
+            playerState={playerState}
+            setPlayerState={setPlayerState}
+            localSettings={props.localSettings}
+            setLocalSettings={props.setLocalSettings}
+            disabled={!playerState.success}
+            onClick={() => {
+              if (playerState.success) {
+                const tokens = !playerState.hasExtraTurn
+                  ? opTokenCount(
+                      "increment",
+                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                      playerState.playerTokens
+                    )
+                  : playerState.inventoryTokens;
+                const sumTokenColors = Object.values(tokens).reduce(
+                  (a, b) => a + b,
+                  0
+                );
+                if (sumTokenColors > 10) {
+                  setPlayerState((prev) => ({
+                    ...prev,
+                    success: false,
+                    hasExtraTurn: true,
+                    isProcessing: false,
+                    message: "Return tokens to 10.",
+                    playerTokens: defaultTokens,
+                    inventoryTokens: tokens,
+                  }));
+                  return;
+                }
+                setPlayerState((prev) => ({
+                  ...prev,
+                  isNextTurn: true,
+                }));
+              }
+            }}
+          >
+            {playerState.hasExtraTurn ? "Return" : "Collect"}
+          </Button>
+        </div>
+      </div>
+    );
+  if (playerState.currentAction === "reserve") {
+    if (playerState.hasExtraTurn)
+      return (
+        <div className="relative flex h-full w-full flex-col gap-6 text-sm">
+          <AvailableTokensShowcase {...props} />
+          <SelectedTokensShowcase {...props} />
+          <YourTokensShowcase {...props} />
+          <div className="flex w-full justify-center">
+            <Button
+              playerState={playerState}
+              setPlayerState={setPlayerState}
+              localSettings={props.localSettings}
+              setLocalSettings={props.setLocalSettings}
+              disabled={
+                !playerState.success || cardReserved || maxReserved || noTokens
+              }
+              onClick={() => {
+                if (
+                  playerState.success &&
+                  !cardReserved &&
+                  !maxReserved &&
+                  !noTokens
+                ) {
+                  const tokens = !playerState.hasExtraTurn
+                    ? opTokenCount(
+                        "increment",
+                        game[`inventory${game.turnIdx}` as InventoryKey].tokens,
+                        playerState.playerTokens
+                      )
+                    : playerState.inventoryTokens;
+                  const sumTokenColors = Object.values(tokens).reduce(
+                    (a, b) => a + b,
+                    0
+                  );
+                  if (sumTokenColors > 10) {
+                    setPlayerState((prev) => ({
+                      ...prev,
+                      success: false,
+                      hasExtraTurn: true,
+                      isProcessing: false,
+                      message: "Return tokens to 10.",
+                      playerTokens: defaultTokens,
+                      inventoryTokens: tokens,
+                    }));
+                    return;
+                  }
+                  setPlayerState((prev) => ({
+                    ...prev,
+                    isNextTurn: true,
+                  }));
+                }
+              }}
+            >
+              Return
+            </Button>
+          </div>
+        </div>
+      );
+    return (
+      <div className="relative flex h-full w-full flex-col gap-6 text-sm">
+        <CardShowcase {...props} />
+        <AvailableTokensShowcase {...props} />
+        <YourTokensShowcase {...props} />
+        <div className="flex w-full justify-center">
+          <Button
+            playerState={playerState}
+            setPlayerState={setPlayerState}
+            localSettings={props.localSettings}
+            setLocalSettings={props.setLocalSettings}
+            disabled={
+              !playerState.success || cardReserved || maxReserved || noTokens
+            }
+            onClick={() => {
+              if (
+                playerState.success &&
+                !cardReserved &&
+                !maxReserved &&
+                !noTokens
+              ) {
+                const sumTokenColors = Object.values(
+                  playerState.inventoryTokens
+                ).reduce((a, b) => a + b, 0);
+                // add gold token
+                if (sumTokenColors > 9) {
+                  setPlayerState((prev) => ({
+                    ...prev,
+                    success: false,
+                    hasExtraTurn: true,
+                    isProcessing: false,
+                    message: "Return tokens to 10.",
+                    playerTokens: defaultTokens,
+                    inventoryTokens: opTokenCountWColor(
+                      "increment",
+                      playerState.inventoryTokens,
+                      "gold"
+                    ),
+                  }));
+                  return;
+                }
+                setPlayerState((prev) => ({
+                  ...prev,
+                  isNextTurn: true,
+                }));
+              }
+            }}
+          >
+            Reserve
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  // Purchase or claim
+  return (
+    <div className="relative flex h-full w-full flex-col gap-6 text-sm">
+      <CardShowcase {...props} />
+      <RequiredTokensShowcase {...props} />
+      <YourTokensShowcase {...props} />
+      <div className="flex w-full justify-center">
+        <Button
+          playerState={playerState}
+          setPlayerState={setPlayerState}
+          localSettings={props.localSettings}
+          setLocalSettings={props.setLocalSettings}
+          disabled={!playerState.success}
+          onClick={() => {
+            if (playerState.success)
+              setPlayerState((prev) => ({
+                ...prev,
+                isNextTurn: true,
+              }));
+          }}
+        >
+          Purchase
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+const CardShowcase = (props: DialogProps) => {
+  const { game, player, playerState, setPlayerState } = props;
+  return (
+    playerState.selectedCard && (
+      <div className="flex flex-col gap-2">
+        {/* <div className="font-semibold">Card</div> */}
+        <div className="flex w-full justify-center gap-6">
+          <Card
+            cardId={playerState.selectedCard.id}
+            cardEffect={null}
+            big
+            {...props}
+          />
+        </div>
+      </div>
+    )
+  );
+};
+
+const RequiredTokensShowcase = (props: DialogProps) => {
+  const { game, player, playerState, setPlayerState } = props;
+  const requiredTokens =
+    playerState.selectedCard &&
+    (Object.keys(playerState.selectedCard.price) as CardColor[]).filter(
+      (cardColor) =>
+        playerState.selectedCard &&
+        playerState.selectedCard.price[cardColor as CardColor] !== 0
+    );
+  const { gold: goldToken, ...price } = playerState.playerTokens;
+  const replacedPrice =
+    playerState.selectedCard &&
+    opPrice("increment", price, playerState.priceToReplace);
+  const discountedPrice =
+    playerState.selectedCard &&
+    opPrice(
+      "decrement",
+      playerState.selectedCard.price,
+      game[`inventory${game.turnIdx}` as InventoryKey].discount
+    );
   const selectedColorClass =
     playerState.selectedCardColor === "white"
       ? "border-slate-300 border shadow-[0_0_0_0.2rem_rgba(255,255,255,.9)]"
@@ -48,55 +279,7 @@ export default function Content(props: DialogProps) {
       ? "border-[#000000] shadow-[0_0_0_0.2rem_rgba(16,16,16,.25)]"
       : "";
 
-  const colorClass = (color: CardColor) =>
-    color === "white"
-      ? "border-white bg-gradient-to-bl from-white to-white/[.7] shadow-white"
-      : color === "blue"
-      ? "border-blue-500 bg-gradient-to-bl from-blue-500 to-blue-500/[.7] shadow-blue-500"
-      : color === "green"
-      ? "border-green-500 bg-gradient-to-bl from-green-500 to-green-500/[.7] shadow-green-500"
-      : color === "red"
-      ? "border-red-500 bg-gradient-to-bl from-red-500 to-red-500/[.7] shadow-red-500"
-      : color === "black"
-      ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-700/[.7] shadow-gray-800"
-      : "";
-
-  const requiredTokens =
-    playerState.selectedCard &&
-    (Object.keys(playerState.selectedCard.price) as CardColor[]).filter(
-      (cardColor) =>
-        playerState.selectedCard &&
-        playerState.selectedCard.price[cardColor as CardColor] !== 0
-    );
-
-  const { gold: goldToken, ...price } = playerState.playerTokens;
-  const replacedPrice =
-    playerState.selectedCard &&
-    opPrice("increment", price, playerState.priceToReplace);
-  const discountedPrice =
-    playerState.selectedCard &&
-    opPrice(
-      "decrement",
-      playerState.selectedCard.price,
-      game[`inventory${game.turnIdx}` as InventoryKey].discount
-    );
-
-  const CardShowcase = () =>
-    playerState.selectedCard && (
-      <div className="flex flex-col gap-2">
-        {/* <div className="font-semibold">Card</div> */}
-        <div className="flex w-full justify-center gap-6">
-          <Card
-            cardId={playerState.selectedCard.id}
-            cardEffect={null}
-            big
-            {...props}
-          />
-        </div>
-      </div>
-    );
-
-  const RequiredTokensShowcase = () =>
+  return (
     requiredTokens &&
     discountedPrice &&
     replacedPrice && (
@@ -180,9 +363,13 @@ export default function Content(props: DialogProps) {
           ))}
         </div>
       </div>
-    );
+    )
+  );
+};
 
-  const AvailableTokensShowcase = () => (
+const AvailableTokensShowcase = (props: DialogProps) => {
+  const { game, player, playerState, setPlayerState } = props;
+  return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
       {playerState.currentAction !== "take" && !playerState.hasExtraTurn && (
         <Title>AVAILABLE TOKENS</Title>
@@ -208,8 +395,11 @@ export default function Content(props: DialogProps) {
       </div>
     </div>
   );
+};
 
-  const SelectedTokensShowcase = () => (
+const SelectedTokensShowcase = (props: DialogProps) => {
+  const { game, player, playerState, setPlayerState } = props;
+  return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
       <Title>SELECTED TOKENS</Title>
       <div className="flex h-full w-full flex-1 items-center">
@@ -228,8 +418,11 @@ export default function Content(props: DialogProps) {
       </div>
     </div>
   );
+};
 
-  const YourTokensShowcase = () => (
+const YourTokensShowcase = (props: DialogProps) => {
+  const { game, player, playerState, setPlayerState } = props;
+  return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
       <Title>YOUR TOKENS</Title>
       {playerState.currentAction === "purchase" ? (
@@ -273,188 +466,7 @@ export default function Content(props: DialogProps) {
       )}
     </div>
   );
-
-  if (playerState.currentAction === "take")
-    return (
-      <div className="relative flex h-full w-full flex-col justify-between gap-6 text-sm">
-        <AvailableTokensShowcase />
-        <SelectedTokensShowcase />
-        <YourTokensShowcase />
-        <div className="flex w-full justify-center">
-          <Button
-            playerState={playerState}
-            setPlayerState={setPlayerState}
-            disabled={!playerState.success}
-            onClick={() => {
-              if (playerState.success) {
-                const tokens = !playerState.hasExtraTurn
-                  ? opTokenCount(
-                      "increment",
-                      game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                      playerState.playerTokens
-                    )
-                  : playerState.inventoryTokens;
-                const sumTokenColors = Object.values(tokens).reduce(
-                  (a, b) => a + b,
-                  0
-                );
-                if (sumTokenColors > 10) {
-                  setPlayerState((prev) => ({
-                    ...prev,
-                    success: false,
-                    hasExtraTurn: true,
-                    isProcessing: false,
-                    message: "Return tokens to 10.",
-                    playerTokens: defaultTokens,
-                    inventoryTokens: tokens,
-                  }));
-                  return;
-                }
-                setPlayerState((prev) => ({
-                  ...prev,
-                  isNextTurn: true,
-                }));
-              }
-            }}
-          >
-            {playerState.hasExtraTurn ? "Return" : "Collect"}
-          </Button>
-        </div>
-      </div>
-    );
-  if (playerState.currentAction === "reserve") {
-    if (playerState.hasExtraTurn)
-      return (
-        <div className="relative flex h-full w-full flex-col gap-6 text-sm">
-          <AvailableTokensShowcase />
-          <SelectedTokensShowcase />
-          <YourTokensShowcase />
-          <div className="flex w-full justify-center">
-            <Button
-              playerState={playerState}
-              setPlayerState={setPlayerState}
-              disabled={
-                !playerState.success || cardReserved || maxReserved || noTokens
-              }
-              onClick={() => {
-                if (
-                  playerState.success &&
-                  !cardReserved &&
-                  !maxReserved &&
-                  !noTokens
-                ) {
-                  const tokens = !playerState.hasExtraTurn
-                    ? opTokenCount(
-                        "increment",
-                        game[`inventory${game.turnIdx}` as InventoryKey].tokens,
-                        playerState.playerTokens
-                      )
-                    : playerState.inventoryTokens;
-                  const sumTokenColors = Object.values(tokens).reduce(
-                    (a, b) => a + b,
-                    0
-                  );
-                  if (sumTokenColors > 10) {
-                    setPlayerState((prev) => ({
-                      ...prev,
-                      success: false,
-                      hasExtraTurn: true,
-                      isProcessing: false,
-                      message: "Return tokens to 10.",
-                      playerTokens: defaultTokens,
-                      inventoryTokens: tokens,
-                    }));
-                    return;
-                  }
-                  setPlayerState((prev) => ({
-                    ...prev,
-                    isNextTurn: true,
-                  }));
-                }
-              }}
-            >
-              Return
-            </Button>
-          </div>
-        </div>
-      );
-    return (
-      <div className="relative flex h-full w-full flex-col gap-6 text-sm">
-        <CardShowcase />
-        <AvailableTokensShowcase />
-        <YourTokensShowcase />
-        <div className="flex w-full justify-center">
-          <Button
-            playerState={playerState}
-            setPlayerState={setPlayerState}
-            disabled={
-              !playerState.success || cardReserved || maxReserved || noTokens
-            }
-            onClick={() => {
-              if (
-                playerState.success &&
-                !cardReserved &&
-                !maxReserved &&
-                !noTokens
-              ) {
-                const sumTokenColors = Object.values(
-                  playerState.inventoryTokens
-                ).reduce((a, b) => a + b, 0);
-                // add gold token
-                if (sumTokenColors > 9) {
-                  setPlayerState((prev) => ({
-                    ...prev,
-                    success: false,
-                    hasExtraTurn: true,
-                    isProcessing: false,
-                    message: "Return tokens to 10.",
-                    playerTokens: defaultTokens,
-                    inventoryTokens: opTokenCountWColor(
-                      "increment",
-                      playerState.inventoryTokens,
-                      "gold"
-                    ),
-                  }));
-                  return;
-                }
-                setPlayerState((prev) => ({
-                  ...prev,
-                  isNextTurn: true,
-                }));
-              }
-            }}
-          >
-            Reserve
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  // Purchase or claim
-  return (
-    <div className="relative flex h-full w-full flex-col gap-6 text-sm">
-      <CardShowcase />
-      <RequiredTokensShowcase />
-      <YourTokensShowcase />
-      <div className="flex w-full justify-center">
-        <Button
-          playerState={playerState}
-          setPlayerState={setPlayerState}
-          disabled={!playerState.success}
-          onClick={() => {
-            if (playerState.success)
-              setPlayerState((prev) => ({
-                ...prev,
-                isNextTurn: true,
-              }));
-          }}
-        >
-          Purchase
-        </Button>
-      </div>
-    </div>
-  );
-}
+};
 
 function CompleteIcon() {
   return (
@@ -473,11 +485,15 @@ function CompleteIcon() {
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   playerState: PlayerState;
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
+  localSettings: any;
+  setLocalSettings: any;
 }
 
 function Button({
   playerState,
   setPlayerState,
+  localSettings,
+  setLocalSettings,
   children,
   onClick,
   disabled,
@@ -493,7 +509,7 @@ function Button({
       }}
       {...props}
     >
-      {playerState.isProcessing && (
+      {localSettings?.enableAnimation && playerState.isProcessing && (
         <svg
           className="absolute -right-[120px] h-5 w-5 animate-spin text-slate-600"
           fill="none"

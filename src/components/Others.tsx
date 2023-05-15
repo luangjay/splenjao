@@ -56,31 +56,36 @@ export default function Others(props: PlayerProps) {
         <OthersProfile {...props} others={others} />
         <div className="flex flex-col items-center gap-6">
           <Title>OPTIONS</Title>
-          <div className="">
+          <div className="flex items-center gap-2">
             <Switch
               checked={props.localSettings?.enableAnimation}
               onChange={toggle}
               className={`${
                 props.localSettings?.enableAnimation
-                  ? "bg-teal-900"
-                  : "bg-teal-700"
+                  ? "bg-slate-600"
+                  : "bg-slate-400"
               }
-          relative inline-flex h-[38px] w-[74px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
+          relative inline-flex h-[28px] w-[53px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
             >
-              <span className="sr-only">Use setting</span>
               <span
                 aria-hidden="true"
                 className={`${
                   props.localSettings?.enableAnimation
-                    ? "translate-x-9"
+                    ? "translate-x-[25px]"
                     : "translate-x-0"
                 }
-            pointer-events-none inline-block h-[34px] w-[34px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+            pointer-events-none inline-block h-[25px] w-[25px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
               />
             </Switch>
+            <div className="font-medium">Animation</div>
           </div>
 
-          <Button onClick={openDialog}>Leave game</Button>
+          <button
+            className="rounded-md p-2 px-4 font-medium hover:bg-white/40"
+            onClick={openDialog}
+          >
+            Leave game
+          </button>
         </div>
       </div>
       <LeaveDialog game={game} player={me} open={open} setOpen={setOpen} />
@@ -116,34 +121,19 @@ const OthersProfile = (props: OthersProps) => (
             (props.localSettings?.enableAnimation ? (
               <div className="bg-animation absolute inset-0 rounded-2xl"></div>
             ) : (
-              <div className="absolute inset-0 rounded-2xl bg-slate-600"></div>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-400/[.8]"></div>
             ))}
           <div
             className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-              isTurn && "border border-slate-600"
+              isTurn ? "border border-slate-600" : "border border-transparent"
             }`}
           >
             <div className="flex flex-col">
-              <div className="h-fit p-3 px-4">
-                <div className="flex justify-between gap-1 text-sm">
-                  {tokenColors.map((tokenColor) => (
-                    <div className="flex w-1/6 items-center gap-[1px]">
-                      {inventory.tokens[tokenColor] > 0 && (
-                        <>
-                          <TokenIcon className={colorClass(tokenColor)} />
-                          {inventory.tokens[tokenColor]}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="mx-4 border"></div>
               <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
                 <div className="aspect-square h-[84%]">
                   <Image
                     alt=""
-                    src={props.player.image || ""}
+                    src={player.image || ""}
                     width={256}
                     height={256}
                     className="aspect-square h-full rounded-full object-cover drop-shadow"
@@ -152,7 +142,7 @@ const OthersProfile = (props: OthersProps) => (
                 <div className="flex h-full flex-1 flex-col justify-between">
                   <div className="flex h-[24px] items-center justify-between">
                     <div className="w-[99px] truncate text-base font-medium">
-                      {props.player.name}
+                      {player.name}
                     </div>
                     <div className="relative flex h-[24px] items-center gap-1.5">
                       {props.localSettings?.enableAnimation && score >= 15 && (
@@ -180,6 +170,21 @@ const OthersProfile = (props: OthersProps) => (
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="mx-4 border"></div>
+            <div className="h-fit p-3 px-4">
+              <div className="flex justify-between gap-1 text-sm">
+                {tokenColors.map((tokenColor) => (
+                  <div className="flex w-1/6 items-center gap-[1px]">
+                    {inventory.tokens[tokenColor] > 0 && (
+                      <>
+                        <TokenIcon className={colorClass(tokenColor)} />
+                        {inventory.tokens[tokenColor]}
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
