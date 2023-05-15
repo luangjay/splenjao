@@ -471,37 +471,44 @@ export const gameRouter = createTRPCRouter({
 });
 
 function calculateWinner(game: Game) {
-  let maxIdx = 0;
-  let maxScore = game.inventory0.score;
-
-  function compIdx(idx: number) {
-    const idxScore = game[`inventory${idx}` as InventoryKey].score;
-    return idxScore > maxScore
-      ? idx
-      : idxScore < maxScore
-      ? maxIdx
-      : maxIdx === -1
-      ? -1
-      : game[`inventory${idx}` as InventoryKey].cards.length <
-        game[`inventory${maxIdx}` as InventoryKey].cards.length
-      ? idx
-      : game[`inventory${idx}` as InventoryKey].cards.length >
-        game[`inventory${maxIdx}` as InventoryKey].cards.length
-      ? maxIdx
-      : -1;
-  }
-
-  Array(game.playerCount - 1)
+  const players = Array(game.playerCount)
     .fill(0)
-    .forEach((_, idx) => {
-      idx++;
-      const idxScore = game[`inventory${idx}` as InventoryKey].score;
-      maxIdx = compIdx(idx);
-      maxScore = Math.max(idxScore, maxScore);
+    .map((_, idx) => {
+      const inventory = game[`inventory${idx}` as InventoryKey];
+      return {
+        idx,
+        score: inventory.score,
+        purchaseCount: inventory.cards.length,
+        reserveCount: inventory.reserves.length,
+      };
     });
 
+  const sortedPlayers = players.sort((a, b) => {
+    if (a.score !== b.score) {
+      return b.score - a.score; // Sort by maximum points
+    } else if (a.purchaseCount !== b.purchaseCount) {
+      return a.purchaseCount - b.purchaseCount; // Sort by least cards purchased
+    } else {
+      return a.reserveCount - b.reserveCount; // Sort by least cards reserved
+    }
+  });
+
+  const winner = sortedPlayers[0] ?? {
+    idx: -1,
+    score: -1,
+    purchaseCount: -1,
+    reserveCount: -1,
+  };
+  const isTie =
+    sortedPlayers.filter(
+      (player) =>
+        player.score === winner.score &&
+        player.purchaseCount === winner.purchaseCount &&
+        player.reserveCount === winner.reserveCount
+    ).length > 1;
+
   return {
-    maxIdx,
-    maxScore,
+    maxIdx: winner.idx !== -1 && !isTie ? winner.idx : -1,
+    maxScore: winner.idx !== -1 && !isTie ? winner.score : -1,
   };
 }

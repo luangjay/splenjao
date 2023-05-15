@@ -107,9 +107,9 @@ const OthersProfile = (props: OthersProps) => (
                     </div>
                     <div className="relative flex h-[24px] items-center gap-1.5">
                       {score >= 15 && (
-                        <span className="absolute -top-0.5 -right-2 z-20 flex h-2 w-2">
+                        <span className="absolute -top-0.5 -right-1.5 z-20 flex h-1.5 w-1.5">
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500"></span>
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sky-500"></span>
                         </span>
                       )}
                       <ScoreIcon />

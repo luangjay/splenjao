@@ -17,6 +17,8 @@ import { useSocket } from "../../../hooks/useSocket";
 import Others from "../../../components/Others";
 import Me from "../../../components/Me";
 import ActionDialog from "../../../components/Dialog";
+import Layout from "../../../components/Layout";
+import Title from "../../../components/Title";
 
 const defaultPrice = {
   white: 0,
@@ -219,6 +221,14 @@ export default function Game() {
     );
   }
   // if (game.isError) return <Error statusCode={404} />;
+
+  if (game.status === "ended" && game.winnerId) {
+    return (
+      <Layout player={player}>
+        <Title size={2}>GAME ENDED</Title>
+      </Layout>
+    );
+  }
   return (
     <>
       <Head>
