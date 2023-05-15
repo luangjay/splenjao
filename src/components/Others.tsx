@@ -44,7 +44,7 @@ export default function Others(props: PlayerProps) {
         return (
           <div
             className={`relative rounded-2xl bg-gray-100 ${
-              !isTurn && "border border-slate-600"
+              !isTurn && "drop-shadow"
             }`}
           >
             {isTurn && (
@@ -71,7 +71,13 @@ export default function Others(props: PlayerProps) {
                       <div className="w-[99px] truncate text-base font-medium">
                         {player.name}
                       </div>
-                      <div className="flex h-[24px] items-center gap-1.5">
+                      <div className="relative flex h-[24px] items-center gap-1.5">
+                        {score >= 15 && (
+                          <span className="absolute -top-0.5 -right-2 z-20 flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500"></span>
+                          </span>
+                        )}
                         <ScoreIcon />
                         {score}
                       </div>

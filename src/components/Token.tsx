@@ -22,7 +22,7 @@ interface TokenIconProps {
   flexCol?: boolean;
 }
 
-function TokenIcon({ className, flexCol = false }: TokenIconProps) {
+export function TokenIcon({ className, flexCol = false }: TokenIconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -63,6 +63,7 @@ export default function Token({
   flexCol = false,
 }: TokenProps) {
   const [disabled, setDisabled] = useState(false);
+  const playerTurn = player.id === game.playerIds[game.turnIdx];
 
   const colorClass =
     tokenColor === "white"
@@ -113,7 +114,9 @@ export default function Token({
       } ${flexCol && "flex-col"}`}
     >
       <button
-        className={`${tokenEffect}`}
+        className={`${tokenEffect} ${
+          playerTurn && showCount && !flexCol && "cursor-pointer"
+        }`}
         disabled={!tokenEffect}
         onClick={(e) => {
           if (!tokenEffect) return;

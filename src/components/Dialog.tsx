@@ -57,7 +57,7 @@ export default function ActionDialog(props: DialogProps) {
       <Dialog
         as="div"
         className="relative z-20 select-none max-md:hidden"
-        onClose={closeDialog}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}
@@ -71,7 +71,7 @@ export default function ActionDialog(props: DialogProps) {
           <div className="fixed inset-0 bg-black bg-opacity-25" />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto" onClick={closeDialog}>
           <div className="flex min-h-full items-center justify-center text-center">
             <Transition.Child
               enter="ease-out duration-300"
@@ -81,11 +81,11 @@ export default function ActionDialog(props: DialogProps) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
+              <div className="absolute left-[-80px] top-[32px] z-[9999] flex flex-col items-end">
+                <ActionTab {...props} />
+              </div>
               {playerState.currentAction && (
-                <Dialog.Panel className="flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
-                  <div className="flex flex-col items-end py-8">
-                    <ActionTab {...props} />
-                  </div>
+                <Dialog.Panel className="relative flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
                   <div className="flex flex-col gap-2 rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
                     <Dialog.Title>
                       <Title size={1}>{titleTxt}</Title>
@@ -94,7 +94,7 @@ export default function ActionDialog(props: DialogProps) {
                       <Content {...props} />
                     </div>
                   </div>
-                  <div className="flex w-[80px] flex-col items-end py-8"></div>
+                  {/* <div className="flex w-[80px] flex-col items-end py-8"></div> */}
                 </Dialog.Panel>
               )}
             </Transition.Child>
@@ -113,12 +113,6 @@ function ActionTab(props: DialogProps) {
         playerState.selectedCard.id
       )
     : false;
-
-  const maxReserved =
-    game[`inventory${game.turnIdx}` as InventoryKey].reserves.length >= 3 ||
-    game[`inventory${game.turnIdx}` as InventoryKey].tokens.gold >= 3;
-
-  const noTokens = game.resource.tokens.gold <= 0;
 
   const changeAction = (action: Action) => {
     if (action !== playerState.currentAction && player && game) {
@@ -187,26 +181,22 @@ function ActionTab(props: DialogProps) {
           className={`flex flex-col items-center justify-center ${
             tab.selected ? "w-[80px]" : "w-[60px]"
           }`}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* {idx !== 0 && <div className="h-4 w-2 bg-slate-400"></div>} */}
           <div className="flex items-center">
-            {tab.selected ? (
-              <button
-                className="flex aspect-square w-[80px] items-center justify-center rounded-[16px_0_0_16px] bg-slate-700 text-gray-200 drop-shadow"
-                disabled={tab.selected}
-                onClick={tab.onClick}
-              >
-                <tab.Child width="70%" height="70%" />
-              </button>
-            ) : (
-              <button
-                className="flex aspect-square w-[60px] items-center justify-center rounded-[16px_0_0_16px] bg-slate-500 pt-1 pl-1 text-gray-200 drop-shadow hover:bg-slate-400"
-                disabled={tab.selected}
-                onClick={tab.onClick}
-              >
-                <tab.Child width="70%" height="70%" />
-              </button>
-            )}
+            <button
+              className={`flex aspect-square items-center justify-center rounded-[16px_0_0_16px] text-gray-200 drop-shadow ${
+                tab.selected
+                  ? "bg-slate-700"
+                  : "bg-slate-500 pt-1 pl-1 hover:bg-slate-400"
+              }`}
+              style={{ width: tab.selected ? "80px" : "60px" }}
+              disabled={tab.selected}
+              onClick={tab.onClick}
+            >
+              <tab.Child width="70%" height="70%" />
+            </button>
           </div>
         </div>
       ))}

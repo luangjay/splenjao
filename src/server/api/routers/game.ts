@@ -163,6 +163,17 @@ export const gameRouter = createTRPCRouter({
       })
     ),
 
+  updateLeave: protectedProcedure.input(z.string()).mutation(({ ctx, input }) =>
+    ctx.prisma.game.update({
+      where: {
+        id: input,
+      },
+      data: {
+        status: "canceled",
+      },
+    })
+  ),
+
   // BAD SMELL: GOD METHOD LOL
   updateNextTurn: protectedProcedure
     .input(

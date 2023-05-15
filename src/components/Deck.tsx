@@ -31,8 +31,8 @@ export default function Deck(props: DeckProps) {
     <div className="flex gap-6 overflow-auto p-2 lg:gap-12 lg:p-6">
       <div className="flex items-center">
         <button
-          className={`flex h-max min-h-[40px] select-none flex-col rounded bg-gray-50 p-1 text-base drop-shadow ${
-            playerTurn && "cursor-pointer hover:bg-gray-100"
+          className={`flex h-max min-h-[40px] select-none flex-col rounded-lg bg-gray-50 p-1 text-base drop-shadow ${
+            playerTurn && "hover:bg-gray-100"
           }`}
           disabled={!playerTurn}
           onClick={() =>
@@ -59,7 +59,7 @@ export default function Deck(props: DeckProps) {
             (tileId, idx) => idx < 5 && <Tile tileId={tileId} />
           )}
         </div>
-        <div className="grid h-fit grid-cols-5 gap-1.5 lg:gap-2">
+        <div className="relative grid h-fit grid-cols-5 gap-1.5 lg:gap-2">
           <Card cardId={103} cardEffect={null} {...props} />
           {game.resource.cardsLv3.map(
             (cardId, idx) =>

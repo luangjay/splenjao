@@ -15,6 +15,14 @@ import Title from "./Title";
 
 export default function Me(props: PlayerProps) {
   const { game, me: player } = props;
+
+  const utils = api.useContext();
+  const leaveGame = api.game.updateLeave.useMutation({
+    async onSettled() {
+      utils.game.findAndAuthorize.invalidate();
+    },
+  });
+
   const idx = game.playerIds.indexOf(player.id);
   const inventory = game[`inventory${idx}` as InventoryKey];
   const cardCount = inventory.cards.length;
@@ -23,13 +31,9 @@ export default function Me(props: PlayerProps) {
   const score = inventory.score;
   const isTurn = idx === game.turnIdx;
 
-  const [showScore, setShowScore] = useState(false);
-
   const MyProfile = (
     <div
-      className={`relative rounded-2xl bg-gray-100 ${
-        !isTurn && "border border-slate-600"
-      }`}
+      className={`relative rounded-2xl bg-gray-100 ${!isTurn && "drop-shadow"}`}
     >
       {isTurn && (
         <div className="bg-animation absolute inset-0 rounded-2xl"></div>
@@ -40,6 +44,21 @@ export default function Me(props: PlayerProps) {
         }`}
       >
         <div className="flex flex-col">
+          <div className="h-fit p-3 px-4">
+            <div className="flex justify-between gap-1 text-sm">
+              {tokenColors.map((tokenColor) => (
+                <div className="flex w-1/6 items-center gap-[1px]">
+                  {inventory.tokens[tokenColor] > 0 && (
+                    <>
+                      <TokenIcon className={colorClass(tokenColor)} />
+                      {inventory.tokens[tokenColor]}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mx-4 border"></div>
           <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
             <div className="aspect-square h-[84%]">
               <Image
@@ -55,7 +74,13 @@ export default function Me(props: PlayerProps) {
                 <div className="w-[99px] truncate text-base font-medium">
                   {player.name}
                 </div>
-                <div className="flex h-[24px] items-center gap-1.5">
+                <div className="relative flex h-[24px] items-center gap-1.5">
+                  {score >= 15 && (
+                    <span className="absolute -top-0.5 -right-2 z-20 flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-500"></span>
+                    </span>
+                  )}
                   <ScoreIcon />
                   {score}
                 </div>
@@ -76,51 +101,40 @@ export default function Me(props: PlayerProps) {
               </div>
             </div>
           </div>
-          <div className="mx-4 border"></div>
-          <div className="h-fit p-3 px-4">
-            <div className="flex justify-between gap-1 text-sm">
-              {tokenColors.map((tokenColor) => (
-                <div className="flex w-1/6 items-center gap-[1px]">
-                  {inventory.tokens[tokenColor] > 0 && (
-                    <>
-                      <TokenIcon className={colorClass(tokenColor)} />
-                      {inventory.tokens[tokenColor]}
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 
+  const MyCard = ({ cardId }: { cardId: number }) => {
+    const [float, setFloat] = useState(false);
+    return (
+      <div
+        className="z-20 flex rounded-lg transition-all duration-[100ms]"
+        style={{ marginTop: float ? "-64px" : "0px" }}
+        onClick={() => setFloat((prev) => !prev)}
+      >
+        <Card
+          cardId={cardId ?? -1}
+          cardEffect={"special"}
+          game={game}
+          player={player}
+        />
+      </div>
+    );
+  };
+
   const MyCards = (
-    <div className="flex h-[190px]">
+    <div className="flex flex-1">
       {inventory.cards.length === 0 ? (
-        <div className="flex h-full w-full items-center justify-center overflow-auto rounded-lg pt-8 text-base">
+        <div className="flex h-[100px] w-full items-center justify-center overflow-auto rounded-lg pt-16 pb-6 text-base">
           No cards owned
         </div>
       ) : (
-        <div className="flex h-full w-full overflow-auto pt-8 text-sm">
-          {inventory.cards.map((cardId) => {
-            const [float, setFloat] = useState(false);
-            return (
-              <div
-                className="flex w-[40px] rounded-lg transition-all duration-[100ms]"
-                style={{ marginTop: float ? "-32px" : "0px" }}
-                onClick={() => setFloat((prev) => !prev)}
-              >
-                <Card
-                  cardId={cardId ?? -1}
-                  cardEffect={"special"}
-                  game={game}
-                  player={player}
-                />
-              </div>
-            );
-          })}
+        <div className="relative flex h-full max-h-[320px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
+          {[...inventory.cards].map((cardId) => (
+            <MyCard cardId={cardId} />
+          ))}
         </div>
       )}
     </div>
@@ -145,23 +159,12 @@ export default function Me(props: PlayerProps) {
   );
 
   return (
-    <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
-      <div className="flex flex-1 flex-col gap-4">
-        <Title>OPTIONS</Title>
-        <div className="flex h-[60px] items-center justify-center rounded-lg">
-          <button
-            className="rounded-lg px-4 py-3 font-semibold hover:bg-white/[.4]"
-            onClick={() => confirm()}
-          >
-            Leave game
-          </button>
-        </div>
-      </div>
+    <div className="flex h-full w-full flex-col gap-6 overflow-auto p-6 text-base">
       <div className="flex flex-col gap-4">
         <Title>TILES</Title>
         {MyTiles}
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2">
         <Title>CARDS</Title>
         {MyCards}
       </div>

@@ -296,7 +296,12 @@ export default function Content(props: DialogProps) {
           <div className="flex w-1/6 justify-center">
             <Token
               tokenColor={tokenColor}
-              tokenEffect={!playerState.hasExtraTurn ? "take" : null}
+              tokenEffect={
+                !playerState.hasExtraTurn &&
+                playerState.currentAction !== "reserve"
+                  ? "take"
+                  : null
+              }
               reference="resource"
               showCount
               flexCol

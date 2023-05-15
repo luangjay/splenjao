@@ -37,13 +37,13 @@ body {
 
 .number {
   color: white;
-  -webkit-text-stroke: 0.05rem #111827;
+  -webkit-text-stroke: 0.07rem #111827;
   @apply font-number;
 }
 
 .number-sm {
   color: white;
-  -webkit-text-stroke: 0.05rem #111827;
+  -webkit-text-stroke: 0.06rem #111827;
   @apply font-number;
 }
 

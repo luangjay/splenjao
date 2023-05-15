@@ -53,15 +53,18 @@ export default function Card({
   if (cardLoading)
     return (
       <div
-        className={`select-none rounded-lg border bg-gray-50 drop-shadow ${
-          playerTurn && cardEffect && "hover:bg-gray-100"
+        className={`select-none rounded-lg bg-gray-50 drop-shadow ${
+          playerTurn &&
+          cardEffect &&
+          "hover:absolute hover:bottom-1 hover:bg-gray-100"
         } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       ></div>
     );
   if (!card || cardId === -1) return <></>;
+  // bg-[length:40px_40px]
   return (
     <button
-      className={`select-none rounded-lg border bg-gray-50 bg-[url('/dragon3.png')] bg-[length:40px_40px] bg-center bg-no-repeat bg-origin-padding drop-shadow ${
+      className={`select-none rounded-lg bg-gray-50 bg-[url('/sakura.png')] bg-cover bg-center bg-no-repeat bg-origin-padding drop-shadow ${
         playerTurn && cardEffect && "hover:bg-gray-100"
       } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       disabled={!playerTurn || !cardEffect}
