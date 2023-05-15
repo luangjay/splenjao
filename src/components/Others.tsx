@@ -20,7 +20,8 @@ import {
   colorClass,
 } from "./Me";
 import Title from "./Title";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Switch, Transition } from "@headlessui/react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface PlayerWithIdx extends Player {
   idx: number;
@@ -42,6 +43,12 @@ export default function Others(props: PlayerProps) {
     .filter((player) => player.id !== me.id) as PlayerWithIdx[];
 
   const openDialog = () => setOpen(true);
+  const toggle = () => {
+    props.setLocalSettings((prev: any) => ({
+      ...prev,
+      enableAnimation: !prev?.enableAnimation,
+    }));
+  };
 
   return (
     <>
@@ -49,6 +56,30 @@ export default function Others(props: PlayerProps) {
         <OthersProfile {...props} others={others} />
         <div className="flex flex-col items-center gap-6">
           <Title>OPTIONS</Title>
+          <div className="">
+            <Switch
+              checked={props.localSettings?.enableAnimation}
+              onChange={toggle}
+              className={`${
+                props.localSettings?.enableAnimation
+                  ? "bg-teal-900"
+                  : "bg-teal-700"
+              }
+          relative inline-flex h-[38px] w-[74px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
+            >
+              <span className="sr-only">Use setting</span>
+              <span
+                aria-hidden="true"
+                className={`${
+                  props.localSettings?.enableAnimation
+                    ? "translate-x-9"
+                    : "translate-x-0"
+                }
+            pointer-events-none inline-block h-[34px] w-[34px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+              />
+            </Switch>
+          </div>
+
           <Button onClick={openDialog}>Leave game</Button>
         </div>
       </div>
@@ -81,20 +112,38 @@ const OthersProfile = (props: OthersProps) => (
             !isTurn && "drop-shadow"
           }`}
         >
-          {isTurn && (
-            <div className="bg-animation absolute inset-0 rounded-2xl"></div>
-          )}
+          {isTurn &&
+            (props.localSettings?.enableAnimation ? (
+              <div className="bg-animation absolute inset-0 rounded-2xl"></div>
+            ) : (
+              <div className="absolute inset-0 rounded-2xl bg-slate-600"></div>
+            ))}
           <div
-            className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none  ${
+            className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
               isTurn && "border border-slate-600"
             }`}
           >
             <div className="flex flex-col">
+              <div className="h-fit p-3 px-4">
+                <div className="flex justify-between gap-1 text-sm">
+                  {tokenColors.map((tokenColor) => (
+                    <div className="flex w-1/6 items-center gap-[1px]">
+                      {inventory.tokens[tokenColor] > 0 && (
+                        <>
+                          <TokenIcon className={colorClass(tokenColor)} />
+                          {inventory.tokens[tokenColor]}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mx-4 border"></div>
               <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
                 <div className="aspect-square h-[84%]">
                   <Image
                     alt=""
-                    src={player.image || ""}
+                    src={props.player.image || ""}
                     width={256}
                     height={256}
                     className="aspect-square h-full rounded-full object-cover drop-shadow"
@@ -103,10 +152,10 @@ const OthersProfile = (props: OthersProps) => (
                 <div className="flex h-full flex-1 flex-col justify-between">
                   <div className="flex h-[24px] items-center justify-between">
                     <div className="w-[99px] truncate text-base font-medium">
-                      {player.name}
+                      {props.player.name}
                     </div>
                     <div className="relative flex h-[24px] items-center gap-1.5">
-                      {score >= 15 && (
+                      {props.localSettings?.enableAnimation && score >= 15 && (
                         <span className="absolute -top-0.5 -right-1.5 z-20 flex h-1.5 w-1.5">
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
                           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sky-500"></span>
@@ -130,21 +179,6 @@ const OthersProfile = (props: OthersProps) => (
                       {tileCount}
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className="mx-4 border"></div>
-              <div className="h-fit p-3 px-4">
-                <div className="flex justify-between gap-1 text-sm">
-                  {tokenColors.map((tokenColor) => (
-                    <div className="flex w-1/6 items-center gap-[1px]">
-                      {inventory.tokens[tokenColor] > 0 && (
-                        <>
-                          <TokenIcon className={colorClass(tokenColor)} />
-                          {inventory.tokens[tokenColor]}
-                        </>
-                      )}
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>

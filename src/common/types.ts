@@ -29,6 +29,7 @@ export type PlayerState = {
   playerTokens: Tokens;
   priceToReplace: Price;
   hasExtraTurn: boolean;
+  isProcessing: boolean;
   isNextTurn: boolean;
   message: string;
   leave: boolean;

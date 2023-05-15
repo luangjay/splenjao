@@ -32,7 +32,7 @@ export default function Layout({ player, children }: LayoutProps) {
               <div>beta</div>
             </div>
             <div className="flex h-full items-center gap-4">
-              <div className="aspect-square h-[84%]">
+              <div className="aspect-square h-[80%]">
                 <Image
                   alt=""
                   src={player.image || ""}
@@ -41,9 +41,9 @@ export default function Layout({ player, children }: LayoutProps) {
                   className="aspect-square h-full rounded-full object-cover drop-shadow"
                 />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex max-w-[140px] flex-col gap-1">
                 <div>Logged in as</div>
-                <div className="w-[120px] truncate text-lg font-semibold">
+                <div className="truncate text-xl font-semibold">
                   {player.name}
                 </div>
               </div>

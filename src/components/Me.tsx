@@ -7,10 +7,12 @@ import Card from "./Card";
 import { useState } from "react";
 import Tile from "./Tile";
 import Title from "./Title";
-
+import { useLocalStorage } from "../hooks/useLocalStorage";
 export interface PlayerProps {
   game: Game;
   player: Player;
+  localSettings: any;
+  setLocalSettings: any;
 }
 
 export default function Me(props: PlayerProps) {
@@ -60,82 +62,88 @@ interface MeProps extends PlayerProps {
   cardId?: number;
 }
 
-const MyProfile = (props: MeProps) => (
-  <div
-    className={`relative rounded-2xl bg-gray-100 ${
-      !props.isTurn && "drop-shadow"
-    }`}
-  >
-    {props.isTurn && (
-      <div className="bg-animation absolute inset-0 rounded-2xl"></div>
-    )}
+const MyProfile = (props: MeProps) => {
+  return (
     <div
-      className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-        props.isTurn && "border border-slate-600"
+      className={`relative rounded-2xl bg-gray-100 ${
+        !props.isTurn && "drop-shadow"
       }`}
     >
-      <div className="flex flex-col">
-        <div className="h-fit p-3 px-4">
-          <div className="flex justify-between gap-1 text-sm">
-            {tokenColors.map((tokenColor) => (
-              <div className="flex w-1/6 items-center gap-[1px]">
-                {props.inventory.tokens[tokenColor] > 0 && (
-                  <>
-                    <TokenIcon className={colorClass(tokenColor)} />
-                    {props.inventory.tokens[tokenColor]}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mx-4 border"></div>
-        <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
-          <div className="aspect-square h-[84%]">
-            <Image
-              alt=""
-              src={props.player.image || ""}
-              width={256}
-              height={256}
-              className="aspect-square h-full rounded-full object-cover drop-shadow"
-            />
-          </div>
-          <div className="flex h-full flex-1 flex-col justify-between">
-            <div className="flex h-[24px] items-center justify-between">
-              <div className="w-[99px] truncate text-base font-medium">
-                {props.player.name}
-              </div>
-              <div className="relative flex h-[24px] items-center gap-1.5">
-                {props.score >= 15 && (
-                  <span className="absolute -top-0.5 -right-1.5 z-20 flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sky-500"></span>
-                  </span>
-                )}
-                <ScoreIcon />
-                {props.score}
-              </div>
+      {props.isTurn &&
+        (props.localSettings?.enableAnimation ? (
+          <div className="bg-animation absolute inset-0 rounded-2xl"></div>
+        ) : (
+          <div className="absolute inset-0 rounded-2xl bg-slate-600"></div>
+        ))}
+      <div
+        className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
+          props.isTurn && "border border-slate-600"
+        }`}
+      >
+        <div className="flex flex-col">
+          <div className="h-fit p-3 px-4">
+            <div className="flex justify-between gap-1 text-sm">
+              {tokenColors.map((tokenColor) => (
+                <div className="flex w-1/6 items-center gap-[1px]">
+                  {props.inventory.tokens[tokenColor] > 0 && (
+                    <>
+                      <TokenIcon className={colorClass(tokenColor)} />
+                      {props.inventory.tokens[tokenColor]}
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-            <div className="flex h-[24px] justify-between">
-              <div className="flex h-[24px] items-center gap-1.5">
-                <CardIcon />
-                {props.cardCount}
+          </div>
+          <div className="mx-4 border"></div>
+          <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
+            <div className="aspect-square h-[84%]">
+              <Image
+                alt=""
+                src={props.player.image || ""}
+                width={256}
+                height={256}
+                className="aspect-square h-full rounded-full object-cover drop-shadow"
+              />
+            </div>
+            <div className="flex h-full flex-1 flex-col justify-between">
+              <div className="flex h-[24px] items-center justify-between">
+                <div className="w-[99px] truncate text-base font-medium">
+                  {props.player.name}
+                </div>
+                <div className="relative flex h-[24px] items-center gap-1.5">
+                  {props.localSettings?.enableAnimation &&
+                    props.score >= 15 && (
+                      <span className="absolute -top-0.5 -right-1.5 z-20 flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sky-500"></span>
+                      </span>
+                    )}
+                  <ScoreIcon />
+                  {props.score}
+                </div>
               </div>
-              <div className="-mx-0.5 flex h-[24px] items-center gap-1">
-                <ReserveIcon />
-                {props.reserveCount}
-              </div>
-              <div className="flex h-[24px] items-center gap-1.5">
-                <TileIcon />
-                {props.tileCount}
+              <div className="flex h-[24px] justify-between">
+                <div className="flex h-[24px] items-center gap-1.5">
+                  <CardIcon />
+                  {props.cardCount}
+                </div>
+                <div className="-mx-0.5 flex h-[24px] items-center gap-1">
+                  <ReserveIcon />
+                  {props.reserveCount}
+                </div>
+                <div className="flex h-[24px] items-center gap-1.5">
+                  <TileIcon />
+                  {props.tileCount}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const MyCards = (props: MeProps) => (
   <div className="flex flex-1">

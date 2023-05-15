@@ -19,6 +19,7 @@ import Me from "../../../components/Me";
 import ActionDialog from "../../../components/Dialog";
 import Layout from "../../../components/Layout";
 import Title from "../../../components/Title";
+import { useLocalStorage } from "../../../hooks/useLocalStorage";
 
 const defaultPrice = {
   white: 0,
@@ -86,6 +87,11 @@ export default function Game() {
     },
   });
 
+  // LOCAL STORAGE
+  const [localSettings, setLocalSettings] = useLocalStorage("settings", {
+    enableAnimation: true,
+  });
+
   // STATE HOOKS
   // const [validTab, setValidTab] = useState(false);
   const [validTab, setValidTab] = useState(true);
@@ -102,6 +108,7 @@ export default function Game() {
     selectedCard: null,
     selectedCardColor: null,
     hasExtraTurn: false,
+    isProcessing: false,
     isNextTurn: false,
     message: "",
     leave: false,
@@ -176,6 +183,7 @@ export default function Game() {
           selectedCard: null,
           selectedCardColor: null,
           hasExtraTurn: false,
+          isProcessing: false,
           isNextTurn: false,
           message: "",
           leave: false,
@@ -242,7 +250,12 @@ export default function Game() {
           className="fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
           style={{ width: !openOthers ? 0 : "306px" }}
         >
-          <Others game={game} player={player} />
+          <Others
+            game={game}
+            player={player}
+            localSettings={localSettings}
+            setLocalSettings={setLocalSettings}
+          />
         </div>
         <div className="fixed z-20 flex h-full items-center">
           <button
@@ -275,7 +288,12 @@ export default function Game() {
             className="fixed right-0 z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
             style={{ width: !openMe ? 0 : "306px" }}
           >
-            <Me game={game} player={player} />
+            <Me
+              game={game}
+              player={player}
+              localSettings={localSettings}
+              setLocalSettings={setLocalSettings}
+            />
           </div>
         </div>
         <ActionDialog
@@ -283,6 +301,8 @@ export default function Game() {
           player={player}
           playerState={playerState}
           setPlayerState={setPlayerState}
+          localSettings={localSettings}
+          setLocalSettings={setLocalSettings}
         />
       </main>
     </>

@@ -1,7 +1,12 @@
 import Card from "./Card";
 import Token from "./Token";
 import { DialogProps } from "./Dialog";
-import { CardColor, InventoryKey, TokenColor } from "../common/types";
+import {
+  CardColor,
+  InventoryKey,
+  PlayerState,
+  TokenColor,
+} from "../common/types";
 import {
   opPrice,
   opColorWPrice,
@@ -12,7 +17,7 @@ import {
   opTokenCountWColor,
 } from "../common/constants";
 import { cardColors } from "../common/constants";
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, SetStateAction } from "react";
 import Title from "./Title";
 
 export default function Content(props: DialogProps) {
@@ -56,8 +61,6 @@ export default function Content(props: DialogProps) {
       ? "border-gray-800 bg-gradient-to-bl from-gray-800 to-gray-700/[.7] shadow-gray-800"
       : "";
 
-  // if (!playerState.selectedCard || action !== "purchase") return <></>;
-
   const requiredTokens =
     playerState.selectedCard &&
     (Object.keys(playerState.selectedCard.price) as CardColor[]).filter(
@@ -78,15 +81,6 @@ export default function Content(props: DialogProps) {
       game[`inventory${game.turnIdx}` as InventoryKey].discount
     );
 
-  const NoCardShowcase = () => (
-    <div className="flex flex-col gap-2">
-      <div className="h-[215px]">
-        <div className="font-semibold">Card</div>
-        <div>Test</div>
-      </div>
-    </div>
-  );
-
   const CardShowcase = () =>
     playerState.selectedCard && (
       <div className="flex flex-col gap-2">
@@ -98,86 +92,6 @@ export default function Content(props: DialogProps) {
             big
             {...props}
           />
-          {/* CARD STATS */}
-          {/* <div className="flex flex-grow flex-col"> */}
-          {/* CARD LEVEL */}
-          {/* <div className="flex h-1/6 w-full items-center gap-2 px-2">
-              <div className="w-[25%]">Level</div>
-              <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
-                {Array(3)
-                  .fill(0)
-                  .map((_, i) => (
-                    <div
-                      className={`h-full w-1/3 rounded-lg drop-shadow ${
-                        playerState.selectedCard &&
-                        playerState.selectedCard.level > i
-                          ? colorClass(
-                              playerState.selectedCard.color as CardColor
-                            )
-                          : "border"
-                      }`}
-                    ></div>
-                  ))}
-              </div>
-              <div className="w-5 text-end">
-                {playerState.selectedCard.level}
-              </div>
-            </div> */}
-          {/* CARD SCORE */}
-          {/* <div className="flex h-1/6 w-full items-center gap-2 px-2">
-              <div className="w-[25%]">Score</div>
-              <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
-                {Array(5)
-                  .fill(0)
-                  .map((_, i) => (
-                    <div
-                      className={`h-full w-1/5 rounded-md drop-shadow ${
-                        playerState.selectedCard &&
-                        playerState.selectedCard.score > i
-                          ? colorClass(
-                              playerState.selectedCard.color as CardColor
-                            )
-                          : "border"
-                      }`}
-                    ></div>
-                  ))}
-              </div>
-              <div className="w-5 text-end">
-                {playerState.selectedCard.score}
-              </div>
-            </div> */}
-          {/* CARD PRICE */}
-          {/* {cardColors.map(
-              (color) =>
-                playerState.selectedCard &&
-                playerState.selectedCard.price[color] > 0 && (
-                  <div className="flex h-1/6 w-full items-center gap-2 px-2">
-                    <div className="w-[25%]">
-                      {`${color.slice(0, 1).toUpperCase()}${color
-                        .slice(1)
-                        .toLowerCase()}`}
-                    </div>
-                    <div className="flex h-[30%] flex-grow items-center justify-between gap-[3px]">
-                      {Array(7)
-                        .fill(0)
-                        .map((_, i) => (
-                          <div
-                            className={`h-full w-1/5 rounded-md drop-shadow ${
-                              playerState.selectedCard &&
-                              playerState.selectedCard?.price[color] > i
-                                ? colorClass(color)
-                                : "border"
-                            }`}
-                          ></div>
-                        ))}
-                    </div>
-                    <div className="w-5 text-end">
-                      {playerState.selectedCard?.price[color]}
-                    </div>
-                  </div>
-                )
-            )}
-          </div> */}
         </div>
       </div>
     );
@@ -264,24 +178,6 @@ export default function Content(props: DialogProps) {
               )}
             </button>
           ))}
-          {/* {Array(4 - requiredTokens.length)
-            .fill(0)
-            .map(() => (
-              <button
-                className={`relative aspect-square w-[20%] cursor-default rounded-md border bg-gray-50 drop-shadow`}
-                disabled
-              >
-                <>
-                  <div className="absolute right-0.5 bottom-0.5">
-                    <span className="text-lg">0</span>
-                    <span className="text-sm">/0</span>
-                  </div>
-                  <div className="flex items-center justify-center text-slate-400">
-                    <CompleteIcon />
-                  </div>
-                </>
-              </button>
-            ))} */}
         </div>
       </div>
     );
@@ -386,6 +282,8 @@ export default function Content(props: DialogProps) {
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
           <Button
+            playerState={playerState}
+            setPlayerState={setPlayerState}
             disabled={!playerState.success}
             onClick={() => {
               if (playerState.success) {
@@ -405,6 +303,7 @@ export default function Content(props: DialogProps) {
                     ...prev,
                     success: false,
                     hasExtraTurn: true,
+                    isProcessing: false,
                     message: "Return tokens to 10.",
                     playerTokens: defaultTokens,
                     inventoryTokens: tokens,
@@ -432,6 +331,8 @@ export default function Content(props: DialogProps) {
           <YourTokensShowcase />
           <div className="flex w-full justify-center">
             <Button
+              playerState={playerState}
+              setPlayerState={setPlayerState}
               disabled={
                 !playerState.success || cardReserved || maxReserved || noTokens
               }
@@ -458,6 +359,7 @@ export default function Content(props: DialogProps) {
                       ...prev,
                       success: false,
                       hasExtraTurn: true,
+                      isProcessing: false,
                       message: "Return tokens to 10.",
                       playerTokens: defaultTokens,
                       inventoryTokens: tokens,
@@ -483,6 +385,8 @@ export default function Content(props: DialogProps) {
         <YourTokensShowcase />
         <div className="flex w-full justify-center">
           <Button
+            playerState={playerState}
+            setPlayerState={setPlayerState}
             disabled={
               !playerState.success || cardReserved || maxReserved || noTokens
             }
@@ -502,6 +406,7 @@ export default function Content(props: DialogProps) {
                     ...prev,
                     success: false,
                     hasExtraTurn: true,
+                    isProcessing: false,
                     message: "Return tokens to 10.",
                     playerTokens: defaultTokens,
                     inventoryTokens: opTokenCountWColor(
@@ -533,6 +438,8 @@ export default function Content(props: DialogProps) {
       <YourTokensShowcase />
       <div className="flex w-full justify-center">
         <Button
+          playerState={playerState}
+          setPlayerState={setPlayerState}
           disabled={!playerState.success}
           onClick={() => {
             if (playerState.success)
@@ -563,14 +470,50 @@ function CompleteIcon() {
   );
 }
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  playerState: PlayerState;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
+}
 
-function Button({ children, ...props }: ButtonProps) {
+function Button({
+  playerState,
+  setPlayerState,
+  children,
+  onClick,
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
     <button
-      className="w-[30%] rounded-md bg-slate-600 p-2 text-base font-semibold text-slate-100 drop-shadow hover:bg-slate-700 disabled:bg-gray-400"
+      className="relative flex w-[30%] items-center justify-center rounded-md bg-slate-600 p-2 text-base font-semibold text-slate-100 drop-shadow hover:bg-slate-700 disabled:bg-gray-400"
+      disabled={playerState.isProcessing || disabled}
+      onClick={(e) => {
+        setPlayerState((prev) => ({ ...prev, isProcessing: true }));
+        if (onClick !== undefined) onClick(e);
+      }}
       {...props}
     >
+      {playerState.isProcessing && (
+        <svg
+          className="absolute -right-[120px] h-5 w-5 animate-spin text-slate-600"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      )}
       {children}
     </button>
   );

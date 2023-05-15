@@ -17,6 +17,8 @@ export interface DialogProps {
   player: Player;
   playerState: PlayerState;
   setPlayerState: (value: SetStateAction<PlayerState>) => void;
+  localSettings: any;
+  setLocalSettings: any;
 }
 
 export default function ActionDialog(props: DialogProps) {
@@ -40,6 +42,7 @@ export default function ActionDialog(props: DialogProps) {
         selectedCard: null,
         selectedCardColor: null,
         hasExtraTurn: false,
+        isProcessing: false,
         isNextTurn: false,
         message: "",
         leave: false,
