@@ -37,12 +37,13 @@ export default function Me(props: PlayerProps) {
   };
 
   return (
-    <div className="flex h-full w-full flex-col justify-between gap-6 overflow-auto p-6 text-base">
+    <div className="flex h-full w-full flex-col gap-6 overflow-auto p-6 text-base">
+      <div className="-mb-6 flex-1"></div>
       <div className="flex flex-col gap-4">
         <Title>TILES</Title>
         <MyTiles {...props} {...addProps} />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         <Title>CARDS</Title>
         <MyCards {...props} {...addProps} />
       </div>
@@ -51,7 +52,7 @@ export default function Me(props: PlayerProps) {
   );
 }
 
-interface MeProps extends PlayerProps {
+export interface MeProps extends PlayerProps {
   idx: number;
   inventory: Inventory;
   cardCount: number;
@@ -73,11 +74,11 @@ const MyProfile = (props: MeProps) => {
         (props.localSettings?.enableAnimation ? (
           <div className="bg-animation absolute inset-0 rounded-2xl"></div>
         ) : (
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-400/[.8]"></div>
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
         ))}
       <div
         className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-          props.isTurn ? "border border-slate-600" : "border border-transparent"
+          props.isTurn ? "border border-pink-500" : "border border-transparent"
         }`}
       >
         <div className="flex flex-col">
@@ -148,11 +149,11 @@ const MyProfile = (props: MeProps) => {
 const MyCards = (props: MeProps) => (
   <div className="flex">
     {props.inventory.cards.length === 0 ? (
-      <div className="flex h-[100px] w-full items-center justify-center overflow-auto rounded-lg pt-16 pb-6 text-base">
+      <div className="rounded-lgtext-base flex h-[190px] w-full items-center justify-center overflow-auto">
         No cards owned
       </div>
     ) : (
-      <div className="relative flex h-[200px] w-full items-center gap-4 overflow-auto pt-16 pb-6 text-sm">
+      <div className="relative flex h-[190px] w-full items-center gap-4 overflow-auto pt-6 pb-3 text-sm">
         {props.inventory.cards.map((cardId) => (
           <MyCard {...props} cardId={cardId} />
         ))}
@@ -166,7 +167,7 @@ const MyCard = (props: MeProps) => {
   return (
     <div
       className="z-20 flex rounded-lg transition-all duration-[100ms]"
-      style={{ marginTop: float ? "-64px" : "0px" }}
+      style={{ marginTop: float ? "-48px" : "0px" }}
       onClick={() => setFloat((prev) => !prev)}
     >
       <Card
@@ -268,7 +269,7 @@ export function ReserveIcon({
       viewBox="0 0 16 16"
       height={height}
       width={width}
-      className="rotate-6"
+      className="-mb-0.5 rotate-6"
     >
       <path d="M2 1a1 1 0 00-1 1v4.586a1 1 0 00.293.707l7 7a1 1 0 001.414 0l4.586-4.586a1 1 0 000-1.414l-7-7A1 1 0 006.586 1H2zm4 3.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
     </svg>

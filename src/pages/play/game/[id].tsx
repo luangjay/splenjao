@@ -20,6 +20,7 @@ import ActionDialog from "../../../components/Dialog";
 import Layout from "../../../components/Layout";
 import Title from "../../../components/Title";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
+import Winner from "../../../components/Winner";
 
 const defaultPrice = {
   white: 0,
@@ -232,18 +233,16 @@ export default function Game() {
 
   if (game.status === "ended" && game.winnerId) {
     return (
-      <Layout player={player}>
-        <Title size={2}>GAME ENDED</Title>
-      </Layout>
+      <Winner
+        game={game}
+        player={player}
+        localSettings={localSettings}
+        setLocalSettings={setLocalSettings}
+      />
     );
   }
   return (
-    <>
-      <Head>
-        <title>Splenjao</title>
-        <meta name="description" content="Splenjao" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <Layout header={false}>
       <main className="relative flex h-screen select-none overflow-auto bg-gray-100 text-xl text-slate-600">
         {/* OTHERS */}
         <div
@@ -305,7 +304,7 @@ export default function Game() {
           setLocalSettings={setLocalSettings}
         />
       </main>
-    </>
+    </Layout>
   );
 }
 

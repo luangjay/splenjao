@@ -47,9 +47,12 @@ export default function Play() {
 
   useEffect(() => {
     if (player.data?.games) {
-      const playerLastGame =
-        player.data.games[player.data.games.length - 1];
-      if (playerLastGame && playerLastGame.status !== "final")
+      const playerLastGame = player.data.games[player.data.games.length - 1];
+      if (
+        playerLastGame &&
+        playerLastGame.status !== "ended" &&
+        playerLastGame.status !== "stopped"
+      )
         router.replace(`/play/game/${playerLastGame.id}`);
     }
     if (player.data?.lobby) {

@@ -7,13 +7,16 @@ interface TitleProps {
 
 export default function Title({ size = 0, children }: TitleProps) {
   const sizeClass =
-    size === 2
-      ? "text-[40px] h-[120px]"
+    size === 3
+      ? "text-[60px] h-[120px]"
+      : size === 2
+      ? "text-[40px] h-[80px]"
       : size === 1
       ? "text-2xl h-[48px]"
       : "text-lg h-[32px]";
 
-  const svgSize = size === 2 ? "60px" : size === 1 ? "24px" : "18px";
+  const svgSize =
+    size === 3 ? "60px" : size === 2 ? "40px" : size === 1 ? "24px" : "18px";
 
   return (
     <div

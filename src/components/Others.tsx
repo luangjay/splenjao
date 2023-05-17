@@ -9,6 +9,7 @@ import {
   ButtonHTMLAttributes,
   Fragment,
   SetStateAction,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -23,7 +24,8 @@ import Title from "./Title";
 import { Dialog, Switch, Transition } from "@headlessui/react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
-interface PlayerWithIdx extends Player {
+export interface PlayerWithIdx extends Player {
+  isLoading: boolean;
   idx: number;
 }
 
@@ -54,16 +56,16 @@ export default function Others(props: PlayerProps) {
     <>
       <div className="flex h-full w-full flex-col gap-6 overflow-auto p-6 text-base">
         <OthersProfile {...props} others={others} />
-        <div className="flex flex-col items-center gap-6">
+        <div className="mt-2 flex flex-col items-center gap-6">
           <Title>OPTIONS</Title>
-          <div className="flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-2">
             <Switch
               checked={props.localSettings?.enableAnimation}
               onChange={toggle}
               className={`${
                 props.localSettings?.enableAnimation
-                  ? "bg-slate-600"
-                  : "bg-slate-400"
+                  ? "bg-[#FFBBD6]"
+                  : "bg-slate-300"
               }
           relative inline-flex h-[28px] w-[53px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
             >
@@ -79,9 +81,8 @@ export default function Others(props: PlayerProps) {
             </Switch>
             <div className="font-medium">Animation</div>
           </div>
-
           <button
-            className="rounded-md p-2 px-4 font-medium hover:bg-white/40"
+            className="rounded-lg p-2.5 font-medium hover:bg-white/40"
             onClick={openDialog}
           >
             Leave game
@@ -93,7 +94,7 @@ export default function Others(props: PlayerProps) {
   );
 }
 
-interface OthersProps extends PlayerProps {
+export interface OthersProps extends PlayerProps {
   others: PlayerWithIdx[];
 }
 
@@ -121,11 +122,11 @@ const OthersProfile = (props: OthersProps) => (
             (props.localSettings?.enableAnimation ? (
               <div className="bg-animation absolute inset-0 rounded-2xl"></div>
             ) : (
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-400/[.8]"></div>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
             ))}
           <div
             className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-              isTurn ? "border border-slate-600" : "border border-transparent"
+              isTurn ? "border border-pink-500" : "border border-transparent"
             }`}
           >
             <div className="flex flex-col">
