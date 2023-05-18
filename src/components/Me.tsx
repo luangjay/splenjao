@@ -78,7 +78,7 @@ const MyProfile = (props: MeProps) => {
         ))}
       <div
         className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-          props.isTurn ? "border border-pink-500" : "border border-transparent"
+          props.isTurn ? "border border-pink-400" : "border border-transparent"
         }`}
       >
         <div className="flex flex-col">

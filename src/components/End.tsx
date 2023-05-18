@@ -16,11 +16,7 @@ import { useEffect, useState } from "react";
 import { tokenColors } from "../common/constants";
 import { Inventory } from "@prisma/client";
 
-interface WinnerProps extends PlayerProps {
-  inventory: Inventory;
-}
-
-export default function Winner(props: PlayerProps) {
+export default function End(props: PlayerProps) {
   // const [open, setOpen] = useState(false);
   const { game, player } = props;
 
@@ -28,12 +24,10 @@ export default function Winner(props: PlayerProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY <= 100) {
+      if (window.scrollY <= 50) {
         setPage(0);
-        // alert(0);
-      } else if (window.scrollY >= window.innerHeight - 200) {
+      } else if (window.scrollY >= window.innerHeight - 150) {
         setPage(1);
-        // alert(1);
       }
     };
 
@@ -97,18 +91,39 @@ export default function Winner(props: PlayerProps) {
                 {game.winnerScore} score
               </div>
             </div>
-            <div className="py-1.5">
+            <div className="py-1">
               <WinnerIcon size={1} />
             </div>
           </div>
         </div>
       )}
       <div className="relative top-[100vh] flex w-full flex-col items-center justify-center gap-6 pt-[30px] pb-[50px]">
-        <Title size={2}>
-          LEADERBOARD
-          {page}
-        </Title>
+        <Title size={2}>LEADERBOARD</Title>
         <PlayersProfile {...props} />
+      </div>
+      <div className="fixed top-0 right-[60px] flex h-screen flex-col justify-center gap-4">
+        <button
+          className={`h-4 w-4 rounded-full shadow-lg ${
+            page === 0 ? "bg-pink-300" : "bg-slate-300"
+          }`}
+          onClick={() => {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        ></button>
+        <button
+          className={`h-4 w-4 rounded-full bg-slate-300 shadow-lg ${
+            page === 1 ? "bg-pink-300" : "bg-slate-300"
+          }`}
+          onClick={() => {
+            window.scrollTo({
+              top: window.innerHeight - 100,
+              behavior: "smooth",
+            });
+          }}
+        ></button>
       </div>
     </Layout>
   );
@@ -143,7 +158,6 @@ const PlayersProfile = (props: PlayerProps) => {
   return (
     <div className="flex w-full max-w-lg flex-col gap-6">
       {sortedPlayers.map((player, arrIdx) => {
-        const idx = player.idx;
         const inventory = player.inventory;
         const reserveCount = inventory.reserves.length;
         const cardCount = inventory.cards.length;
@@ -166,7 +180,7 @@ const PlayersProfile = (props: PlayerProps) => {
             <div
               className={`m-1.5 h-fit rounded-xl bg-gray-50 text-2xl drop-shadow-none ${
                 isWinner
-                  ? "border border-pink-500"
+                  ? "border border-pink-400"
                   : "border border-transparent"
               }`}
             >
@@ -226,7 +240,7 @@ const PlayersProfile = (props: PlayerProps) => {
 };
 
 const WinnerIcon = ({ size = 0 }: { size?: number }) => {
-  const sizeClass = size === 1 ? "h-[36px] w-[45px]" : "h-[29px] w-[36px]";
+  const sizeClass = size === 1 ? "h-[38px] w-[47px]" : "h-[29px] w-[36px]";
 
   return (
     <Image
@@ -234,7 +248,7 @@ const WinnerIcon = ({ size = 0 }: { size?: number }) => {
       width={256}
       height={256}
       src="/medal.svg"
-      className={`h-[29px] w-[36px] object-cover object-bottom p-0.5 drop-shadow ${sizeClass}`}
+      className={`object-cover object-bottom p-0.5 drop-shadow ${sizeClass}`}
     />
   );
 };

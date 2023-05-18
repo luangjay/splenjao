@@ -20,7 +20,7 @@ import ActionDialog from "../../../components/Dialog";
 import Layout from "../../../components/Layout";
 import Title from "../../../components/Title";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
-import Winner from "../../../components/Winner";
+import End from "../../../components/End";
 
 const defaultPrice = {
   white: 0,
@@ -233,7 +233,7 @@ export default function Game() {
 
   if (game.status === "ended" && game.winnerId) {
     return (
-      <Winner
+      <End
         game={game}
         player={player}
         localSettings={localSettings}

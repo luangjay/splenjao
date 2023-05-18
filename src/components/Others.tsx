@@ -64,7 +64,7 @@ export default function Others(props: PlayerProps) {
               onChange={toggle}
               className={`${
                 props.localSettings?.enableAnimation
-                  ? "bg-[#FFBBD6]"
+                  ? "bg-pink-300"
                   : "bg-slate-300"
               }
           relative inline-flex h-[28px] w-[53px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
@@ -126,7 +126,7 @@ const OthersProfile = (props: OthersProps) => (
             ))}
           <div
             className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-              isTurn ? "border border-pink-500" : "border border-transparent"
+              isTurn ? "border border-pink-400" : "border border-transparent"
             }`}
           >
             <div className="flex flex-col">

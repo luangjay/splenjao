@@ -71,10 +71,10 @@ body {
     animation: rotate-animation 4s linear infinite;
     background: linear-gradient(
       var(--angle),
-      #ec4899,
-      #407cff,
-      #ec4899,
-      #6366f1
+      rgb(236 72 153 / 0.8),
+      rgb(14 165 233 / 0.8),
+      rgb(236 72 153 / 0.6),
+      rgb(14 165 233 / 0.6)
     );
   }
 }

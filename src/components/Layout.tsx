@@ -1,10 +1,9 @@
 import { ReactNode } from "react";
-import { Player } from "@prisma/client";
 import Image from "next/image";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 interface LayoutProps {
   header?: boolean;
@@ -13,7 +12,6 @@ interface LayoutProps {
 
 export default function Layout({ header = true, children }: LayoutProps) {
   const session = useSession();
-  const router = useRouter();
   const { data: player } = api.game.findPlayerById.useQuery(
     session.data?.user.id
   );
@@ -29,15 +27,12 @@ export default function Layout({ header = true, children }: LayoutProps) {
         {header && (
           <div className="fixed top-0 z-10 h-[120px] w-full overflow-hidden p-6 px-[120px] backdrop-blur-md">
             <div className="flex h-full items-center justify-between drop-shadow">
-              <button
-                className="flex gap-2"
-                onClick={() => {
-                  router.push("/");
-                }}
-              >
-                <div className="font-mono text-3xl font-bold">SPLENJAO</div>
-                <div>beta</div>
-              </button>
+              <Link href="/">
+                <button className="flex gap-2">
+                  <div className="font-mono text-3xl font-bold">SPLENJAO</div>
+                  <div>beta</div>
+                </button>
+              </Link>
               {player && (
                 <div className="flex h-full items-center gap-4">
                   <div className="aspect-square h-[80%]">
