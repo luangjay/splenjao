@@ -26,6 +26,7 @@ model Lobby {
     playerCount     Int
     playerIds       String[]  @db.ObjectId
     players         Player[]
+    code            Int
     // host            Player    @relation(fields: [hostId], references: [id], name: "hostLobby")
 }
 

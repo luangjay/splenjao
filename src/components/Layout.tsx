@@ -27,11 +27,9 @@ export default function Layout({ header = true, children }: LayoutProps) {
         {header && (
           <div className="fixed top-0 z-10 h-[120px] w-full overflow-hidden p-6 px-[120px] backdrop-blur-md">
             <div className="flex h-full items-center justify-between drop-shadow">
-              <Link href="/">
-                <button className="flex gap-2">
-                  <div className="font-mono text-3xl font-bold">SPLENJAO</div>
-                  <div>beta</div>
-                </button>
+              <Link href="/" className="flex gap-2">
+                <div className="font-mono text-3xl font-bold">SPLENJAO</div>
+                <div className="relative top-0">beta</div>
               </Link>
               {player && (
                 <div className="flex h-full items-center gap-4">

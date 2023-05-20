@@ -82,19 +82,17 @@ export const lobbyRouter = createTRPCRouter({
       })
     ),
 
-  findPlayer: protectedProcedure
-    .input(z.string().optional())
-    .query(({ ctx, input }) =>
-      ctx.prisma.player.findUnique({
-        where: {
-          id: input,
-        },
-        include: {
-          games: true,
-          lobby: true,
-        },
-      })
-    ),
+  findPlayer: protectedProcedure.input(z.string()).query(({ ctx, input }) =>
+    ctx.prisma.player.findUnique({
+      where: {
+        id: input,
+      },
+      include: {
+        games: true,
+        lobby: true,
+      },
+    })
+  ),
 
   createGame: protectedProcedure
     .input(
@@ -121,6 +119,42 @@ export const lobbyRouter = createTRPCRouter({
         },
       })
     ),
+
+  leaveLobby: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        playerId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const lobby: Lobby = await ctx.prisma.lobby.findUniqueOrThrow({
+        where: {
+          id: input.id,
+        },
+      });
+      if (input.playerId === lobby.hostId) {
+        await ctx.prisma.lobby.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            playerIds: [...lobby.playerIds].slice(0, lobby.playerCount - 1),
+            playerCount: {
+              decrement: 1,
+            },
+          },
+        });
+        return ctx.prisma.player.update({
+          where: {
+            id: input.playerId,
+          },
+          data: {
+            lobbyId: null,
+          },
+        });
+      }
+    }),
 
   /**
    * Returns the average of two numbers.
@@ -163,7 +197,7 @@ export const lobbyRouter = createTRPCRouter({
         });
     }),
 
-  clearThisLobby: protectedProcedure
+  clearLobby: protectedProcedure
     .input(
       z.object({
         id: z.string(),

@@ -231,7 +231,7 @@ export default function Game() {
   }
   // if (game.isError) return <Error statusCode={404} />;
 
-  if (game.status === "ended" && game.winnerId) {
+  if (game.status === "ended") {
     return (
       <End
         game={game}

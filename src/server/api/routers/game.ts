@@ -171,7 +171,7 @@ export const gameRouter = createTRPCRouter({
           id: input.id,
         },
         data: {
-          status: "stopped",
+          status: "ended",
           stopperId: input.playerId,
           endedAt: new Date(),
         },

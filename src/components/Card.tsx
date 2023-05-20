@@ -65,7 +65,7 @@ export default function Card({
       className={`select-none rounded-lg bg-gray-50 bg-[url('/sakura.png')] bg-cover bg-center bg-no-repeat bg-origin-padding drop-shadow ${
         playerTurn && cardEffect && ""
       } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
-      disabled={!playerTurn || !cardEffect}
+      disabled={(!playerTurn && cardEffect !== "special") || !cardEffect}
       onClick={() => {
         if (
           playerTurn &&

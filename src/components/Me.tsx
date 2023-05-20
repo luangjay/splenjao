@@ -257,8 +257,8 @@ export function TokenIcon({
 }
 
 export function ReserveIcon({
-  width = "20px",
-  height = "20px",
+  width = "19px",
+  height = "19px",
 }: {
   width?: string;
   height?: string;
@@ -277,8 +277,8 @@ export function ReserveIcon({
 }
 
 export function CardIcon({
-  width = "20px",
-  height = "20px",
+  width = "21px",
+  height = "21px",
 }: {
   width?: string;
   height?: string;

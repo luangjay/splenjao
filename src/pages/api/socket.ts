@@ -32,11 +32,7 @@ export default function handler(
 
   io.on("connection", (socket) => {
     socket.on(SocketEvents.UpdateServer, () => {
-      Array(80)
-        .fill(0)
-        .forEach(() => {
-          console.log("on: UpdateServer");
-        });
+      console.log("on: UpdateServer");
       io.emit(SocketEvents.UpdateClient, "bruh");
     });
   });

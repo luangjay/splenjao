@@ -1,4 +1,4 @@
-import { useState, Fragment, SetStateAction } from "react";
+import { useState, Fragment, SetStateAction, useEffect } from "react";
 import { Dialog, Tab, Transition } from "@headlessui/react";
 import { Game, Player } from "@prisma/client";
 import { Action, InventoryKey, PlayerState } from "../common/types";
@@ -49,6 +49,23 @@ export default function ActionDialog(props: DialogProps) {
       });
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeDialog();
+      }
+    };
+
+    // Add event listener when component mounts
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Remove event listener when component unmounts
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const titleTxt = playerState.hasExtraTurn
     ? "RETURN"
     : playerState.currentAction === "purchase"
