@@ -111,7 +111,7 @@ export default function Token({
     <div
       className={`flex select-none items-center ${
         showCount && !flexCol && "w-[64px]"
-      } ${flexCol && "flex-col"}`}
+      } ${flexCol && "h-[56px] flex-col"}`}
     >
       <button
         className={`${tokenEffect} ${

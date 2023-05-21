@@ -35,6 +35,17 @@ body {
   border: 3px solid var(--primary);
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
 .number {
   color: white;
   -webkit-text-stroke: 0.07rem #111827;

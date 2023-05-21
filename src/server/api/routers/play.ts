@@ -55,11 +55,12 @@ export const playRouter = createTRPCRouter({
   //   }),
 
   findEmptyLobbyAndUpdate: protectedProcedure.mutation(async ({ ctx }) => {
-    const lobby: Lobby = await ctx.prisma.lobby.findFirstOrThrow({
+    const lobby: Lobby | null = await ctx.prisma.lobby.findFirst({
       where: {
         playerCount: 0,
       },
     });
+    if (!lobby) return null;
     let code = -1;
     // 10 retries for lobby code generation
     const lobbyNotFound = Array(10)
@@ -113,6 +114,9 @@ export const playRouter = createTRPCRouter({
     .query(({ ctx, input }) =>
       ctx.prisma.lobby.findFirst({
         where: {
+          hostId: {
+            not: null,
+          },
           code: input,
         },
       })

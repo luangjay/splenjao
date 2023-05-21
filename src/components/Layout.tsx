@@ -4,6 +4,7 @@ import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import Link from "next/link";
+import { Toaster } from "react-hot-toast";
 
 interface LayoutProps {
   header?: boolean;

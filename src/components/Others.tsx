@@ -108,6 +108,10 @@ const OthersProfile = (props: OthersProps) => (
       const tileCount = inventory.tiles.length;
       const score = inventory.score;
       const isTurn = idx === props.game.turnIdx;
+      const sumTokenCount = Object.values(inventory.tokens).reduce(
+        (a, v) => a + v,
+        0
+      );
 
       // if (player.isLoading) {
       //   return <div className="w-full"></div>;
@@ -175,18 +179,24 @@ const OthersProfile = (props: OthersProps) => (
             </div>
             <div className="mx-4 border"></div>
             <div className="h-fit p-3 px-4">
-              <div className="flex justify-between gap-1 text-sm">
-                {tokenColors.map((tokenColor) => (
-                  <div className="flex w-1/6 items-center gap-[1px]">
-                    {inventory.tokens[tokenColor] > 0 && (
-                      <>
-                        <TokenIcon className={colorClass(tokenColor)} />
-                        {inventory.tokens[tokenColor]}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {sumTokenCount === 0 ? (
+                <div className="flex h-[20px] justify-center gap-1 text-sm">
+                  No tokens owned
+                </div>
+              ) : (
+                <div className="flex h-[20px] justify-between gap-1 text-sm">
+                  {tokenColors.map((tokenColor) => (
+                    <div className="flex w-1/6 items-center gap-[1px]">
+                      {inventory.tokens[tokenColor] > 0 && (
+                        <>
+                          <TokenIcon className={colorClass(tokenColor)} />
+                          {inventory.tokens[tokenColor]}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

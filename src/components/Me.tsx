@@ -64,6 +64,11 @@ export interface MeProps extends PlayerProps {
 }
 
 const MyProfile = (props: MeProps) => {
+  const sumTokenCount = Object.values(props.inventory.tokens).reduce(
+    (a, v) => a + v,
+    0
+  );
+
   return (
     <div
       className={`relative rounded-2xl bg-gray-100 ${
@@ -83,18 +88,24 @@ const MyProfile = (props: MeProps) => {
       >
         <div className="flex flex-col">
           <div className="h-fit p-3 px-4">
-            <div className="flex justify-between gap-1 text-sm">
-              {tokenColors.map((tokenColor) => (
-                <div className="flex w-1/6 items-center gap-[1px]">
-                  {props.inventory.tokens[tokenColor] > 0 && (
-                    <>
-                      <TokenIcon className={colorClass(tokenColor)} />
-                      {props.inventory.tokens[tokenColor]}
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+            {sumTokenCount === 0 ? (
+              <div className="flex h-[20px] justify-center gap-1 text-sm">
+                No tokens owned
+              </div>
+            ) : (
+              <div className="flex h-[20px] justify-between gap-1 text-sm">
+                {tokenColors.map((tokenColor) => (
+                  <div className="flex w-1/6 items-center gap-[1px]">
+                    {props.inventory.tokens[tokenColor] > 0 && (
+                      <>
+                        <TokenIcon className={colorClass(tokenColor)} />
+                        {props.inventory.tokens[tokenColor]}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="mx-4 border"></div>
           <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">

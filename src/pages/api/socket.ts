@@ -35,6 +35,10 @@ export default function handler(
       console.log("on: UpdateServer");
       io.emit(SocketEvents.UpdateClient, "bruh");
     });
+    socket.on(SocketEvents.ToastServer, (bread) => {
+      console.log("on: ToastServer");
+      io.emit(SocketEvents.ToastClient, bread);
+    });
   });
   res.end();
 }

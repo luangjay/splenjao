@@ -270,13 +270,13 @@ const RequiredTokensShowcase = (props: DialogProps) => {
     playerState.selectedCardColor === "white"
       ? "border-slate-300 border shadow-[0_0_0_0.2rem_rgba(255,255,255,.9)]"
       : playerState.selectedCardColor === "blue"
-      ? "border-[#80bdff] shadow-[0_0_0_0.2rem_rgba(0,128,255,.25)]"
+      ? "border-[#80bdff] shadow-[0_0_0_0.25rem_rgba(0,128,255,.25)]"
       : playerState.selectedCardColor === "green"
-      ? "border-[#60eebd] shadow-[0_0_0_0.2rem_rgba(128,255,0,.25)]"
+      ? "border-[#60eebd] shadow-[0_0_0_0.25rem_rgba(128,255,0,.25)]"
       : playerState.selectedCardColor === "red"
-      ? "border-[#ff80bd] shadow-[0_0_0_0.2rem_rgba(255,128,0,.25)]"
+      ? "border-[#ff80bd] shadow-[0_0_0_0.25rem_rgba(255,128,0,.25)]"
       : playerState.selectedCardColor === "black"
-      ? "border-[#000000] shadow-[0_0_0_0.2rem_rgba(16,16,16,.25)]"
+      ? "border-[#000000] shadow-[0_0_0_0.25rem_rgba(16,16,16,.25)]"
       : "";
 
   return (
@@ -422,46 +422,54 @@ const SelectedTokensShowcase = (props: DialogProps) => {
 
 const YourTokensShowcase = (props: DialogProps) => {
   const { game, player, playerState, setPlayerState } = props;
+  const sumTokenCount = Object.values(
+    game[`inventory${game.turnIdx}` as InventoryKey].tokens
+  ).reduce((a, v) => a + v, 0);
+
   return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
       <Title>YOUR TOKENS</Title>
       {playerState.currentAction === "purchase" ? (
-        <div className="flex w-full flex-1 items-center justify-center gap-6">
-          {tokenColors.map((tokenColor) => (
-            <Token
-              tokenColor={tokenColor}
-              tokenEffect={
-                !playerState.hasExtraTurn &&
-                playerState.currentAction !== "purchase"
-                  ? null
-                  : "take"
-              }
-              reference="inventory"
-              showCount={true}
-              flexCol
-              {...props}
-            />
-          ))}
+        <div className="flex h-[56px] w-full flex-1 items-center justify-center gap-6">
+          {sumTokenCount === 0
+            ? "No tokens owned"
+            : tokenColors.map((tokenColor) => (
+                <Token
+                  tokenColor={tokenColor}
+                  tokenEffect={
+                    !playerState.hasExtraTurn &&
+                    playerState.currentAction !== "purchase"
+                      ? null
+                      : "take"
+                  }
+                  reference="inventory"
+                  showCount={true}
+                  flexCol
+                  {...props}
+                />
+              ))}
         </div>
       ) : (
-        <div className="flex h-full w-full items-center">
-          {tokenColors.map((tokenColor) => (
-            <div className="flex w-1/6 justify-center">
-              <Token
-                tokenColor={tokenColor}
-                tokenEffect={
-                  !playerState.hasExtraTurn &&
-                  playerState.currentAction !== "purchase"
-                    ? null
-                    : "take"
-                }
-                reference="inventory"
-                showCount={true}
-                flexCol
-                {...props}
-              />
-            </div>
-          ))}
+        <div className="flex h-full w-full items-center justify-center">
+          {sumTokenCount === 0
+            ? "No tokens owned"
+            : tokenColors.map((tokenColor) => (
+                <div className="flex w-1/6 justify-center">
+                  <Token
+                    tokenColor={tokenColor}
+                    tokenEffect={
+                      !playerState.hasExtraTurn &&
+                      playerState.currentAction !== "purchase"
+                        ? null
+                        : "take"
+                    }
+                    reference="inventory"
+                    showCount={true}
+                    flexCol
+                    {...props}
+                  />
+                </div>
+              ))}
         </div>
       )}
     </div>

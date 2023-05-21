@@ -38,4 +38,6 @@ export type PlayerState = {
 export enum SocketEvents {
   UpdateServer = "UPDATE_SERVER",
   UpdateClient = "UPDATE_CLIENT",
+  ToastServer = "TOAST_SERVER",
+  ToastClient = "TOAST_CLIENT",
 }

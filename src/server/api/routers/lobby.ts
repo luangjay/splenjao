@@ -53,17 +53,6 @@ const newInventory = () => ({
 });
 
 export const lobbyRouter = createTRPCRouter({
-  // findAll: publicProcedure.query(({ ctx }) => {
-  //   return ctx.prisma.card.findMany();
-  // }),
-
-  // findById: publicProcedure.input(z.number()).query(({ ctx, input }) =>
-  //   ctx.prisma.card.findUnique({
-  //     where: {
-  //       id: input,
-  //     },
-  //   })
-  // ),
   findAndAuthorize: publicProcedure
     .input(
       z.object({
@@ -71,27 +60,31 @@ export const lobbyRouter = createTRPCRouter({
         playerId: z.string().optional(),
       })
     )
-    .query(({ ctx, input }) =>
-      ctx.prisma.lobby.findFirstOrThrow({
-        where: {
-          id: input.id,
-          playerIds: {
-            has: input.playerId,
+    .query(
+      async ({ ctx, input }) =>
+        await ctx.prisma.lobby.findFirstOrThrow({
+          where: {
+            id: input.id,
+            playerIds: input.playerId
+              ? {
+                  has: input.playerId,
+                }
+              : undefined,
           },
-        },
-      })
+        })
     ),
 
-  findPlayer: protectedProcedure.input(z.string()).query(({ ctx, input }) =>
-    ctx.prisma.player.findUnique({
-      where: {
-        id: input,
-      },
-      include: {
-        games: true,
-        lobby: true,
-      },
-    })
+  findPlayer: protectedProcedure.input(z.string().optional()).query(
+    async ({ ctx, input }) =>
+      await ctx.prisma.player.findUniqueOrThrow({
+        where: {
+          id: input,
+        },
+        include: {
+          games: true,
+          lobby: true,
+        },
+      })
   ),
 
   createGame: protectedProcedure
@@ -102,22 +95,23 @@ export const lobbyRouter = createTRPCRouter({
         playerIds: z.array(z.string()),
       })
     )
-    .mutation(({ ctx, input }) =>
-      ctx.prisma.game.create({
-        data: {
-          hostId: input.hostId,
-          playerCount: input.playerCount,
-          playerIds: input.playerIds,
-          createdAt: new Date(),
-          status: "starting",
-          turnIdx: -1,
-          resource: newResource(input.playerCount),
-          inventory0: newInventory(),
-          inventory1: newInventory(),
-          inventory2: newInventory(),
-          inventory3: newInventory(),
-        },
-      })
+    .mutation(
+      async ({ ctx, input }) =>
+        await ctx.prisma.game.create({
+          data: {
+            hostId: input.hostId,
+            playerCount: input.playerCount,
+            playerIds: input.playerIds,
+            createdAt: new Date(),
+            status: "started",
+            turnIdx: 0,
+            resource: newResource(input.playerCount),
+            inventory0: newInventory(),
+            inventory1: newInventory(),
+            inventory2: newInventory(),
+            inventory3: newInventory(),
+          },
+        })
     ),
 
   leaveLobby: protectedProcedure
@@ -133,27 +127,33 @@ export const lobbyRouter = createTRPCRouter({
           id: input.id,
         },
       });
-      if (input.playerId === lobby.hostId) {
-        await ctx.prisma.lobby.update({
-          where: {
-            id: input.id,
+      await ctx.prisma.lobby.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          hostId:
+            lobby.playerCount === 1
+              ? null
+              : lobby.hostId === input.playerId
+              ? lobby.playerIds[1]
+              : undefined,
+          playerIds: lobby.playerIds.filter(
+            (playerId) => playerId !== input.playerId
+          ),
+          playerCount: {
+            decrement: 1,
           },
-          data: {
-            playerIds: [...lobby.playerIds].slice(0, lobby.playerCount - 1),
-            playerCount: {
-              decrement: 1,
-            },
-          },
-        });
-        return ctx.prisma.player.update({
-          where: {
-            id: input.playerId,
-          },
-          data: {
-            lobbyId: null,
-          },
-        });
-      }
+        },
+      });
+      return await ctx.prisma.player.update({
+        where: {
+          id: input.playerId,
+        },
+        data: {
+          lobbyId: null,
+        },
+      });
     }),
 
   /**
@@ -179,7 +179,7 @@ export const lobbyRouter = createTRPCRouter({
         },
       });
       if (input.playerId === lobby.hostId)
-        return ctx.prisma.player.updateMany({
+        return await ctx.prisma.player.updateMany({
           where: {
             id: {
               in: input.ids,
@@ -211,7 +211,7 @@ export const lobbyRouter = createTRPCRouter({
         },
       });
       if (input.playerId === lobby.hostId)
-        return ctx.prisma.lobby.update({
+        return await ctx.prisma.lobby.update({
           where: {
             id: input.id,
           },

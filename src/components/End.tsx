@@ -63,7 +63,7 @@ export default function End(props: PlayerProps) {
   return (
     <Layout>
       {!winner && !winnerLoading ? (
-        <div className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
+        <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
           <Title size={3}>RESULT</Title>
           {stopper ? (
             <div className="mt-6 flex aspect-square h-[338px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px]">
@@ -76,71 +76,81 @@ export default function End(props: PlayerProps) {
               <div>resulting in no winners!</div>
             </div>
           )}
-        </div>
+        </main>
       ) : (
-        <div className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
-          <Title size={3}>RESULT</Title>
-          <div className="mt-6 aspect-square h-[192px]">
-            <Image
-              alt=""
-              src={winner?.image || ""}
-              width={256}
-              height={256}
-              className="aspect-square h-full rounded-full object-cover drop-shadow"
-            />
-          </div>
-          <div className="relative mt-10 w-fit">
-            <div className="max-w-[320px] truncate text-[32px] font-semibold drop-shadow">
-              {winner?.name}
-            </div>
-            <div className="absolute -right-12 top-0 py-1">
-              <WinnerIcon size={1} />
-            </div>
-          </div>
-          <div className="mt-4 text-[28px] drop-shadow">
-            {game.winnerScore} score
-          </div>
-        </div>
-      )}
-      {!winner && !winnerLoading ? (
-        <div className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
-          {stopper ? (
-            <div className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 pt-6 text-[32px]">
-              <div>Player {stopper.name} has left,</div>
-              <div>resulting in the game's end!</div>
-            </div>
-          ) : (
-            <div className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 pt-6 text-[32px]">
-              <div>The players tied,</div>
-              <div>resulting in no winners!</div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
-          <div className="aspect-square h-[160px]">
-            <Image
-              alt=""
-              src={winner?.image || ""}
-              width={256}
-              height={256}
-              className="aspect-square h-full rounded-full object-cover drop-shadow"
-            />
-          </div>
-          <div className="flex gap-4">
-            <div className="flex flex-col items-center gap-12 drop-shadow">
-              <div className="max-w-[240px] truncate text-[32px] font-semibold">
-                {winner?.name}
+        <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
+          {winner && (
+            <>
+              <Title size={3}>RESULT</Title>
+
+              <div className="mt-6 aspect-square h-[192px]">
+                <Image
+                  alt=""
+                  src={winner.image || ""}
+                  width={192}
+                  height={192}
+                  loading="lazy"
+                  className="aspect-square h-full rounded-full object-cover drop-shadow"
+                />
               </div>
-              <div className="text-[28px] drop-shadow">
+              <div className="relative mt-10 w-fit">
+                <div className="max-w-[320px] truncate text-[32px] font-semibold drop-shadow">
+                  {winner?.name}
+                </div>
+                <div className="absolute -right-12 top-0 py-1">
+                  <WinnerIcon size={1} />
+                </div>
+              </div>
+              <div className="mt-4 text-[28px] drop-shadow">
                 {game.winnerScore} score
               </div>
+            </>
+          )}
+        </main>
+      )}
+      {!winner && !winnerLoading ? (
+        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
+          {stopper ? (
+            <div className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 pt-6 text-[32px]">
+              <div>Player {stopper.name} has left,</div>
+              <div>resulting in the game's end!</div>
             </div>
-            <div className="py-1">
-              <WinnerIcon size={1} />
+          ) : (
+            <div className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 pt-6 text-[32px]">
+              <div>The players tied,</div>
+              <div>resulting in no winners!</div>
             </div>
-          </div>
-        </div>
+          )}
+        </main>
+      ) : (
+        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
+          {winner && (
+            <>
+              <div className="aspect-square h-[160px]">
+                <Image
+                  alt=""
+                  src={winner.image || ""}
+                  width={256}
+                  height={256}
+                  className="aspect-square h-full rounded-full object-cover drop-shadow"
+                />
+              </div>
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center gap-12 drop-shadow">
+                  <div className="max-w-[240px] truncate text-[32px] font-semibold">
+                    {winner?.name}
+                  </div>
+                  <div className="text-[28px] drop-shadow">
+                    {game.winnerScore} score
+                  </div>
+                </div>
+                <div className="py-1">
+                  <WinnerIcon size={1} />
+                </div>
+              </div>
+            </>
+          )}
+        </main>
       )}
       <div className="relative top-[100vh] flex w-full flex-col items-center justify-center gap-6 pt-[30px] pb-[50px]">
         <Title size={2}>LEADERBOARD</Title>

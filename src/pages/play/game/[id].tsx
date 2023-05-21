@@ -21,6 +21,7 @@ import Layout from "../../../components/Layout";
 import Title from "../../../components/Title";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import End from "../../../components/End";
+import Error404 from "../../404";
 
 const defaultPrice = {
   white: 0,
@@ -56,7 +57,8 @@ export default function Game() {
 
   // REACT QUERY HOOKS
   const { data: player } = api.game.findPlayerById.useQuery(
-    session.data?.user.id
+    session.data?.user.id,
+    { retry: false }
     // EXPENSIVE SHIT
     // {
     //   refetchInterval: 8000,
@@ -73,8 +75,6 @@ export default function Game() {
     },
     {
       retry: false,
-      // notifyOnChangeProps: ["data"],
-      // refetchInterval: 1000,
     }
   );
   const updatePlayerLastPlayed = api.game.updatePlayerLastPlayed.useMutation({
@@ -219,16 +219,16 @@ export default function Game() {
   const [openOthers, setOpenOthers] = useState(false);
   const [openMe, setOpenMe] = useState(false);
 
-  if (gameError) return <Error statusCode={404} />;
-  if (!player || !game) return <></>;
-  if (!validTab) {
-    return (
-      <>
-        <p>It looks like you are playing in another instance.</p>
-        <p>If not, please wait a moment...</p>
-      </>
-    );
-  }
+  if (gameError) return <Error404 />;
+  if (!player || !game) return <Layout header={false} />;
+  // if (!validTab) {
+  //   return (
+  //     <Layout>
+  //       <p>It looks like you are playing in another instance.</p>
+  //       <p>If not, please wait a moment...</p>
+  //     </Layout>
+  //   );
+  // }
   // if (game.isError) return <Error statusCode={404} />;
 
   if (game.status === "ended") {
