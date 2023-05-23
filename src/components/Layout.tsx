@@ -26,11 +26,15 @@ export default function Layout({ header = true, children }: LayoutProps) {
       </Head>
       <div className="flex min-h-screen select-none flex-col bg-gray-100 text-slate-600">
         {header && (
-          <div className="fixed top-0 z-10 h-[120px] w-full overflow-hidden p-6 px-[120px] backdrop-blur-md">
+          <div className="fixed top-0 z-10 h-[96px] w-full overflow-hidden py-4 px-[96px] backdrop-blur-md lg:h-[120px] lg:px-[120px] lg:py-6">
             <div className="flex h-full items-center justify-between drop-shadow">
               <Link href="/" className="flex gap-2">
-                <div className="font-mono text-3xl font-bold">SPLENJAO</div>
-                <div className="relative top-0">beta</div>
+                <div className="font-mono text-2xl font-bold lg:text-3xl">
+                  SPLENJAO
+                </div>
+                <div className="relative top-0 text-[13px] lg:text-base">
+                  beta
+                </div>
               </Link>
               {player && (
                 <div className="flex h-full items-center gap-4">
@@ -43,9 +47,9 @@ export default function Layout({ header = true, children }: LayoutProps) {
                       className="aspect-square h-full rounded-full object-cover drop-shadow"
                     />
                   </div>
-                  <div className="flex max-w-[140px] flex-col gap-1">
+                  <div className="flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
                     <div>Logged in as</div>
-                    <div className="truncate text-xl font-semibold">
+                    <div className="truncate text-base font-semibold lg:text-xl">
                       {player.name}
                     </div>
                   </div>

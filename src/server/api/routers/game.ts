@@ -219,41 +219,41 @@ export const gameRouter = createTRPCRouter({
             game[`inventory${game.turnIdx}` as InventoryKey].discount,
             input.playerState.selectedCard.color as CardColor
           )
-        : null;
-      const tiles: Tile[] =
-        input.playerState.selectedCard?.color && nPrice
-          ? await ctx.prisma.tile.findMany({
-              where: {
-                id: {
-                  in: game.resource.tiles,
+        : game[`inventory${game.turnIdx}` as InventoryKey].discount;
+      const tiles = await ctx.prisma.tile.findMany({
+        where: {
+          id: {
+            in: game.resource.tiles,
+          },
+          price: {
+            is: {
+              AND: {
+                white: {
+                  lte: nPrice.white,
                 },
-                price: {
-                  is: {
-                    AND: {
-                      white: {
-                        lte: nPrice.white,
-                      },
-                      blue: {
-                        lte: nPrice.blue,
-                      },
-                      green: {
-                        lte: nPrice.green,
-                      },
-                      red: {
-                        lte: nPrice.red,
-                      },
-                      black: {
-                        lte: nPrice.black,
-                      },
-                    },
-                  },
+                blue: {
+                  lte: nPrice.blue,
+                },
+                green: {
+                  lte: nPrice.green,
+                },
+                red: {
+                  lte: nPrice.red,
+                },
+                black: {
+                  lte: nPrice.black,
                 },
               },
-            })
-          : [];
+            },
+          },
+        },
+      });
       const dedicatedTiles = [...tiles].slice(0, 1);
       const tileIds = dedicatedTiles.map((tile) => tile.id);
       const tileScores = dedicatedTiles.map((tile) => tile.score);
+      Array(80)
+        .fill(0)
+        .forEach(() => console.log(dedicatedTiles));
       // const card: Card | null = await ctx.prisma.card.findUnique({
       //   where: {
       //     id: input.playerState.cardId,
@@ -295,6 +295,11 @@ export const gameRouter = createTRPCRouter({
                           input.playerState.resourceTokens,
                           input.playerState.playerTokens
                         ),
+                    tiles:
+                      // input.playerState.currentAction === "purchase" &&
+                      dedicatedTiles.length > 0
+                        ? takeTiles(game.resource.tiles, tileIds)
+                        : undefined,
                   }
                 : (input.playerState.currentAction === "purchase" ||
                     input.playerState.currentAction === "reserve") &&
@@ -315,8 +320,8 @@ export const gameRouter = createTRPCRouter({
                       input.playerState.playerTokens
                     ),
                     tiles:
-                      input.playerState.currentAction === "purchase" &&
-                      dedicatedTiles
+                      // input.playerState.currentAction === "purchase" &&
+                      dedicatedTiles.length > 0
                         ? takeTiles(game.resource.tiles, tileIds)
                         : undefined,
                     ...drawCards(
@@ -336,8 +341,32 @@ export const gameRouter = createTRPCRouter({
                         game[`inventory${game.turnIdx}` as InventoryKey].tokens,
                         input.playerState.playerTokens
                       ),
+                      tiles: dedicatedTiles
+                        ? {
+                            push: tileIds,
+                          }
+                        : undefined,
+                      score: {
+                        increment:
+                          dedicatedTiles.length > 0
+                            ? tileScores.reduce((acc, score) => acc + score, 0)
+                            : 0,
+                      },
                     }
-                  : { tokens: input.playerState.inventoryTokens }
+                  : {
+                      tokens: input.playerState.inventoryTokens,
+                      tiles: dedicatedTiles
+                        ? {
+                            push: tileIds,
+                          }
+                        : undefined,
+                      score: {
+                        increment:
+                          dedicatedTiles.length > 0
+                            ? tileScores.reduce((acc, score) => acc + score, 0)
+                            : 0,
+                      },
+                    }
                 : input.playerState.currentAction === "purchase"
                 ? {
                     tokens: opTokenCount(
@@ -358,11 +387,6 @@ export const gameRouter = createTRPCRouter({
                             cardId !== input.playerState.selectedCard?.id
                         )
                       : undefined,
-                    tiles: dedicatedTiles
-                      ? {
-                          push: tileIds,
-                        }
-                      : undefined,
                     discount: input.playerState.selectedCard
                       ? opPriceWColor(
                           "increment",
@@ -371,11 +395,16 @@ export const gameRouter = createTRPCRouter({
                           input.playerState.selectedCard.color as CardColor
                         )
                       : undefined,
+                    tiles: dedicatedTiles
+                      ? {
+                          push: tileIds,
+                        }
+                      : undefined,
                     score: input.playerState.selectedCard
                       ? {
                           increment:
                             input.playerState.selectedCard.score +
-                            (dedicatedTiles
+                            (dedicatedTiles.length > 0
                               ? tileScores.reduce(
                                   (acc, score) => acc + score,
                                   0
@@ -399,6 +428,17 @@ export const gameRouter = createTRPCRouter({
                           push: input.playerState.selectedCard.id,
                         }
                       : undefined,
+                    tiles: dedicatedTiles
+                      ? {
+                          push: tileIds,
+                        }
+                      : undefined,
+                    score: {
+                      increment:
+                        dedicatedTiles.length > 0
+                          ? tileScores.reduce((acc, score) => acc + score, 0)
+                          : 0,
+                    },
                   }
                 : undefined,
           },

@@ -1,3 +1,5 @@
+import Layout from "./Layout";
+
 export default function LazyDevProvider({
   children,
 }: {
@@ -8,8 +10,12 @@ export default function LazyDevProvider({
   return (
     <>
       <div className="md:hidden">
-        <div>Your screen size is currently not supported.</div>
-        <div>THE DEV IS LAZY!</div>
+        <Layout header={false}>
+          <div className="flex h-screen flex-col items-center justify-center text-center text-[12px]">
+            <div>Your screen size is currently not supported.</div>
+            <div>THE DEVELOPER IS LAZY!</div>
+          </div>
+        </Layout>
       </div>
       <div className="max-md:hidden">{children}</div>
     </>

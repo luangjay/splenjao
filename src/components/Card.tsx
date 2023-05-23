@@ -53,7 +53,7 @@ export default function Card({
   if (cardLoading)
     return (
       <div
-        className={`select-none rounded-lg bg-gray-50 drop-shadow ${
+        className={`select-none rounded-lg bg-gray-100 drop-shadow ${
           playerTurn && cardEffect && ""
         } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
       ></div>

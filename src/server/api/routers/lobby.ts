@@ -1,4 +1,4 @@
-import { Lobby } from "@prisma/client";
+import { Lobby, prisma } from "@prisma/client";
 import { z } from "zod";
 import { shuffle } from "../../../common/constants";
 
@@ -60,23 +60,23 @@ export const lobbyRouter = createTRPCRouter({
         playerId: z.string().optional(),
       })
     )
-    .query(
-      async ({ ctx, input }) =>
-        await ctx.prisma.lobby.findFirstOrThrow({
-          where: {
-            id: input.id,
-            playerIds: input.playerId
-              ? {
-                  has: input.playerId,
-                }
-              : undefined,
-          },
-        })
+    .query(({ ctx, input }) =>
+      ctx.prisma.lobby.findFirstOrThrow({
+        where: {
+          id: input.id,
+          playerIds: input.playerId
+            ? {
+                has: input.playerId,
+              }
+            : undefined,
+        },
+      })
     ),
 
-  findPlayer: protectedProcedure.input(z.string().optional()).query(
-    async ({ ctx, input }) =>
-      await ctx.prisma.player.findUniqueOrThrow({
+  findPlayer: protectedProcedure
+    .input(z.string().optional())
+    .query(({ ctx, input }) =>
+      ctx.prisma.player.findUniqueOrThrow({
         where: {
           id: input,
         },
@@ -85,7 +85,22 @@ export const lobbyRouter = createTRPCRouter({
           lobby: true,
         },
       })
-  ),
+    ),
+
+  findPlayers: protectedProcedure
+    .input(z.array(z.string()))
+    .query(({ ctx, input }) =>
+      Promise.all(
+        input.map(
+          async (playerId) =>
+            await ctx.prisma.player.findUnique({
+              where: {
+                id: playerId,
+              },
+            })
+        )
+      )
+    ),
 
   createGame: protectedProcedure
     .input(
@@ -95,23 +110,22 @@ export const lobbyRouter = createTRPCRouter({
         playerIds: z.array(z.string()),
       })
     )
-    .mutation(
-      async ({ ctx, input }) =>
-        await ctx.prisma.game.create({
-          data: {
-            hostId: input.hostId,
-            playerCount: input.playerCount,
-            playerIds: input.playerIds,
-            createdAt: new Date(),
-            status: "started",
-            turnIdx: 0,
-            resource: newResource(input.playerCount),
-            inventory0: newInventory(),
-            inventory1: newInventory(),
-            inventory2: newInventory(),
-            inventory3: newInventory(),
-          },
-        })
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.game.create({
+        data: {
+          hostId: input.hostId,
+          playerCount: input.playerCount,
+          playerIds: input.playerIds,
+          createdAt: new Date(),
+          status: "started",
+          turnIdx: 0,
+          resource: newResource(input.playerCount),
+          inventory0: newInventory(),
+          inventory1: newInventory(),
+          inventory2: newInventory(),
+          inventory3: newInventory(),
+        },
+      })
     ),
 
   leaveLobby: protectedProcedure

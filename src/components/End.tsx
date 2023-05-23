@@ -66,12 +66,12 @@ export default function End(props: PlayerProps) {
         <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
           <Title size={3}>RESULT</Title>
           {stopper ? (
-            <div className="mt-6 flex aspect-square h-[338px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px]">
+            <div className="flex aspect-square h-[386px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px] drop-shadow">
               <div>Player {stopper.name} has left,</div>
               <div>resulting in the game's end!</div>
             </div>
           ) : (
-            <div className="mt-6 flex aspect-square h-[338px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px]">
+            <div className="flex aspect-square h-[386px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px] drop-shadow">
               <div>The players tied,</div>
               <div>resulting in no winners!</div>
             </div>
@@ -101,7 +101,7 @@ export default function End(props: PlayerProps) {
                   <WinnerIcon size={1} />
                 </div>
               </div>
-              <div className="mt-4 text-[28px] drop-shadow">
+              <div className="mt-4 mb-6 text-[28px] drop-shadow">
                 {game.winnerScore} score
               </div>
             </>

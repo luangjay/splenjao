@@ -308,8 +308,8 @@ const RequiredTokensShowcase = (props: DialogProps) => {
                   <div
                     className={`absolute ${
                       playerState.priceToReplace[cardColor] !== 0
-                        ? "top-4 left-3"
-                        : "top-4 left-4"
+                        ? "top-[22px] left-[14px]"
+                        : "top-[18px] left-[18px]"
                     }`}
                   >
                     <Token
@@ -323,8 +323,8 @@ const RequiredTokensShowcase = (props: DialogProps) => {
                   <div
                     className={`absolute ${
                       playerState.playerTokens[cardColor] !== 0
-                        ? "right-2 top-2"
-                        : "top-4 left-4"
+                        ? "right-1.5 top-2.5"
+                        : "top-[18px] left-[18px]"
                     }`}
                   >
                     <Token

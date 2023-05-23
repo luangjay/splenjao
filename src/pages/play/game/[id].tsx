@@ -207,8 +207,11 @@ export default function Game() {
           socket.emit(SocketEvents.UpdateServer);
         }
       })();
+      if (playerState.leave) {
+        socket.emit(SocketEvents.UpdateServer);
+      }
     }
-  }, [playerState.isNextTurn]);
+  }, [socket, playerState.isNextTurn, playerState.leave]);
 
   // useEffect(() => {
   //   if (game && game.status === "ended") {

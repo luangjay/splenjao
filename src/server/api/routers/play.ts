@@ -75,20 +75,21 @@ export const playRouter = createTRPCRouter({
         return existingLobby !== null;
       });
     if (!lobbyNotFound) return null;
-    return ctx.prisma.lobby.update({
+    return await ctx.prisma.lobby.update({
       where: {
         id: lobby.id,
       },
       data: {
         code,
+        playerCount: 0,
+        playerIds: [],
       },
     });
   }),
 
-  findPlayer: protectedProcedure
-    .input(z.string().optional())
-    .query(({ ctx, input }) =>
-      ctx.prisma.player.findUnique({
+  findPlayer: protectedProcedure.input(z.string().optional()).query(
+    async ({ ctx, input }) =>
+      await ctx.prisma.player.findUnique({
         where: {
           id: input,
         },
@@ -97,22 +98,20 @@ export const playRouter = createTRPCRouter({
           lobby: true,
         },
       })
-    ),
+  ),
 
-  findLobbyById: protectedProcedure
-    .input(z.string().optional())
-    .query(({ ctx, input }) =>
-      ctx.prisma.lobby.findUniqueOrThrow({
+  findLobbyById: protectedProcedure.input(z.string().optional()).query(
+    async ({ ctx, input }) =>
+      await ctx.prisma.lobby.findUniqueOrThrow({
         where: {
           id: input,
         },
       })
-    ),
+  ),
 
-  findLobbyByCode: protectedProcedure
-    .input(z.number())
-    .query(({ ctx, input }) =>
-      ctx.prisma.lobby.findFirst({
+  findLobbyByCode: protectedProcedure.input(z.number()).query(
+    async ({ ctx, input }) =>
+      await ctx.prisma.lobby.findFirst({
         where: {
           hostId: {
             not: null,
@@ -120,7 +119,19 @@ export const playRouter = createTRPCRouter({
           code: input,
         },
       })
-    ),
+  ),
+
+  findLobbyByCodeMutation: protectedProcedure.input(z.number()).mutation(
+    async ({ ctx, input }) =>
+      await ctx.prisma.lobby.findFirst({
+        where: {
+          hostId: {
+            not: null,
+          },
+          code: input,
+        },
+      })
+  ),
 
   updateLobby: protectedProcedure
     .input(
