@@ -1,5 +1,5 @@
 import { Game, Player } from "@prisma/client";
-import { InventoryKey, TokenColor } from "../common/types";
+import { InventoryKey, PlayerState, TokenColor } from "../common/types";
 import { PlayerProps } from "./Me";
 import { api } from "../utils/api";
 import Image from "next/image";
@@ -32,7 +32,7 @@ export interface PlayerWithIdx extends Player {
 export default function Others(props: PlayerProps) {
   const [open, setOpen] = useState(false);
 
-  const { game, player: me } = props;
+  const { game, player: me, setPlayerState } = props;
   const findOthersById = game.playerIds.map((playerId) =>
     api.game.findPlayerById.useQuery(playerId)
   );
@@ -89,7 +89,13 @@ export default function Others(props: PlayerProps) {
           </button>
         </div>
       </div>
-      <LeaveDialog game={game} player={me} open={open} setOpen={setOpen} />
+      <LeaveDialog
+        game={game}
+        player={me}
+        open={open}
+        setPlayerState={setPlayerState}
+        setOpen={setOpen}
+      />
     </>
   );
 }
@@ -135,13 +141,13 @@ const OthersProfile = (props: OthersProps) => (
           >
             <div className="flex flex-col">
               <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
-                <div className="aspect-square h-[84%]">
+                <div className="aspect-square h-[84%] drop-shadow">
                   <Image
                     alt=""
                     src={player.image || ""}
                     width={256}
                     height={256}
-                    className="aspect-square h-full rounded-full object-cover drop-shadow"
+                    className="aspect-square h-full rounded-full object-cover"
                   />
                 </div>
                 <div className="flex h-full flex-1 flex-col justify-between">
@@ -209,11 +215,13 @@ function LeaveDialog({
   game,
   player,
   open,
+  setPlayerState,
   setOpen,
 }: {
   game: Game;
   player: Player;
   open: boolean;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
   setOpen: (value: SetStateAction<boolean>) => void;
 }) {
   const utils = api.useContext();
@@ -229,6 +237,7 @@ function LeaveDialog({
 
   async function confirmLeave() {
     await leaveGame.mutateAsync({ id: game.id, playerId: player.id });
+    setPlayerState((prev) => ({ ...prev, leave: true }));
     closeDialog();
   }
 

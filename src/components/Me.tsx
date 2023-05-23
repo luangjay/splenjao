@@ -1,16 +1,22 @@
 import { Card as CardSchema, Game, Inventory, Player } from "@prisma/client";
-import { CardColor, InventoryKey, TokenColor } from "../common/types";
+import {
+  CardColor,
+  InventoryKey,
+  PlayerState,
+  TokenColor,
+} from "../common/types";
 import { api } from "../utils/api";
 import { tokenColors } from "../common/constants";
 import Image from "next/image";
 import Card from "./Card";
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import Tile from "./Tile";
 import Title from "./Title";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 export interface PlayerProps {
   game: Game;
   player: Player;
+  setPlayerState: (value: SetStateAction<PlayerState>) => void;
   localSettings: any;
   setLocalSettings: any;
 }
@@ -109,13 +115,13 @@ const MyProfile = (props: MeProps) => {
           </div>
           <div className="mx-4 border"></div>
           <div className="flex h-[90px] w-full items-center gap-3 p-4 pb-3 text-start">
-            <div className="aspect-square h-[84%]">
+            <div className="aspect-square h-[84%] drop-shadow">
               <Image
                 alt=""
                 src={props.player.image || ""}
                 width={256}
                 height={256}
-                className="aspect-square h-full rounded-full object-cover drop-shadow"
+                className="aspect-square h-full rounded-full object-cover"
               />
             </div>
             <div className="flex h-full flex-1 flex-col justify-between">

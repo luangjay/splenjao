@@ -82,7 +82,6 @@ export default function End(props: PlayerProps) {
           {winner && (
             <>
               <Title size={3}>RESULT</Title>
-
               <div className="mt-6 aspect-square h-[192px]">
                 <Image
                   alt=""
@@ -241,13 +240,13 @@ const PlayersProfile = (props: PlayerProps) => {
             >
               <div className="flex flex-col">
                 <div className="flex h-[120px] w-full items-center gap-4 p-[22px] text-start">
-                  <div className="aspect-square h-[90%]">
+                  <div className="aspect-square h-[90%] drop-shadow">
                     <Image
                       alt=""
                       src={player.image || ""}
                       width={256}
                       height={256}
-                      className="aspect-square h-full rounded-full object-cover drop-shadow"
+                      className="aspect-square h-full rounded-full object-cover"
                     />
                   </div>
                   <div className="flex h-full flex-1 flex-col justify-between">

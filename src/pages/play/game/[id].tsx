@@ -56,7 +56,11 @@ export default function Game() {
   const utils = api.useContext();
 
   // REACT QUERY HOOKS
-  const { data: player } = api.game.findPlayerById.useQuery(
+  const {
+    data: player,
+    isError: playerError,
+    isFetchedAfterMount: playerFetched,
+  } = api.game.findPlayerById.useQuery(
     session.data?.user.id,
     { retry: false }
     // EXPENSIVE SHIT
@@ -66,8 +70,9 @@ export default function Game() {
   );
   const {
     data: game,
-    error: gameError,
+    isError: gameError,
     refetch: gameRefetch,
+    isFetchedAfterMount: gameFetched,
   } = api.game.findAndAuthorize.useQuery(
     {
       id,
@@ -222,8 +227,8 @@ export default function Game() {
   const [openOthers, setOpenOthers] = useState(false);
   const [openMe, setOpenMe] = useState(false);
 
-  if (gameError) return <Error404 />;
-  if (!player || !game) return <Layout header={false} />;
+  if (playerError || gameError) return <Error404 />;
+  if (!player || !game || !gameFetched) return <Layout header={false} />;
   // if (!validTab) {
   //   return (
   //     <Layout>
@@ -239,6 +244,7 @@ export default function Game() {
       <End
         game={game}
         player={player}
+        setPlayerState={setPlayerState}
         localSettings={localSettings}
         setLocalSettings={setLocalSettings}
       />
@@ -255,6 +261,7 @@ export default function Game() {
           <Others
             game={game}
             player={player}
+            setPlayerState={setPlayerState}
             localSettings={localSettings}
             setLocalSettings={setLocalSettings}
           />
@@ -293,6 +300,7 @@ export default function Game() {
             <Me
               game={game}
               player={player}
+              setPlayerState={setPlayerState}
               localSettings={localSettings}
               setLocalSettings={setLocalSettings}
             />

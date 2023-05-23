@@ -64,11 +64,9 @@ export const lobbyRouter = createTRPCRouter({
       ctx.prisma.lobby.findFirstOrThrow({
         where: {
           id: input.id,
-          playerIds: input.playerId
-            ? {
-                has: input.playerId,
-              }
-            : undefined,
+          playerIds: {
+            has: input.playerId || null,
+          },
         },
       })
     ),

@@ -12,13 +12,16 @@ export default function Tile({ tileId }: TileProps) {
   );
 
   if (tileId === -1)
-    return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
+    // return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
+    return <PlaceholderTile />;
   if (tileLoading)
     return (
-      <div className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-gray-100 bg-cover drop-shadow"></div>
+      // <div className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-gray-100 bg-cover drop-shadow"></div>
+      <PlaceholderTile />
     );
   if (!tile || tileId === -1)
-    return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
+    // return <div className="mx-auto aspect-square select-none rounded-lg"></div>;
+    return <PlaceholderTile />;
   return (
     <div
       className="relative mx-auto aspect-square w-[100px] select-none rounded-lg bg-cover drop-shadow"
@@ -35,6 +38,16 @@ export default function Tile({ tileId }: TileProps) {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PlaceholderTile() {
+  return (
+    <div className="flex aspect-square w-[100px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-300 to-slate-300/50 text-center text-sm text-slate-600 drop-shadow">
+      <div>
+        <span className="text-md font-mono font-bold">SPLENJAO</span>
       </div>
     </div>
   );

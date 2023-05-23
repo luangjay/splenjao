@@ -52,14 +52,16 @@ export default function Card({
   if (cardId === 104) return <PlaceholderCard />;
   if (cardLoading)
     return (
-      <div
-        className={`select-none rounded-lg bg-gray-100 drop-shadow ${
-          playerTurn && cardEffect && ""
-        } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
-      ></div>
+      // <div
+      //   className={`select-none rounded-lg bg-gray-100 drop-shadow ${
+      //     playerTurn && cardEffect && ""
+      //   } ${!big ? "h-[154px] min-w-[100px]" : "h-[205px] min-w-[133px]"}`}
+      // ></div>
+      <PlaceholderCard />
     );
-  if (!card || cardId === -1) return <></>;
-  // bg-[length:40px_40px]
+  if (!card || cardId === -1)
+    // return <div className="h-[154px] min-w-[100px]"></div>;
+    return <PlaceholderCard />;
   return (
     <button
       className={`select-none rounded-lg bg-gray-50 bg-[url('/sakura.png')] bg-cover bg-center bg-no-repeat bg-origin-padding drop-shadow ${
@@ -108,10 +110,8 @@ export default function Card({
 
 function PlaceholderCard() {
   return (
-    <div className="flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-300 to-slate-300/80 text-center text-sm drop-shadow">
-      <div>
-        <span className="text-md font-mono font-semibold">SPLENJAO</span>
-      </div>
+    <div className="flex aspect-[0.65] min-w-[100px] max-w-[200px] select-none items-center justify-center rounded-lg bg-gradient-to-br from-slate-300 to-slate-300/80 text-center text-sm text-slate-600 drop-shadow">
+      <div className="text-md font-mono font-bold">SPLENJAO</div>
     </div>
   );
 }

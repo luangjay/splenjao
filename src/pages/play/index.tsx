@@ -138,7 +138,7 @@ export default function Play() {
       }
     } else {
       toast.dismiss(toastId);
-      toast.error("Try again later");
+      toast.error("Not logged in");
       setProcessing(false);
     }
   };
@@ -168,7 +168,7 @@ export default function Play() {
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
       });
-      refs[0]?.current?.focus();
+      refs[digit]?.current?.focus();
     })();
     return () => {
       toast.remove();
@@ -216,7 +216,7 @@ export default function Play() {
               htmlFor={`input${digit}`}
             >
               <div>Join lobby with room code</div>
-              <div className="flex gap-4 font-mono font-semibold">
+              <div className="flex gap-4 font-mono font-semibold caret-slate-600">
                 {values.map((value, idx) =>
                   idx !== digit ? (
                     <div className="flex aspect-square h-[64px] items-center justify-center rounded-xl border-2 border-slate-400 bg-gray-50 text-[32px]">
@@ -270,7 +270,7 @@ export default function Play() {
             <div className="flex items-center gap-8 px-6">
               <div>No code?</div>
               <button
-                className="w-[140px] rounded-lg bg-slate-600 p-2 text-xl text-slate-100 hover:bg-slate-700"
+                className="w-[140px] rounded-lg bg-slate-600 p-2 text-xl font-medium text-slate-100 hover:bg-slate-700"
                 onClick={newLobby}
               >
                 New lobby

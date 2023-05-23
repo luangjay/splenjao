@@ -11,7 +11,7 @@ export default function LazyDevProvider({
     <>
       <div className="md:hidden">
         <Layout header={false}>
-          <div className="flex h-screen flex-col items-center justify-center text-center text-[12px]">
+          <div className="flex h-screen flex-col items-center justify-center text-center text-sm">
             <div>Your screen size is currently not supported.</div>
             <div>THE DEVELOPER IS LAZY!</div>
           </div>

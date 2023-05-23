@@ -399,22 +399,29 @@ const AvailableTokensShowcase = (props: DialogProps) => {
 
 const SelectedTokensShowcase = (props: DialogProps) => {
   const { game, player, playerState, setPlayerState } = props;
+  const sumTokenCount = Object.values(playerState.playerTokens).reduce(
+    (a, v) => a + v,
+    0
+  );
+
   return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
       <Title>SELECTED TOKENS</Title>
-      <div className="flex h-full w-full flex-1 items-center">
-        {tokenColors.map((tokenColor) => (
-          <div className="flex w-1/6 justify-center">
-            <Token
-              tokenColor={tokenColor}
-              tokenEffect="return"
-              reference="player"
-              showCount
-              flexCol
-              {...props}
-            />
-          </div>
-        ))}
+      <div className="flex h-full w-full flex-1 items-center justify-center">
+        {sumTokenCount === 0
+          ? "No tokens selected"
+          : tokenColors.map((tokenColor) => (
+              <div className="flex w-1/6 justify-center">
+                <Token
+                  tokenColor={tokenColor}
+                  tokenEffect="return"
+                  reference="player"
+                  showCount
+                  flexCol
+                  {...props}
+                />
+              </div>
+            ))}
       </div>
     </div>
   );
@@ -422,9 +429,10 @@ const SelectedTokensShowcase = (props: DialogProps) => {
 
 const YourTokensShowcase = (props: DialogProps) => {
   const { game, player, playerState, setPlayerState } = props;
-  const sumTokenCount = Object.values(
-    game[`inventory${game.turnIdx}` as InventoryKey].tokens
-  ).reduce((a, v) => a + v, 0);
+  const sumTokenCount = Object.values(playerState.inventoryTokens).reduce(
+    (a, v) => a + v,
+    0
+  );
 
   return (
     <div className="mx-4 flex flex-1 flex-col gap-2">
@@ -517,7 +525,7 @@ function Button({
       }}
       {...props}
     >
-      {localSettings?.enableAnimation && playerState.isProcessing && (
+      {playerState.isProcessing && (
         <svg
           className="absolute -right-[120px] h-5 w-5 animate-spin text-slate-600"
           fill="none"

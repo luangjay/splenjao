@@ -114,6 +114,7 @@ export default function Lobby() {
         lobbyId: lobby.id,
         gameId: game.id,
       });
+      socket.emit(SocketEvents.UpdateServer);
       await clearLobby.mutateAsync({
         id: lobby.id,
         playerId: player.id,
@@ -132,7 +133,6 @@ export default function Lobby() {
         type: "error",
         message: "Try again later",
       });
-      socket.emit(SocketEvents.UpdateServer);
       setProcessing(false);
     }
   };
@@ -239,10 +239,10 @@ export default function Lobby() {
         <div className="max-xl:hidden">
           <Title size={3}>LOBBY</Title>
         </div>
-        <div className="flex aspect-square h-[386px] w-full max-w-lg flex-col items-center pt-[96px] text-lg lg:justify-center lg:pt-16 lg:text-2xl xl:pt-8">
+        <div className="flex aspect-square h-[386px] w-full max-w-lg flex-col items-center pt-[96px] pb-2 text-lg lg:justify-center lg:pt-16 lg:text-2xl xl:pt-8">
           <div className="flex items-center gap-4 drop-shadow">
-            <div className="pt-0.5 text-base lg:pt-1 lg:text-xl">Room code</div>
-            <div className="rounded-md bg-slate-200 py-0.5 px-1.5 font-mono font-semibold">
+            <div className="mt-1 flex leading-none lg:mt-0.5">Room code</div>
+            <div className="rounded-md bg-slate-200 px-1.5 py-1 font-mono text-[25px] font-semibold leading-none lg:text-[32px]">
               {lobby.code}
             </div>
             <CopyButton code={lobby.code} />
@@ -252,7 +252,7 @@ export default function Lobby() {
               lobbyPlayers.map(
                 (lobbyPlayer) =>
                   lobbyPlayer && (
-                    <div className="flex h-[104px] flex-col items-center gap-4 drop-shadow lg:h-[130px]">
+                    <div className="flex h-[104px] flex-col items-center gap-2 drop-shadow lg:h-[130px] lg:gap-3">
                       <div className="relative flex aspect-square h-[72px] flex-col items-center lg:h-[90px]">
                         <Image
                           width={256}
@@ -268,7 +268,7 @@ export default function Lobby() {
                           </div>
                         )}
                       </div>
-                      <div className="max-w-[72px] truncate text-[13px] leading-none lg:max-w-[90px] lg:text-base">
+                      <div className="max-w-[72px] truncate text-[14px] lg:max-w-[90px] lg:text-lg">
                         {lobbyPlayer.name}
                       </div>
                     </div>
