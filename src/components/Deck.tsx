@@ -47,6 +47,7 @@ export default function Deck(props: DeckProps) {
               tokenColor={tokenColor}
               tokenEffect={null}
               reference="resource"
+              fixed
               showCount
               {...props}
             />

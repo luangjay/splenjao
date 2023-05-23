@@ -48,6 +48,7 @@ interface TokenProps {
   colorToReplace?: CardColor;
   showCount?: boolean;
   flexCol?: boolean;
+  fixed?: boolean;
 }
 
 export default function Token({
@@ -61,6 +62,7 @@ export default function Token({
   colorToReplace,
   showCount,
   flexCol = false,
+  fixed = false,
 }: TokenProps) {
   const [disabled, setDisabled] = useState(false);
   const playerTurn = player.id === game.playerIds[game.turnIdx];
@@ -85,7 +87,9 @@ export default function Token({
   const tokenCount =
     // game.status === "created" ||
     reference === "resource"
-      ? playerState.resourceTokens[tokenColor]
+      ? fixed
+        ? game.resource.tokens[tokenColor]
+        : playerState.resourceTokens[tokenColor]
       : reference === "inventory"
       ? game.status !== "created"
         ? playerState.inventoryTokens[tokenColor]
