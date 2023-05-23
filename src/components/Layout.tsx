@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Image from "next/image";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
+import { useRouter } from "next/router";
 import Link from "next/link";
-import { Toaster } from "react-hot-toast";
 
 interface LayoutProps {
   header?: boolean;
@@ -13,9 +13,21 @@ interface LayoutProps {
 
 export default function Layout({ header = true, children }: LayoutProps) {
   const session = useSession();
+  const router = useRouter();
   const { data: player } = api.game.findPlayerById.useQuery(
     session.data?.user.id
   );
+  const [navOpen, setNavOpen] = useState(false);
+  const pagename =
+    router.pathname === "/"
+      ? "Home"
+      : router.pathname === "/about"
+      ? "About"
+      : router.pathname === "/lobby/[id]"
+      ? "Lobby"
+      : router.pathname === "/game/[id]"
+      ? "Game"
+      : "Page";
 
   return (
     <>
@@ -36,8 +48,18 @@ export default function Layout({ header = true, children }: LayoutProps) {
                   beta
                 </div>
               </Link>
-              {player && (
-                <div className="flex h-full items-center gap-4">
+              <div className="flex h-full items-center gap-4">
+                {/* <div className="mr-8 flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
+                  <button
+                    className="w-[90px] rounded-lg bg-slate-200 p-1.5 text-base font-medium text-slate-600 drop-shadow-sm hover:bg-slate-300 lg:w-[112px] lg:p-2 lg:text-xl"
+                    onClick={
+                      session.data ? () => void signOut() : () => void signIn()
+                    }
+                  >
+                    {session.data ? "Logout" : "Login"}
+                  </button>
+                </div> */}
+                {player && (
                   <div className="aspect-square h-[80%]">
                     <Image
                       alt=""
@@ -47,19 +69,88 @@ export default function Layout({ header = true, children }: LayoutProps) {
                       className="aspect-square h-full rounded-full object-cover drop-shadow"
                     />
                   </div>
+                )}
+                {player ? (
                   <div className="flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
                     <div>Logged in as</div>
                     <div className="truncate text-base font-semibold lg:text-xl">
                       {player.name}
                     </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
+                    Not logged in
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
-        <div className={header ? "h-screen px-[120px]" : ""}>{children}</div>
+        {header && (
+          <div className="fixed bottom-0 z-20 flex w-full items-center justify-center">
+            <button
+              className="absolute flex w-[72px] justify-center rounded-[8px_8px_0_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all duration-200 hover:bg-gray-200/[.25]"
+              style={{ bottom: !navOpen ? 0 : "200px" }}
+              onClick={() => setNavOpen((prev) => !prev)}
+              // style={{ right: !openMe ? 0 : "306px" }}
+              // onClick={() => setOpenMe((prev) => !prev)}
+            >
+              {!navOpen ? <UpIcon /> : <DownIcon />}
+            </button>
+            <div
+              className="fixed bottom-0 z-20 flex w-[342px] flex-col items-center justify-between overflow-hidden rounded-[12px_12px_0_0] bg-gray-200/[.5] text-xl drop-shadow backdrop-blur transition-all"
+              style={{ height: !navOpen ? 0 : "200px" }}
+            >
+              <div className="flex h-full flex-col items-center justify-between p-6">
+                <div className="font-medium drop-shadow">{pagename}</div>
+                <button
+                  className="w-[112px] rounded-lg bg-slate-600 p-1.5 text-lg font-medium text-slate-100 drop-shadow-sm hover:bg-slate-700 disabled:bg-gray-400"
+                  disabled={pagename === "About"}
+                  onClick={() => {
+                    const newTab = window.open("/about", "_blank");
+                    newTab?.focus();
+                  }}
+                >
+                  About
+                </button>
+                <button
+                  className="w-[112px] rounded-lg bg-slate-600 p-1.5 text-lg font-medium text-slate-100 drop-shadow-sm hover:bg-slate-700"
+                  onClick={
+                    session.data
+                      ? () => void signOut({ callbackUrl: "/" })
+                      : () => void signIn()
+                  }
+                >
+                  {session.data ? "Logout" : "Login"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className={header ? "h-screen" : ""}>{children}</div>
       </div>
     </>
   );
 }
+
+const UpIcon = () => {
+  return (
+    <svg fill="currentColor" viewBox="0 0 16 16" height="36px" width="36px">
+      <path
+        fillRule="evenodd"
+        d="M7.646 4.646a.5.5 0 01.708 0l6 6a.5.5 0 01-.708.708L8 5.707l-5.646 5.647a.5.5 0 01-.708-.708l6-6z"
+      />
+    </svg>
+  );
+};
+
+const DownIcon = () => {
+  return (
+    <svg fill="currentColor" viewBox="0 0 16 16" height="36px" width="36px">
+      <path
+        fillRule="evenodd"
+        d="M1.646 4.646a.5.5 0 01.708 0L8 10.293l5.646-5.647a.5.5 0 01.708.708l-6 6a.5.5 0 01-.708 0l-6-6a.5.5 0 010-.708z"
+      />
+    </svg>
+  );
+};

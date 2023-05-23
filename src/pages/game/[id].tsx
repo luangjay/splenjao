@@ -3,25 +3,25 @@ import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-import { api } from "../../../utils/api";
-import Card from "../../../components/Card";
-import Deck from "../../../components/Deck";
-import Token from "../../../components/Token";
+import { api } from "../../utils/api";
+import Card from "../../components/Card";
+import Deck from "../../components/Deck";
+import Token from "../../components/Token";
 import { useRouter } from "next/router";
 import Error from "next/error";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { Tokens } from "@prisma/client";
-import { PlayerState, SocketEvents } from "../../../common/types";
-import { InventoryKey, TokenColor } from "../../../common/types";
-import { useSocket } from "../../../hooks/useSocket";
-import Others from "../../../components/Others";
-import Me from "../../../components/Me";
-import ActionDialog from "../../../components/Dialog";
-import Layout from "../../../components/Layout";
-import Title from "../../../components/Title";
-import { useLocalStorage } from "../../../hooks/useLocalStorage";
-import End from "../../../components/End";
-import Error404 from "../../404";
+import { PlayerState, SocketEvents } from "../../common/types";
+import { InventoryKey, TokenColor } from "../../common/types";
+import { useSocket } from "../../hooks/useSocket";
+import Others from "../../components/Others";
+import Me from "../../components/Me";
+import ActionDialog from "../../components/Dialog";
+import Layout from "../../components/Layout";
+import Title from "../../components/Title";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import End from "../../components/End";
+import Error404 from "../404";
 
 const defaultPrice = {
   white: 0,
@@ -255,7 +255,7 @@ export default function Game() {
       <main className="relative flex h-screen select-none overflow-auto bg-gray-100 text-xl text-slate-600">
         {/* OTHERS */}
         <div
-          className="fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
+          className="fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur transition-all"
           style={{ width: !openOthers ? 0 : "306px" }}
         >
           <Others
@@ -268,7 +268,7 @@ export default function Game() {
         </div>
         <div className="fixed z-20 flex h-full items-center">
           <button
-            className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
+            className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all hover:bg-gray-200/[.25]"
             style={{ left: !openOthers ? "0" : "306px" }}
             onClick={() => setOpenOthers((prev) => !prev)}
           >

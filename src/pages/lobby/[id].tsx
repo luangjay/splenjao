@@ -6,13 +6,13 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { api } from "../../../utils/api";
-import Layout from "../../../components/Layout";
-import { useSocket } from "../../../hooks/useSocket";
-import { SocketEvents } from "../../../common/types";
+import { api } from "../../utils/api";
+import Layout from "../../components/Layout";
+import { useSocket } from "../../hooks/useSocket";
+import { SocketEvents } from "../../common/types";
 import { ToastBar, Toaster, toast } from "react-hot-toast";
-import Error404 from "../../404";
-import Title from "../../../components/Title";
+import Error404 from "../404";
+import Title from "../../components/Title";
 import Image from "next/image";
 
 export default function Lobby() {
@@ -69,7 +69,7 @@ export default function Lobby() {
     if (player && playerFetched && player.games) {
       const playerLastGame = player.games[player.games.length - 1];
       if (playerLastGame && playerLastGame.status !== "ended") {
-        router.replace(`/play/game/${playerLastGame.id}`);
+        router.replace(`/game/${playerLastGame.id}`);
       }
     }
   }, [player]);
@@ -147,7 +147,7 @@ export default function Lobby() {
       socket.emit(SocketEvents.UpdateServer);
       toast.dismiss(toastId);
       setProcessing(false);
-      router.replace("/play");
+      router.replace("/");
     } else {
       toast.dismiss(toastId);
       toast.error("Try again later");
@@ -240,9 +240,11 @@ export default function Lobby() {
           <Title size={3}>LOBBY</Title>
         </div>
         <div className="flex aspect-square h-[386px] w-full max-w-lg flex-col items-center pt-[96px] pb-2 text-lg lg:justify-center lg:pt-16 lg:text-2xl xl:pt-8">
-          <div className="flex items-center gap-4 drop-shadow">
-            <div className="mt-1 flex leading-none lg:mt-0.5">Room code</div>
-            <div className="rounded-md bg-slate-200 px-1.5 py-1 font-mono text-[25px] font-semibold leading-none lg:text-[32px]">
+          <div className="flex items-center gap-4">
+            <div className="mt-1 flex leading-none drop-shadow lg:mt-0.5">
+              Room code
+            </div>
+            <div className="rounded-md bg-slate-200 px-1.5 py-1 font-mono text-[25px] font-semibold leading-none shadow lg:text-[32px]">
               {lobby.code}
             </div>
             <CopyButton code={lobby.code} />

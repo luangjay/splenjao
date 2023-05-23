@@ -24,9 +24,9 @@ export default function End(props: PlayerProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY <= 50) {
+      if (window.scrollY <= 60) {
         setPage(0);
-      } else if (window.scrollY >= window.innerHeight - 150) {
+      } else if (window.scrollY >= window.innerHeight - 120) {
         setPage(1);
       }
     };
@@ -151,11 +151,11 @@ export default function End(props: PlayerProps) {
           )}
         </main>
       )}
-      <div className="relative top-[100vh] flex w-full flex-col items-center justify-center gap-6 pt-[30px] pb-[50px]">
+      <div className="relative top-[100vh] flex min-h-screen w-full flex-col items-center justify-center gap-6 pt-[30px] pb-[50px]">
         <Title size={2}>LEADERBOARD</Title>
         <PlayersProfile {...props} />
       </div>
-      <div className="fixed top-0 right-[60px] flex h-screen flex-col justify-center gap-4">
+      <div className="fixed top-0 right-[48px] flex h-screen flex-col justify-center gap-4 lg:right-[60px]">
         <button
           className={`h-4 w-4 rounded-full shadow-lg ${
             page === 0 ? "bg-pink-300" : "bg-slate-300"
@@ -173,7 +173,7 @@ export default function End(props: PlayerProps) {
           }`}
           onClick={() => {
             window.scrollTo({
-              top: window.innerHeight - 100,
+              top: window.innerHeight - 80,
               behavior: "smooth",
             });
           }}

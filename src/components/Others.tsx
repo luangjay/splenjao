@@ -58,7 +58,7 @@ export default function Others(props: PlayerProps) {
         <OthersProfile {...props} others={others} />
         <div className="mt-2 flex flex-col items-center gap-6">
           <Title>OPTIONS</Title>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="m-1 flex items-center gap-2">
             <Switch
               checked={props.localSettings?.enableAnimation}
               onChange={toggle}
@@ -82,7 +82,7 @@ export default function Others(props: PlayerProps) {
             <div className="font-medium">Animation</div>
           </div>
           <button
-            className="rounded-lg p-2.5 font-medium hover:bg-white/40"
+            className="w-[120px] rounded-lg bg-slate-600 p-2 font-medium text-slate-100 hover:bg-slate-700"
             onClick={openDialog}
           >
             Leave game
@@ -284,7 +284,7 @@ function LeaveDialog({
                     <Button inverse onClick={closeDialog}>
                       Cancel
                     </Button>
-                    <Button onClick={confirmLeave}>Confirm</Button>
+                    <Button onClick={confirmLeave}>Leave</Button>
                   </div>
                 </div>
                 {/* <div className="flex w-[80px] flex-col items-end py-8"></div> */}

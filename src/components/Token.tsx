@@ -109,7 +109,7 @@ export default function Token({
     );
   return (
     <div
-      className={`flex select-none items-center ${
+      className={`flex select-none items-center text-slate-600 ${
         showCount && !flexCol && "w-[64px]"
       } ${flexCol && "h-[56px] flex-col"}`}
     >
