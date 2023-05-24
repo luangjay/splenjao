@@ -22,7 +22,7 @@ model Example {
 
 model Lobby {
     id              String    @id @default(auto()) @map("_id") @db.ObjectId
-    hostId          String?   @db.ObjectId @unique
+    hostId          String?   @db.ObjectId
     playerCount     Int
     playerIds       String[]  @db.ObjectId
     players         Player[]

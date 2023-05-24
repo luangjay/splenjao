@@ -175,7 +175,6 @@ export default function Play() {
     };
   }, []);
 
-  if (!playerFetched) return <Layout />;
   return (
     <Layout>
       <Toaster gutter={20}>
@@ -206,10 +205,10 @@ export default function Play() {
         )}
       </Toaster>
       <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center text-2xl">
-        <div className="max-xl:hidden">
+        <div className="mt-16 max-xl:hidden">
           <Title size={3}>SPLENJAO</Title>
         </div>
-        <div className="flex aspect-square h-full w-full max-w-lg flex-col items-center justify-center max-lg:gap-12 max-lg:pt-12 lg:h-[386px]">
+        <div className="flex aspect-square h-full w-full max-w-lg flex-col items-center justify-center max-lg:gap-12 max-lg:pt-12 lg:h-[386px] lg:pb-12 xl:pb-12">
           <div className="flex items-center justify-center lg:flex-1 xl:pb-12">
             <label
               className="flex flex-col items-center justify-center gap-6 drop-shadow"
@@ -221,7 +220,7 @@ export default function Play() {
               <div className="flex gap-4 font-mono font-semibold caret-slate-600">
                 {values.map((value, idx) =>
                   idx !== digit ? (
-                    <div className="flex aspect-square h-[64px] items-center justify-center rounded-xl border-2 border-slate-400 bg-gray-50 text-[32px]">
+                    <div className="flex h-[64px] w-[64px] items-center justify-center rounded-xl border-2 border-slate-400 bg-gray-50 text-[32px]">
                       {values[idx]}
                     </div>
                   ) : (
@@ -260,7 +259,7 @@ export default function Play() {
                           }
                         }
                       }}
-                      className="aspect-square h-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none"
+                      className="h-[64px] w-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none"
                     />
                   )
                 )}

@@ -14,9 +14,8 @@ interface LayoutProps {
 export default function Layout({ header = true, children }: LayoutProps) {
   const session = useSession();
   const router = useRouter();
-  const { data: player } = api.game.findPlayerById.useQuery(
-    session.data?.user.id
-  );
+  const { data: player, isFetched: playerFetched } =
+    api.game.findPlayerById.useQuery(session.data?.user.id, { retry: false });
   const [navOpen, setNavOpen] = useState(false);
   const pagename =
     router.pathname === "/"
@@ -70,7 +69,9 @@ export default function Layout({ header = true, children }: LayoutProps) {
                     />
                   </div>
                 )}
-                {player ? (
+                {!playerFetched ? (
+                  <></>
+                ) : player ? (
                   <div className="flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
                     <div>Logged in as</div>
                     <div className="truncate text-base font-semibold lg:text-xl">
@@ -89,7 +90,7 @@ export default function Layout({ header = true, children }: LayoutProps) {
         {header && (
           <div className="fixed bottom-0 z-20 flex w-full items-center justify-center">
             <button
-              className="absolute flex w-[72px] justify-center rounded-[8px_8px_0_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all duration-200 hover:bg-gray-200/[.25]"
+              className="absolute flex w-[72px] justify-center rounded-[8px_8px_0_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all duration-150 hover:bg-gray-200/[.25]"
               style={{ bottom: !navOpen ? 0 : "200px" }}
               onClick={() => setNavOpen((prev) => !prev)}
               // style={{ right: !openMe ? 0 : "306px" }}

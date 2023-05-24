@@ -63,7 +63,7 @@ export default function End(props: PlayerProps) {
   return (
     <Layout>
       {!winner && !winnerLoading ? (
-        <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
+        <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center pt-16 max-xl:hidden">
           <Title size={3}>RESULT</Title>
           {stopper ? (
             <div className="flex aspect-square h-[386px] w-full flex-col items-center justify-center gap-2 pb-24 text-[32px] drop-shadow">
@@ -81,34 +81,38 @@ export default function End(props: PlayerProps) {
         <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center max-xl:hidden">
           {winner && (
             <>
-              <Title size={3}>RESULT</Title>
-              <div className="mt-6 aspect-square h-[192px]">
-                <Image
-                  alt=""
-                  src={winner.image || ""}
-                  width={192}
-                  height={192}
-                  loading="lazy"
-                  className="aspect-square h-full rounded-full object-cover drop-shadow"
-                />
+              <div className="mt-16 max-xl:hidden">
+                <Title size={3}>RESULT</Title>
               </div>
-              <div className="relative mt-10 w-fit">
-                <div className="max-w-[320px] truncate text-[32px] font-semibold drop-shadow">
-                  {winner?.name}
+              <div className="flex h-[386px] flex-col items-center">
+                <div className="mt-4 aspect-square h-[192px]">
+                  <Image
+                    alt=""
+                    src={winner.image || ""}
+                    width={192}
+                    height={192}
+                    loading="lazy"
+                    className="aspect-square h-full rounded-full object-cover drop-shadow"
+                  />
                 </div>
-                <div className="absolute -right-12 top-0 py-1">
-                  <WinnerIcon size={1} />
+                <div className="relative mt-8 w-fit">
+                  <div className="max-w-[320px] truncate text-[32px] font-semibold drop-shadow">
+                    {winner?.name}
+                  </div>
+                  <div className="absolute -right-12 top-0 py-1">
+                    <WinnerIcon size={1} />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 mb-6 text-[28px] drop-shadow">
-                {game.winnerScore} score
+                <div className="mt-4 mb-6 text-[28px] drop-shadow">
+                  {game.winnerScore} score
+                </div>
               </div>
             </>
           )}
         </main>
       )}
       {!winner && !winnerLoading ? (
-        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
+        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[40px] xl:hidden">
           {stopper ? (
             <div className="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 pt-6 text-[32px]">
               <div>Player {stopper.name} has left,</div>
@@ -122,7 +126,7 @@ export default function End(props: PlayerProps) {
           )}
         </main>
       ) : (
-        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[50px] xl:hidden">
+        <main className="absolute left-0 flex h-full w-full items-center justify-center gap-12 overflow-auto max-lg:pt-[40px] xl:hidden">
           {winner && (
             <>
               <div className="aspect-square h-[160px]">

@@ -236,10 +236,10 @@ export default function Lobby() {
         )}
       </Toaster>
       <main className="absolute left-0 flex h-full w-full flex-col items-center justify-center">
-        <div className="max-xl:hidden">
+        <div className="mt-16 max-xl:hidden">
           <Title size={3}>LOBBY</Title>
         </div>
-        <div className="flex aspect-square h-[386px] w-full max-w-lg flex-col items-center pt-[96px] pb-2 text-lg lg:justify-center lg:pt-16 lg:text-2xl xl:pt-8">
+        <div className="flex aspect-square h-full w-full max-w-lg flex-col items-center justify-center pt-16 pb-2 text-lg lg:h-[386px] lg:pt-12 lg:text-2xl xl:justify-start xl:pt-2">
           <div className="flex items-center gap-4">
             <div className="mt-1 flex leading-none drop-shadow lg:mt-0.5">
               Room code
@@ -249,7 +249,7 @@ export default function Lobby() {
             </div>
             <CopyButton code={lobby.code} />
           </div>
-          <div className="m-[40px_0_32px_0] flex justify-center gap-8 lg:m-[42px_0_34px_0] xl:m-[80px_0_64px_0]">
+          <div className="m-[32px_0_26px_0] flex justify-center gap-8 lg:m-[40px_0_32px_0] xl:m-[60px_0_48px_0]">
             {lobbyPlayers ? (
               lobbyPlayers.map(
                 (lobbyPlayer) =>

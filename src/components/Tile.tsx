@@ -28,7 +28,7 @@ export default function Tile({ tileId }: TileProps) {
       style={{ backgroundImage: `url(${tile.pic})` }}
     >
       <div className="flex h-full flex-row rounded-lg drop-shadow-none">
-        <div className="z-10 flex h-full w-[33%] flex-col justify-between rounded-[8px_0_0_8px] bg-white/[.5] p-[4px] backdrop-blur-sm">
+        <div className="z-10 flex h-full w-[33%] flex-col justify-between rounded-[8px_0_0_8px] bg-white/[.5] p-[4px] ">
           <ScoreLabel score={tile.score} />
           <div className="flex flex-col gap-[1.5px]">
             {(["white", "blue", "green", "red", "black"] as CardColor[]).map(

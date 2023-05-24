@@ -49,7 +49,6 @@ export default function Home() {
           >
             Splendor
           </Link>
-          .
         </div>
         <Link
           href="https://github.com/luangjay/splenjao"
