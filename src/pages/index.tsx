@@ -177,6 +177,7 @@ export default function Home() {
       });
       refs[digit]?.current?.focus();
     })();
+    toast.remove();
     return () => {
       toast.remove();
     };

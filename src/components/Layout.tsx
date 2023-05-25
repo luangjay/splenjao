@@ -48,16 +48,6 @@ export default function Layout({ header = true, children }: LayoutProps) {
                 </div>
               </Link>
               <div className="flex h-full items-center gap-4">
-                {/* <div className="mr-8 flex max-w-[140px] flex-col gap-1 text-[13px] lg:text-base">
-                  <button
-                    className="w-[90px] rounded-lg bg-slate-200 p-1.5 text-base font-medium text-slate-600 drop-shadow-sm hover:bg-slate-300 lg:w-[112px] lg:p-2 lg:text-xl"
-                    onClick={
-                      session.data ? () => void signOut() : () => void signIn()
-                    }
-                  >
-                    {session.data ? "Logout" : "Login"}
-                  </button>
-                </div> */}
                 {player && (
                   <div className="aspect-square h-[80%]">
                     <Image
@@ -93,8 +83,6 @@ export default function Layout({ header = true, children }: LayoutProps) {
               className="absolute flex w-[72px] justify-center rounded-[8px_8px_0_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all duration-150 hover:bg-gray-200/[.25]"
               style={{ bottom: !navOpen ? 0 : "200px" }}
               onClick={() => setNavOpen((prev) => !prev)}
-              // style={{ right: !openMe ? 0 : "306px" }}
-              // onClick={() => setOpenMe((prev) => !prev)}
             >
               {!navOpen ? <UpIcon /> : <DownIcon />}
             </button>

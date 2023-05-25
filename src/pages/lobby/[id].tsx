@@ -160,6 +160,7 @@ export default function Lobby() {
   };
 
   useEffect(() => {
+    toast.remove()
     return () => {
       toast.remove();
     };
