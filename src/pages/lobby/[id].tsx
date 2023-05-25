@@ -10,7 +10,7 @@ import { api } from "../../utils/api";
 import Layout from "../../components/Layout";
 import { useSocket } from "../../hooks/useSocket";
 import { SocketEvents } from "../../common/types";
-import { ToastBar, Toaster, toast } from "react-hot-toast";
+import { ToastBar, Toaster, toast, useToasterStore } from "react-hot-toast";
 import Error404 from "../404";
 import Title from "../../components/Title";
 import Image from "next/image";
@@ -66,12 +66,16 @@ export default function Lobby() {
   const socket = useSocket();
 
   useEffect(() => {
-    if (player && playerFetched && player.games) {
-      const playerLastGame = player.games[player.games.length - 1];
-      if (playerLastGame && playerLastGame.status !== "ended") {
-        router.replace(`/game/${playerLastGame.id}`);
+    (async () => {
+      if (player && playerFetched && player.games) {
+        const playerLastGame = player.games[player.games.length - 1];
+        if (playerLastGame && playerLastGame.status !== "ended") {
+          setProcessing(true);
+          await router.replace(`/game/${playerLastGame.id}`);
+          setProcessing(false);
+        }
       }
-    }
+    })();
   }, [player]);
 
   const handleCreateGame = async () => {
@@ -98,7 +102,7 @@ export default function Lobby() {
         playerCount: lobby.playerCount,
         playerIds: lobby.playerIds,
       };
-      let game = await createGame.mutateAsync(gameData);
+      const game = await createGame.mutateAsync(gameData);
       // toast.dismiss(toastId);
       socket.emit(SocketEvents.ToastServer, {
         type: "dismiss",
@@ -146,8 +150,8 @@ export default function Lobby() {
       });
       socket.emit(SocketEvents.UpdateServer);
       toast.dismiss(toastId);
+      await router.replace("/");
       setProcessing(false);
-      router.replace("/");
     } else {
       toast.dismiss(toastId);
       toast.error("Try again later");
@@ -162,14 +166,17 @@ export default function Lobby() {
   }, []);
   useEffect(() => {
     if (socket) {
-      socket.on(SocketEvents.UpdateClient, (message) => {
+      socket.on(SocketEvents.UpdateClient, async (message) => {
         console.log("on: UpdateClient", message);
-        lobbyRefetch();
         playerRefetch();
+        lobbyRefetch();
       });
       socket.on(SocketEvents.ToastClient, (bread) => {
         console.log("on: ToastClient", bread);
         const { type, message } = bread;
+        if (type === "loading" && message === "Starting game") {
+          setProcessing(true);
+        }
         switch (type) {
           case "success":
             toast.success(message);
@@ -199,10 +206,20 @@ export default function Lobby() {
     }
   }, [socket]);
 
-  const { data: lobbyPlayers } = api.lobby.findPlayers.useQuery(
-    lobby ? lobby.playerIds : []
-  );
+  // const { data: lobbyPlayers } = api.lobby.findPlayers.useQuery(
+  //   lobby ? lobby.playerIds : []
+  // );
+  const lobbyPlayers = lobby ? lobby.players : [];
   const isHost = player && lobby ? player.id === lobby.hostId : false;
+
+  // Enforce Limit
+  const { toasts } = useToasterStore();
+  useEffect(() => {
+    toasts
+      .filter((t) => t.visible) // Only consider visible toasts
+      .filter((_, i) => i >= 3) // Is toast index over limit
+      .forEach((t) => toast.dismiss(t.id)); // Dismiss – Use toast.remove(t.id) removal without animation
+  }, [toasts]);
 
   if (playerFetched && lobbyFetched && lobbyError) return <Error404 />;
   if (!playerFetched || !lobbyFetched || !player || !lobby) return <Layout />;
@@ -284,7 +301,7 @@ export default function Lobby() {
             <button
               disabled={isProcessing}
               onClick={handleLeaveLobby}
-              className="w-[90px] rounded-lg bg-slate-200 p-1.5 font-medium text-slate-600 drop-shadow-sm hover:bg-slate-300 lg:w-[112px] lg:p-2"
+              className="w-[90px] rounded-lg bg-slate-200 p-1.5 font-medium text-slate-600 drop-shadow-sm hover:bg-slate-300 disabled:bg-slate-200 lg:w-[112px] lg:p-2"
             >
               Leave
             </button>
@@ -292,7 +309,7 @@ export default function Lobby() {
               <button
                 disabled={isProcessing}
                 onClick={handleCreateGame}
-                className="w-[112px] rounded-lg bg-slate-600 p-1.5 font-medium text-slate-100 drop-shadow-sm hover:bg-slate-700 lg:w-[140px] lg:p-2"
+                className="w-[112px] rounded-lg bg-slate-600 p-1.5 font-medium text-slate-100 drop-shadow-sm hover:bg-slate-700 disabled:bg-slate-600 lg:w-[140px] lg:p-2"
               >
                 Start game
               </button>
@@ -326,11 +343,12 @@ const CopyButton = ({ code }: { code: number }) => {
   const [ok, setOk] = useState(false);
   const handleClick = async () => {
     copyToClipboard(code.toString());
-    setOk(true);
     if (!ok) {
+      setOk(true);
       await new Promise((resolve) => {
         setTimeout(resolve, 10000);
       });
+      setOk(false);
     }
   };
 

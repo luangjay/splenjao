@@ -88,8 +88,10 @@ const MyProfile = (props: MeProps) => {
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
         ))}
       <div
-        className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-          props.isTurn ? "border border-pink-400" : "border border-transparent"
+        className={`z-30 m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
+          props.isTurn
+            ? "border border-transparent"
+            : "border border-transparent"
         }`}
       >
         <div className="flex flex-col">
@@ -163,21 +165,53 @@ const MyProfile = (props: MeProps) => {
   );
 };
 
-const MyCards = (props: MeProps) => (
-  <div className="flex">
-    {props.inventory.cards.length === 0 ? (
-      <div className="rounded-lgtext-base flex h-[190px] w-full items-center justify-center overflow-auto">
-        No cards owned
-      </div>
-    ) : (
-      <div className="relative flex h-[190px] w-full items-center gap-4 overflow-auto pt-6 pb-3 text-sm">
-        {props.inventory.cards.map((cardId) => (
-          <MyCard {...props} cardId={cardId} />
-        ))}
-      </div>
-    )}
-  </div>
-);
+const MyCards = (props: MeProps) => {
+  const { data: allCards } = api.card.findAll.useQuery();
+
+  return (
+    <div className="flex">
+      {props.inventory.cards.length === 0 ? (
+        <div
+          className="rounded-lgtext-base flex h-[190px] w-full items-center justify-center overflow-auto"
+          onClick={() => {
+            alert(JSON.stringify(allCards));
+          }}
+        >
+          No cards owned
+        </div>
+      ) : (
+        <div className="relative flex h-[190px] w-full items-center gap-4 overflow-auto pt-6 pb-3 text-sm">
+          {(props.localSettings?.sortCards && allCards
+            ? [...props.inventory.cards].sort(
+                (a, b) =>
+                  cardOrder(allCards[a]?.color) - cardOrder(allCards[b]?.color)
+              )
+            : [...props.inventory.cards]
+          ).map((cardId) => (
+            <MyCard {...props} cardId={cardId} key={cardId} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const cardOrder = (cardColor?: string) => {
+  switch (cardColor) {
+    case "white":
+      return 0;
+    case "blue":
+      return 1;
+    case "green":
+      return 2;
+    case "red":
+      return 3;
+    case "black":
+      return 4;
+    default:
+      return 5;
+  }
+};
 
 const MyCard = (props: MeProps) => {
   const [float, setFloat] = useState(false);

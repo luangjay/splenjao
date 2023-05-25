@@ -27,7 +27,7 @@ export default function ActionDialog(props: DialogProps) {
   const isOpen = playerTurn && playerState.currentAction !== null;
 
   function closeDialog() {
-    if (player && game) {
+    if (!playerState.isProcessing && player && game) {
       setPlayerState({
         // reset: false,
         success: false,

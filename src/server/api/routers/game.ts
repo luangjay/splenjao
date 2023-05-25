@@ -211,13 +211,15 @@ export const gameRouter = createTRPCRouter({
           id: input.id,
         },
       });
-      const nPrice = input.playerState.selectedCard?.color
-        ? opPriceWColor(
-            "increment",
-            game[`inventory${game.turnIdx}` as InventoryKey].discount,
-            input.playerState.selectedCard.color as CardColor
-          )
-        : game[`inventory${game.turnIdx}` as InventoryKey].discount;
+      const nPrice =
+        input.playerState.selectedCard?.color &&
+        input.playerState.currentAction === "purchase"
+          ? opPriceWColor(
+              "increment",
+              game[`inventory${game.turnIdx}` as InventoryKey].discount,
+              input.playerState.selectedCard.color as CardColor
+            )
+          : game[`inventory${game.turnIdx}` as InventoryKey].discount;
       const tiles = await ctx.prisma.tile.findMany({
         where: {
           id: {
@@ -249,9 +251,6 @@ export const gameRouter = createTRPCRouter({
       const dedicatedTiles = [...tiles].slice(0, 1);
       const tileIds = dedicatedTiles.map((tile) => tile.id);
       const tileScores = dedicatedTiles.map((tile) => tile.score);
-      Array(80)
-        .fill(0)
-        .forEach(() => console.log(dedicatedTiles));
       // const card: Card | null = await ctx.prisma.card.findUnique({
       //   where: {
       //     id: input.playerState.cardId,

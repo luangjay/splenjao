@@ -96,6 +96,7 @@ export default function Game() {
   // LOCAL STORAGE
   const [localSettings, setLocalSettings] = useLocalStorage("settings", {
     enableAnimation: true,
+    sortCards: false,
   });
 
   // STATE HOOKS

@@ -68,6 +68,9 @@ export const lobbyRouter = createTRPCRouter({
             has: input.playerId || null,
           },
         },
+        include: {
+          players: true,
+        },
       })
     ),
 

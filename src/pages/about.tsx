@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import Title from "../components/Title";
 
-export default function Home() {
+export default function About() {
   const session = useSession();
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const { data: player } = api.game.findPlayerById.useQuery(

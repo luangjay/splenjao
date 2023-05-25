@@ -45,10 +45,16 @@ export default function Others(props: PlayerProps) {
     .filter((player) => player.id !== me.id) as PlayerWithIdx[];
 
   const openDialog = () => setOpen(true);
-  const toggle = () => {
+  const toggleAnimation = () => {
     props.setLocalSettings((prev: any) => ({
       ...prev,
       enableAnimation: !prev?.enableAnimation,
+    }));
+  };
+  const toggleSortCards = () => {
+    props.setLocalSettings((prev: any) => ({
+      ...prev,
+      sortCards: !prev?.sortCards,
     }));
   };
 
@@ -61,7 +67,7 @@ export default function Others(props: PlayerProps) {
           <div className="m-1 flex items-center gap-2">
             <Switch
               checked={props.localSettings?.enableAnimation}
-              onChange={toggle}
+              onChange={toggleAnimation}
               className={`${
                 props.localSettings?.enableAnimation
                   ? "bg-pink-300"
@@ -80,6 +86,27 @@ export default function Others(props: PlayerProps) {
               />
             </Switch>
             <div className="font-medium">Animation</div>
+          </div>
+          <div className="m-1 flex items-center gap-2">
+            <Switch
+              checked={props.localSettings?.sortCards}
+              onChange={toggleSortCards}
+              className={`${
+                props.localSettings?.sortCards ? "bg-pink-300" : "bg-slate-300"
+              }
+          relative inline-flex h-[28px] w-[53px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
+            >
+              <span
+                aria-hidden="true"
+                className={`${
+                  props.localSettings?.sortCards
+                    ? "translate-x-[25px]"
+                    : "translate-x-0"
+                }
+            pointer-events-none inline-block h-[25px] w-[25px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+              />
+            </Switch>
+            <div className="font-medium">Sort cards</div>
           </div>
           <button
             className="w-[120px] rounded-lg bg-slate-600 p-2 font-medium text-slate-100 hover:bg-slate-700"
@@ -135,8 +162,8 @@ const OthersProfile = (props: OthersProps) => (
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
             ))}
           <div
-            className={`m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
-              isTurn ? "border border-pink-400" : "border border-transparent"
+            className={`z-30 m-1.5 h-fit rounded-xl bg-gray-100 text-base drop-shadow-none ${
+              isTurn ? "border border-transparent" : "border border-transparent"
             }`}
           >
             <div className="flex flex-col">

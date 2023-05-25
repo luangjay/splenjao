@@ -18,7 +18,7 @@ import { ToastBar, Toaster, toast, useToasterStore } from "react-hot-toast";
 import Title from "../components/Title";
 import Image from "next/image";
 
-export default function Play() {
+export default function Home() {
   const router = useRouter();
   const [isProcessing, setProcessing] = useState(false);
   const [isSuccess, setSuccess] = useState(false);
@@ -62,23 +62,29 @@ export default function Play() {
   });
 
   useEffect(() => {
-    if (player && playerFetched) {
-      if (player.games) {
-        const playerLastGame = player.games[player.games.length - 1] as Game;
-        if (playerLastGame && playerLastGame.status !== "ended") {
-          router.replace(`/game/${playerLastGame.id}`);
+    (async () => {
+      if (!isProcessing && player && playerFetched) {
+        if (player.games) {
+          setProcessing(true);
+          const playerLastGame = player.games[player.games.length - 1] as Game;
+          if (playerLastGame && playerLastGame.status !== "ended") {
+            await router.replace(`/game/${playerLastGame.id}`);
+          }
+          setProcessing(false);
+        }
+        if (player.lobbyId) {
+          setProcessing(true);
+          await router.replace(`/lobby/${player.lobbyId}`);
+          setProcessing(false);
         }
       }
-      if (player.lobbyId) {
-        router.replace(`/lobby/${player.lobbyId}`);
-      }
-    }
+    })();
   }, [player]);
 
   const addPlayerToLobby = async (lobbyId: string) => {
     // await playerRefetch();
     if (player) {
-      let goLobby = await updateLobby.mutateAsync({
+      const goLobby = await updateLobby.mutateAsync({
         id: lobbyId,
         playerId: player.id,
       });
@@ -87,6 +93,7 @@ export default function Play() {
           id: player.id,
           lobbyId: lobbyId,
         });
+        await router.replace(`/lobby/${lobbyId}`);
       }
     }
   };
@@ -101,7 +108,7 @@ export default function Play() {
         toast.success("Lobby created");
         await addPlayerToLobby(lobby.id);
         toast.dismiss();
-        // setProcessing(false);
+        setProcessing(false);
       } else {
         toast.dismiss(toastId);
         toast.error("Too many requests");
@@ -115,8 +122,8 @@ export default function Play() {
   };
   const joinLobby = async () => {
     const toastId = toast.loading("Finding lobby");
-    await playerRefetch();
     setProcessing(true);
+    await playerRefetch();
     if (player) {
       // await lobbyByCode.refetch();
       const lobby = await findLobbyByCodeMutation.mutateAsync(inputCode);
@@ -129,7 +136,8 @@ export default function Play() {
           toast.dismiss(toastId);
           toast.success("Lobby found");
           await addPlayerToLobby(lobby.id);
-          // setProcessing(false);
+          toast.dismiss();
+          setProcessing(false);
         }
       } else {
         toast.dismiss(toastId);
@@ -143,9 +151,8 @@ export default function Play() {
     }
   };
 
-  const { toasts } = useToasterStore();
-
   // Enforce Limit
+  const { toasts } = useToasterStore();
   useEffect(() => {
     toasts
       .filter((t) => t.visible) // Only consider visible toasts
@@ -231,6 +238,7 @@ export default function Play() {
                       ref={refs[idx]}
                       value={value}
                       disabled={isProcessing}
+                      onChange={() => {}}
                       onKeyDown={(e) => {
                         if (isProcessing) return;
                         if (e.key === "e") {
@@ -259,7 +267,7 @@ export default function Play() {
                           }
                         }
                       }}
-                      className="h-[64px] w-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none"
+                      className="h-[64px] w-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none disabled:border-slate-400 disabled:bg-gray-50"
                     />
                   )
                 )}
@@ -271,7 +279,8 @@ export default function Play() {
             <div className="flex items-center gap-8 px-6">
               <div className="leading-none">No code?</div>
               <button
-                className="w-[140px] rounded-lg bg-slate-600 p-2 text-xl font-medium text-slate-100 hover:bg-slate-700"
+                className="w-[140px] rounded-lg bg-slate-600 p-2 text-xl font-medium text-slate-100 hover:bg-slate-700 disabled:bg-slate-600"
+                disabled={isProcessing}
                 onClick={newLobby}
               >
                 New lobby

@@ -4,7 +4,11 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const cardRouter = createTRPCRouter({
   findAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.card.findMany();
+    return ctx.prisma.card.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
   }),
 
   findById: publicProcedure.input(z.number()).query(({ ctx, input }) =>

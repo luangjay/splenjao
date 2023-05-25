@@ -60,12 +60,48 @@ input[type="number"] {
 
 /* SAD: cpu usage is too damn high */
 .bg-animation {
-  content: "";
-  --angle: 0deg;
-  transform: translateZ(0);
+  @apply flex items-center justify-center overflow-hidden bg-slate-300;
 }
 
-@property --angle {
+.bg-animation::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-image: conic-gradient(
+    transparent,
+    transparent,
+    transparent,
+    rgba(236, 72, 153, 0.8)
+  );
+  animation: animate-border 4s linear infinite;
+}
+
+.bg-animation::after {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-image: conic-gradient(
+    transparent,
+    transparent,
+    transparent,
+    rgba(14, 165, 233, 0.8)
+  );
+  animation: animate-border 4s linear infinite;
+  animation-delay: -2s;
+}
+
+@keyframes animate-border {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* @property --angle {
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
@@ -87,5 +123,56 @@ input[type="number"] {
       rgb(236 72 153 / 0.6),
       rgb(14 165 233 / 0.6)
     );
+  }
+} */
+
+.dot-flashing {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 5px;
+  background-color: rgba(249, 168, 212, 0.2);
+  color: rgba(249, 168, 212, 0.2);
+  animation: dot-flashing 1s infinite linear alternate;
+  animation-delay: 0.5s;
+}
+
+.dot-flashing::before,
+.dot-flashing::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+
+.dot-flashing::before {
+  left: -12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 5px;
+  background-color: rgba(249, 168, 212, 0.2);
+  color: rgba(249, 168, 212, 0.2);
+  animation: dot-flashing 1s infinite alternate;
+  animation-delay: 0s;
+}
+
+.dot-flashing::after {
+  left: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 5px;
+  background-color: rgba(249, 168, 212, 0.2);
+  color: rgba(249, 168, 212, 0.2);
+  animation: dot-flashing 1s infinite alternate;
+  animation-delay: 1s;
+}
+
+@keyframes dot-flashing {
+  0% {
+    background-color: rgba(236, 72, 153, 0.8);
+  }
+  50%,
+  100% {
+    background-color: rgba(249, 168, 212, 0.2);
   }
 }

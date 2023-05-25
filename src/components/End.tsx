@@ -233,12 +233,12 @@ const PlayersProfile = (props: PlayerProps) => {
               (props.localSettings?.enableAnimation ? (
                 <div className="bg-animation absolute inset-0 rounded-2xl"></div>
               ) : (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.6] to-pink-400/[.4]"></div>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
               ))}
             <div
-              className={`m-1.5 h-fit rounded-xl bg-gray-50 text-2xl drop-shadow-none ${
+              className={`z-30 m-1.5 h-fit rounded-xl bg-gray-50 text-2xl drop-shadow-none ${
                 isWinner
-                  ? "border border-pink-400"
+                  ? "border border-transparent"
                   : "border border-transparent"
               }`}
             >
@@ -262,7 +262,7 @@ const PlayersProfile = (props: PlayerProps) => {
                         {isWinner && <WinnerIcon />}
                       </div>
                     </div>
-                    <div className="flex h-[28px] text-lg">
+                    <div className="-mb-0.5 flex h-[28px] text-lg">
                       <div className="flex h-[28px] items-center text-end">
                         <CardIcon />
                         <span className="w-[48px] px-3 text-start">
