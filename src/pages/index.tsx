@@ -100,7 +100,7 @@ export default function Home() {
   const newLobby = async () => {
     const toastId = toast.loading("Creating lobby");
     setProcessing(true);
-    await playerRefetch();
+    // await playerRefetch();
     if (player) {
       const lobby = await findEmptyLobbyAndUpdate.mutateAsync();
       if (lobby) {
@@ -123,7 +123,7 @@ export default function Home() {
   const joinLobby = async () => {
     const toastId = toast.loading("Finding lobby");
     setProcessing(true);
-    await playerRefetch();
+    // await playerRefetch();
     if (player) {
       // await lobbyByCode.refetch();
       const lobby = await findLobbyByCodeMutation.mutateAsync(inputCode);
@@ -268,7 +268,7 @@ export default function Home() {
                           }
                         }
                       }}
-                      className="h-[64px] w-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none disabled:border-slate-400 disabled:bg-gray-50"
+                      className="h-[64px] w-[64px] rounded-xl border-2 border-slate-400 bg-gray-50 text-center text-[32px] focus:border-pink-400 focus:shadow-[0_0_0_0.3rem_rgba(244,114,182,.25)] focus:outline-none disabled:border-slate-400 disabled:bg-gray-50 disabled:opacity-100"
                     />
                   )
                 )}

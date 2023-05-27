@@ -256,7 +256,9 @@ export default function Game() {
       <main className="relative flex h-screen select-none overflow-auto bg-gray-100 text-xl text-slate-600">
         {/* OTHERS */}
         <div
-          className="fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur transition-all"
+          className={`fixed z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur ${
+            localSettings?.enableAnimation ? "transition-all" : ""
+          }`}
           style={{ width: !openOthers ? 0 : "306px" }}
         >
           <Others
@@ -269,7 +271,9 @@ export default function Game() {
         </div>
         <div className="fixed z-20 flex h-full items-center">
           <button
-            className="absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur transition-all hover:bg-gray-200/[.25]"
+            className={`absolute flex h-[72px] items-center rounded-[0_8px_8px_0] bg-gray-200/[.5] drop-shadow backdrop-blur hover:bg-gray-200/[.25] ${
+              localSettings?.enableAnimation ? "transition-all" : ""
+            }`}
             style={{ left: !openOthers ? "0" : "306px" }}
             onClick={() => setOpenOthers((prev) => !prev)}
           >
@@ -288,15 +292,21 @@ export default function Game() {
         {/* ME */}
         <div className="fixed right-0 z-20 flex h-full items-center">
           <button
-            className="absolute flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all hover:bg-gray-200/[.25]"
+            className={`absolute flex h-[72px] items-center rounded-[8px_0_0_8px] bg-gray-200/[.5] drop-shadow backdrop-blur-sm hover:bg-gray-200/[.25] ${
+              localSettings?.enableAnimation ? "transition-all" : ""
+            }`}
             style={{ right: !openMe ? 0 : "306px" }}
             onClick={() => setOpenMe((prev) => !prev)}
           >
             {!openMe ? <LeftIcon /> : <RightIcon />}
           </button>
           <div
-            className="fixed right-0 z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm transition-all"
-            style={{ width: !openMe ? 0 : "306px" }}
+            className={`fixed right-0 z-20 flex h-full flex-1 flex-col items-center justify-between overflow-hidden bg-gray-200/[.5] drop-shadow backdrop-blur-sm ${
+              localSettings?.enableAnimation ? "transition-all" : ""
+            }`}
+            style={{
+              width: !openMe ? 0 : "306px",
+            }}
           >
             <Me
               game={game}

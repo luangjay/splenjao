@@ -22,7 +22,7 @@ export interface DialogProps {
 }
 
 export default function ActionDialog(props: DialogProps) {
-  const { game, player, playerState, setPlayerState } = props;
+  const { game, player, playerState, setPlayerState, localSettings } = props;
   const playerTurn = player.id === game.playerIds[game.turnIdx];
   const isOpen = playerTurn && playerState.currentAction !== null;
 
@@ -74,6 +74,42 @@ export default function ActionDialog(props: DialogProps) {
     ? "RESERVE"
     : "COLLECT";
 
+  const bgTransition = localSettings?.enableAnimation
+    ? {
+        enter: "ease-out duration-300",
+        enterFrom: "opacity-0",
+        enterTo: "opacity-100",
+        leave: "ease-in duration-200",
+        leaveFrom: "opacity-100",
+        leaveTo: "opacity-0",
+      }
+    : {
+        enter: "ease-out duration-[0]",
+        enterFrom: "opacity-0",
+        enterTo: "opacity-100",
+        leave: "ease-in duration-[0]",
+        leaveFrom: "opacity-100",
+        leaveTo: "opacity-0",
+      };
+
+  const panelTransition = !localSettings?.enableAnimation
+    ? {
+        enter: "ease-out duration-[0]",
+        enterFrom: "opacity-0 scale-95",
+        enterTo: "opacity-100 scale-100",
+        leave: "ease-in duration-[0]",
+        leaveFrom: "opacity-100 scale-100",
+        leaveTo: "opacity-0 scale-95",
+      }
+    : {
+        enter: "ease-out duration-200",
+        enterFrom: "opacity-0 scale-95",
+        enterTo: "opacity-100 scale-100",
+        leave: "ease-in duration-150",
+        leaveFrom: "opacity-100 scale-100",
+        leaveTo: "opacity-0 scale-95",
+      };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -81,32 +117,17 @@ export default function ActionDialog(props: DialogProps) {
         className="relative z-20 select-none text-slate-600 max-md:hidden"
         onClose={() => {}}
       >
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
+        <Transition.Child as={Fragment} {...bgTransition}>
           <div className="fixed inset-0 bg-black bg-opacity-25" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto" onClick={closeDialog}>
           <div className="flex min-h-full items-center justify-center text-center">
-            <Transition.Child
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <div className="absolute left-[-80px] top-[32px] z-[9999] flex flex-col items-end">
-                <ActionTab {...props} />
-              </div>
-              {playerState.currentAction && (
+            {playerState.currentAction && (
+              <Transition.Child {...panelTransition}>
+                <div className="absolute left-[-80px] top-[32px] flex flex-col items-end">
+                  <ActionTab {...props} />
+                </div>
                 <Dialog.Panel className="relative flex transform overflow-hidden text-left align-middle drop-shadow-xl transition-all">
                   <div className="flex flex-col rounded-2xl border-4 border-slate-700 bg-gray-100 p-6">
                     <Dialog.Title>
@@ -118,8 +139,8 @@ export default function ActionDialog(props: DialogProps) {
                   </div>
                   {/* <div className="flex w-[80px] flex-col items-end py-8"></div> */}
                 </Dialog.Panel>
-              )}
-            </Transition.Child>
+              </Transition.Child>
+            )}
           </div>
         </div>
       </Dialog>
@@ -195,7 +216,6 @@ function ActionTab(props: DialogProps) {
           },
         ];
 
-  if (playerState.currentAction === null) return <></>;
   return (
     <>
       {tabs.map((tab, idx) => (

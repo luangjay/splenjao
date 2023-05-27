@@ -87,7 +87,7 @@ export default function Layout({ header = true, children }: LayoutProps) {
               {!navOpen ? <UpIcon /> : <DownIcon />}
             </button>
             <div
-              className="fixed bottom-0 z-20 flex w-[342px] flex-col items-center justify-between overflow-hidden rounded-[12px_12px_0_0] bg-gray-200/[.5] text-xl drop-shadow backdrop-blur transition-all"
+              className="fixed bottom-0 z-20 flex w-[360px] flex-col items-center justify-between overflow-hidden rounded-[12px_12px_0_0] bg-gray-200/[.5] text-xl drop-shadow backdrop-blur transition-all"
               style={{ height: !navOpen ? 0 : "200px" }}
             >
               <div className="flex h-full flex-col items-center justify-between p-6">

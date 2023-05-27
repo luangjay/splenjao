@@ -225,7 +225,7 @@ const PlayersProfile = (props: PlayerProps) => {
 
         return (
           <div
-            className={`relative rounded-2xl bg-gray-50 text-lg ${
+            className={`relative rounded-2xl bg-slate-300 text-lg ${
               !isWinner && "drop-shadow"
             }`}
           >
@@ -233,7 +233,7 @@ const PlayersProfile = (props: PlayerProps) => {
               (props.localSettings?.enableAnimation ? (
                 <div className="bg-animation absolute inset-0 rounded-2xl"></div>
               ) : (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-400/[.7] to-pink-400/[.5]"></div>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-pink-500/[.8] to-sky-500/[.8]"></div>
               ))}
             <div
               className={`z-30 m-1.5 h-fit rounded-xl bg-gray-50 text-2xl drop-shadow-none ${

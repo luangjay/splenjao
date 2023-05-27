@@ -42,6 +42,18 @@ input::-webkit-inner-spin-button {
   margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
+input,
+textarea,
+button,
+select,
+a {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+input:disabled {
+  opacity: 1;
+}
+
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox */
 }
@@ -60,7 +72,7 @@ input[type="number"] {
 
 /* SAD: cpu usage is too damn high */
 .bg-animation {
-  @apply flex items-center justify-center overflow-hidden bg-slate-300;
+  @apply flex items-center justify-center overflow-hidden;
 }
 
 .bg-animation::before {
