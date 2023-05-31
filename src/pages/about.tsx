@@ -138,23 +138,6 @@ function AuthShowcase() {
     { enabled: sessionData?.user !== undefined }
   );
 
-  const user = api.home.findUserById.useQuery(sessionData?.user.id);
-  const upsertPlayer = api.home.upsertPlayer.useMutation();
-
-  const [isUpsertDone, setUpsertDone] = useState(false);
-
-  useEffect(() => {
-    if (!isUpsertDone && user.data) {
-      const playerData = {
-        id: user.data.id,
-        name: user.data.name,
-        image: user.data.image,
-      };
-      upsertPlayer.mutate(playerData);
-      setUpsertDone(true);
-    }
-  }, [user.data]);
-
   return (
     <p className="text-center text-xl">
       {sessionData && <span>Logged in as {sessionData.user?.name}</span>}

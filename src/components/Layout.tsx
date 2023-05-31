@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -12,10 +12,18 @@ interface LayoutProps {
 }
 
 export default function Layout({ header = true, children }: LayoutProps) {
-  const session = useSession();
   const router = useRouter();
+  const utils = api.useContext();
+  const { data: session } = useSession();
   const { data: player, isFetched: playerFetched } =
-    api.game.findPlayerById.useQuery(session.data?.user.id, { retry: false });
+    api.play.findPlayerById.useQuery(session?.user.id, { retry: false });
+  const { data: user } = api.home.findUserById.useQuery(session?.user.id);
+  const upsertPlayer = api.home.upsertPlayer.useMutation({
+    async onSuccess() {
+      utils.play.findPlayerById.invalidate();
+    },
+  });
+
   const [navOpen, setNavOpen] = useState(false);
   const pagename =
     router.pathname === "/"
@@ -27,6 +35,16 @@ export default function Layout({ header = true, children }: LayoutProps) {
       : router.pathname === "/game/[id]"
       ? "Game"
       : "Page";
+
+  useEffect(() => {
+    if (user) {
+      upsertPlayer.mutate({
+        id: user.id,
+        name: user.name,
+        image: user.image,
+      });
+    }
+  }, [user]);
 
   return (
     <>
@@ -105,12 +123,12 @@ export default function Layout({ header = true, children }: LayoutProps) {
                 <button
                   className="w-[112px] rounded-lg bg-slate-600 p-1.5 text-lg font-medium text-slate-100 drop-shadow-sm hover:bg-slate-700"
                   onClick={
-                    session.data
+                    session
                       ? () => void signOut({ callbackUrl: "/" })
                       : () => void signIn()
                   }
                 >
-                  {session.data ? "Logout" : "Login"}
+                  {session ? "Logout" : "Login"}
                 </button>
               </div>
             </div>
